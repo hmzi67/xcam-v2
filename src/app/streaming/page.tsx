@@ -7,9 +7,8 @@ import { MediaPermissions } from '@/components/stream/media-permissions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
-import { Loader2, Video, Users, Plus, CheckCircle, XCircle, Info } from 'lucide-react';
+import { Loader2, Video, Users, Plus, Upload, X, Tag, FolderOpen } from 'lucide-react';
 import { TabbedChatContainer } from '@/components/chat';
 import { Navigation } from "@/components/navigation";
 
@@ -17,6 +16,9 @@ interface Stream {
   id: string;
   title: string;
   description: string;
+  category?: string;
+  tags?: string[];
+  thumbnailUrl?: string;
   status: 'LIVE' | 'SCHEDULED' | 'ENDED';
   createdAt: Date;
   creator: {
@@ -38,27 +40,124 @@ export default function StreamingPage() {
   const [loading, setLoading] = useState(false);
   const [hasMediaPermissions, setHasMediaPermissions] = useState(false);
   const [permissionError, setPermissionError] = useState<string>('');
-  const [showAgeVerification, setShowAgeVerification] = useState(true);
 
   // New stream form
   const [newStream, setNewStream] = useState({
     title: '',
-    description: ''
+    description: '',
+    category: '',
+    tags: [] as string[],
+    thumbnailUrl: ''
   });
+  const [tagInput, setTagInput] = useState('');
 
-  // Check age verification on mount
-  useEffect(() => {
-    const hasVerified = localStorage.getItem('ageVerified');
-    if (hasVerified === 'true') {
-      setShowAgeVerification(false);
+  // Handle tag management
+  const addTag = () => {
+    if (tagInput.trim() && !newStream.tags.includes(tagInput.trim()) && newStream.tags.length < 10) {
+      setNewStream(prev => ({
+        ...prev,
+        tags: [...prev.tags, tagInput.trim()]
+      }));
+      setTagInput('');
     }
-  }, []);
-
-  // Handle age verification
-  const handleAgeVerification = () => {
-    localStorage.setItem('ageVerified', 'true');
-    setShowAgeVerification(false);
   };
+
+  const removeTag = (tagToRemove: string) => {
+    setNewStream(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleTagKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
+  // Handle thumbnail upload
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 2MB for base64 storage)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image must be less than 2MB for database storage');
+      return;
+    }
+
+    // Convert to base64
+    try {
+      const base64 = await convertToBase64(file);
+      setNewStream(prev => ({
+        ...prev,
+        thumbnailUrl: base64 as string
+      }));
+    } catch (error) {
+      console.error('Error converting image:', error);
+      alert('Failed to process image');
+    }
+  };
+
+  // Helper function to convert file to base64 with compression
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        // Calculate new dimensions (max 800x450 for thumbnails)
+        const maxWidth = 800;
+        const maxHeight = 450;
+        let { width, height } = img;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = width * ratio;
+          height = height * ratio;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8); // 80% quality
+        resolve(compressedDataUrl);
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Stream categories
+  const streamCategories = [
+    'Solo Female',
+    'Solo Male',
+    'Couples',
+    'LGBTQ+',
+    'Trans & Non-Binary',
+    'Fetish & Kinks',
+    'Roleplay & Fantasy',
+    'Cosplay & Gaming',
+    'Mature & MILF',
+    'ASMR & Tease',
+    'Group & Party',
+    'Private Shows',
+    'New Performers',
+    'Verified & Premium',
+    'Other'
+  ];
+
 
   // Fetch available streams
   const fetchStreams = async () => {
@@ -68,7 +167,11 @@ export default function StreamingPage() {
         const data = await response.json();
         const streamsWithDates = (data.streams || []).map((stream: any) => ({
           ...stream,
-          createdAt: new Date(stream.createdAt)
+          createdAt: new Date(stream.createdAt),
+          creator: {
+            ...stream.creator,
+            image: stream.creator.avatar // Map avatar to image for consistency
+          }
         }));
         setStreams(streamsWithDates);
       }
@@ -137,7 +240,8 @@ export default function StreamingPage() {
           setCurrentStreamData(stream);
           setSelectedStream(stream.id);
           setMode(newMode);
-          setNewStream({ title: '', description: '' }); // Reset form
+          setNewStream({ title: '', description: '', category: '', tags: [], thumbnailUrl: '' }); // Reset form
+          setTagInput('');
 
           console.log('✅ All state updated, mode should be:', newMode);
         } else {
@@ -238,81 +342,6 @@ export default function StreamingPage() {
     <div className="min-h-screen bg-gray-900 text-white">
       <Navigation />
 
-      {/* Age Verification Dialog */}
-      <Dialog open={showAgeVerification} onOpenChange={() => { }}>
-        <DialogContent className="sm:max-w-md bg-gray-800 border-gray-700 text-white" showCloseButton={false}>
-          <div className="p-6">
-            {/* Disclaimer Section */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-white mb-4">Disclaimer</h2>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                The pages of this website contain explicit material and are not suitable for minors. If you are a minor (-18year)
-                or do not wish to be confronted with explicit websites, please leave this website by clicking on{' '}
-                <span className="font-semibold">Exit</span> below. By clicking on{' '}
-                <span className="font-semibold">Enter</span> below you expressly confirm that you are of age and agree with this website's user
-                agreement. All models on this website are at least 18 years old. Parents, protect your children against explicit
-                websites using one of the following programs.
-              </p>
-            </div>
-
-            {/* Cookie Policy Section */}
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-white mb-3">Cookie policy</h3>
-              <p className="text-gray-300 text-sm leading-relaxed mb-2">
-                This site uses cookies to analyze the website, to make it more user-friendly and to offer you products tailored to
-                your needs. By using the site, you accept the terms of the{' '}
-                <a href="#" className="text-purple-400 hover:text-purple-300 underline">Privacy Policy</a>
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              <Button
-                onClick={handleAgeVerification}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium"
-              >
-                <CheckCircle className="w-5 h-5 mr-2" />
-                I'm 18 or older – Enter
-              </Button>
-
-              <Button
-                onClick={() => window.location.href = 'https://google.com'}
-                variant="outline"
-                className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 py-3 rounded-lg font-medium"
-              >
-                <XCircle className="w-5 h-5 mr-2" />
-                I'm under 18 – Exit
-              </Button>
-            </div>
-
-            {/* Additional Info */}
-            <div className="mt-6 p-4 bg-gray-700/50 rounded-lg">
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm text-gray-300 mb-2">
-                    Access to explicit content is restricted until your age has been verified.
-                  </p>
-                  <div className="flex flex-wrap gap-4 text-xs text-purple-400">
-                    <a href="#" className="hover:text-purple-300 underline">BIK+</a>
-                    <span className="text-gray-500">|</span>
-                    <a href="#" className="hover:text-purple-300 underline">RTA</a>
-                    <span className="text-gray-500">|</span>
-                    <a href="#" className="hover:text-purple-300 underline">ASACP</a>
-                    <span className="text-gray-500">|</span>
-                    <a href="#" className="hover:text-purple-300 underline">Netnanny</a>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-2">
-                    18 U.S.C 2257 Record-Keeping Requirements<br />
-                    Compliance Statement
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <main className="container mx-auto px-4 py-8">
         <div className="">
           {/* Header */}
@@ -407,6 +436,57 @@ export default function StreamingPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
+                    {/* Thumbnail Upload */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Stream Thumbnail</label>
+                      <div className="flex flex-col gap-4">
+                        {newStream.thumbnailUrl ? (
+                          <div className="relative">
+                            <img
+                              src={newStream.thumbnailUrl}
+                              alt="Stream thumbnail"
+                              className="w-full max-w-xs rounded-lg object-cover aspect-video"
+                            />
+                            <Button
+                              onClick={() => {
+                                // Clean up object URL if it's not a base64 string
+                                if (newStream.thumbnailUrl && !newStream.thumbnailUrl.startsWith('data:')) {
+                                  URL.revokeObjectURL(newStream.thumbnailUrl);
+                                }
+                                setNewStream(prev => ({ ...prev, thumbnailUrl: '' }));
+                              }}
+                              variant="outline"
+                              size="sm"
+                              className="absolute top-2 right-2 h-8 w-8 p-0 bg-gray-800/80 border-gray-600 hover:bg-gray-700"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
+                            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-400 mb-2">Upload a thumbnail image</p>
+                            <p className="text-xs text-gray-500">PNG, JPG up to 2MB (auto-compressed)</p>
+                          </div>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleThumbnailUpload}
+                          className="hidden"
+                          id="thumbnail-upload"
+                        />
+                        <Button
+                          onClick={() => document.getElementById('thumbnail-upload')?.click()}
+                          variant="outline"
+                          className="w-fit border-gray-600 text-gray-300 hover:bg-gray-700"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          {newStream.thumbnailUrl ? 'Change Thumbnail' : 'Upload Thumbnail'}
+                        </Button>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium mb-2">Stream Title *</label>
                       <Input
@@ -432,10 +512,80 @@ export default function StreamingPage() {
                       <p className="text-xs text-gray-400 mt-1">{newStream.description.length}/500</p>
                     </div>
 
+                    {/* Category Selection */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Category *</label>
+                      <div className="relative">
+                        <FolderOpen className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <select
+                          value={newStream.category}
+                          onChange={(e) => setNewStream(prev => ({ ...prev, category: e.target.value }))}
+                          className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-md text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        >
+                          <option value="">Select a category</option>
+                          {streamCategories.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Tags</label>
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Tag className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input
+                              value={tagInput}
+                              onChange={(e) => setTagInput(e.target.value)}
+                              onKeyPress={handleTagKeyPress}
+                              placeholder="Add a tag and press Enter"
+                              className="pl-10 bg-gray-900 border-gray-700 focus:ring-purple-500"
+                              maxLength={20}
+                            />
+                          </div>
+                          <Button
+                            onClick={addTag}
+                            variant="outline"
+                            disabled={!tagInput.trim() || newStream.tags.includes(tagInput.trim()) || newStream.tags.length >= 10}
+                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                          >
+                            Add
+                          </Button>
+                        </div>
+
+                        {newStream.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {newStream.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full text-sm border border-purple-500/30"
+                              >
+                                {tag}
+                                <Button
+                                  onClick={() => removeTag(tag)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-4 w-4 p-0 hover:bg-purple-500/30"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500">Add tags to help viewers find your stream (max 10 tags)</p>
+                      </div>
+                    </div>
+
                     <div className="flex gap-3">
                       <Button
                         onClick={handleCreateStream}
-                        disabled={loading || !newStream.title.trim()}
+                        disabled={loading || !newStream.title.trim() || !newStream.category.trim()}
                         className="flex-1 bg-purple-600 hover:bg-purple-700"
                       >
                         {loading ? (

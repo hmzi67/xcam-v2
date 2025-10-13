@@ -9,6 +9,9 @@ const prisma = new PrismaClient();
 const createStreamSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().optional(),
+  category: z.string().min(1).max(50),
+  tags: z.array(z.string().min(1).max(20)).max(10).optional().default([]),
+  thumbnailUrl: z.string().optional(),
   scheduledAt: z.string().optional(),
 });
 
@@ -35,7 +38,8 @@ export async function POST(request: NextRequest) {
 
     // Validate request body
     const body = await request.json();
-    const { title, description, scheduledAt } = createStreamSchema.parse(body);
+    const { title, description, category, tags, thumbnailUrl, scheduledAt } =
+      createStreamSchema.parse(body);
 
     // Check if user already has a live stream
     const existingLiveStream = await prisma.stream.findFirst({
@@ -61,6 +65,9 @@ export async function POST(request: NextRequest) {
         creatorId: user.id,
         title,
         description: description || null,
+        category,
+        tags: tags || [],
+        thumbnailUrl: thumbnailUrl || null,
         status: scheduledAt ? "SCHEDULED" : "LIVE",
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         ingestUrl: "", // Will be set after LiveKit room creation
@@ -100,9 +107,11 @@ export async function POST(request: NextRequest) {
         stream: {
           id: updatedStream.id,
           title: updatedStream.title,
+          description: updatedStream.description,
           category: updatedStream.category,
-          status: updatedStream.status,
+          tags: updatedStream.tags,
           thumbnailUrl: updatedStream.thumbnailUrl,
+          status: updatedStream.status,
           ingestUrl: updatedStream.ingestUrl,
           playbackUrl: updatedStream.playbackUrl,
           roomName,

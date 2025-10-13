@@ -108,7 +108,9 @@ export async function GET(request: NextRequest) {
         return {
           id: stream.id,
           title: stream.title,
+          description: stream.description,
           category: stream.category,
+          tags: stream.tags,
           status: stream.status,
           thumbnailUrl: stream.thumbnailUrl,
           participantCount,

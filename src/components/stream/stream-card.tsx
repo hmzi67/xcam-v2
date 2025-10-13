@@ -8,7 +8,9 @@ import {
     Eye,
     Clock,
     Play,
-    Users
+    Users,
+    Tag,
+    FolderOpen
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -17,6 +19,8 @@ interface StreamCardProps {
         id: string;
         title: string;
         description?: string;
+        category?: string;
+        tags?: string[];
         status: 'LIVE' | 'SCHEDULED' | 'ENDED';
         createdAt: Date;
         scheduledFor?: Date;
@@ -104,33 +108,14 @@ export function StreamCard({
 
     const getTimeDisplay = () => {
         if (stream.status === 'SCHEDULED' && stream.scheduledFor) {
-            return (
-                <div className="flex items-center gap-1 text-sm text-gray-400">
-                    <Clock className="w-4 h-4" />
-                    <span>
-                        Starts {formatDistanceToNow(new Date(stream.scheduledFor), { addSuffix: true })}
-                    </span>
-                </div>
-            );
+            return `Starts ${formatDistanceToNow(new Date(stream.scheduledFor), { addSuffix: true })}`;
         }
 
         if (stream.status === 'LIVE') {
-            return (
-                <div className="flex items-center gap-1 text-sm text-gray-400">
-                    <Users className="w-4 h-4" />
-                    <span>{participantCount} watching</span>
-                </div>
-            );
+            return `${participantCount} watching`;
         }
 
-        return (
-            <div className="flex items-center gap-1 text-sm text-gray-400">
-                <Clock className="w-4 h-4" />
-                <span>
-                    {formatDistanceToNow(new Date(stream.createdAt), { addSuffix: true })}
-                </span>
-            </div>
-        );
+        return formatDistanceToNow(new Date(stream.createdAt), { addSuffix: true });
     };
 
     return (
@@ -149,8 +134,14 @@ export function StreamCard({
                         className="w-full h-full object-cover"
                     />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
-                        <Play className="w-12 h-12 text-gray-500" />
+                    <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-gray-800 flex flex-col items-center justify-center">
+                        <Play className="w-12 h-12 text-gray-500 mb-2" />
+                        <div className="text-xs text-gray-500 text-center px-4">
+                            <div className="font-medium truncate">{stream.title}</div>
+                            {stream.category && (
+                                <div className="text-purple-400 mt-1">{stream.category}</div>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -178,31 +169,66 @@ export function StreamCard({
 
             <CardContent className="px-4 pb-4">
                 {/* Stream Title */}
-                <h3 className="font-semibold text-lg mb-2 line-clamp-2 text-white group-hover:text-purple-400 transition-colors">
+                <h3 className="font-semibold text-base mb-2 line-clamp-2 text-white group-hover:text-purple-400 transition-colors">
                     {stream.title}
                 </h3>
 
                 {/* Creator Info */}
-                <div className="flex items-center gap-3 mb-3">
-                    <Avatar className="w-8 h-8">
+                <div className="flex items-center gap-2 mb-2">
+                    <Avatar className="w-6 h-6">
                         <AvatarImage src={stream.creator.image} />
-                        <AvatarFallback>
+                        <AvatarFallback className="text-xs">
                             {stream.creator.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
-                    <div>
-                        <p className="text-sm font-medium text-gray-200">
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-200 truncate">
                             {stream.creator.name}
                         </p>
-                        {getTimeDisplay()}
+                        <div className="text-xs text-gray-400 flex items-center gap-1">
+                            {stream.status === 'LIVE' && <Users className="w-3 h-3" />}
+                            {stream.status === 'SCHEDULED' && <Clock className="w-3 h-3" />}
+                            {stream.status === 'ENDED' && <Clock className="w-3 h-3" />}
+                            <span>{getTimeDisplay()}</span>
+                        </div>
                     </div>
                 </div>
 
                 {/* Description */}
                 {stream.description && (
-                    <p className="text-sm text-gray-400 line-clamp-2 mb-3">
+                    <p className="text-xs text-gray-400 line-clamp-2 mb-2">
                         {stream.description}
                     </p>
+                )}
+
+                {/* Category */}
+                {stream.category && (
+                    <div className="flex items-center gap-1 mb-2">
+                        <FolderOpen className="w-3 h-3 text-purple-400" />
+                        <span className="text-xs font-medium text-purple-400 bg-purple-600/20 px-2 py-1 rounded-full border border-purple-500/30">
+                            {stream.category}
+                        </span>
+                    </div>
+                )}
+
+                {/* Tags */}
+                {stream.tags && stream.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                        {stream.tags.slice(0, 2).map((tag) => (
+                            <span
+                                key={tag}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded text-xs border border-gray-600/50"
+                            >
+                                <Tag className="w-2.5 h-2.5" />
+                                {tag}
+                            </span>
+                        ))}
+                        {stream.tags.length > 2 && (
+                            <span className="inline-flex items-center px-2 py-0.5 bg-gray-600/50 text-gray-400 rounded text-xs">
+                                +{stream.tags.length - 2}
+                            </span>
+                        )}
+                    </div>
                 )}
 
                 {/* Action Button */}

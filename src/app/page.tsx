@@ -13,8 +13,10 @@ interface Stream {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: 'LIVE' | 'SCHEDULED' | 'ENDED';
   category?: string;
+  tags?: string[];
+  thumbnailUrl?: string;
   createdAt: Date;
   creator: {
     id: string;
@@ -35,9 +37,13 @@ export default function Home() {
       const response = await fetch('/api/streams/list');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: never) => ({
+        const streamsWithDates = (data.streams || []).map((stream: any) => ({
           ...stream,
-          createdAt: new Date(stream.createdAt)
+          createdAt: new Date(stream.createdAt),
+          creator: {
+            ...stream.creator,
+            image: stream.creator.avatar // Map avatar to image for consistency
+          }
         }));
         setStreams(streamsWithDates);
       }
