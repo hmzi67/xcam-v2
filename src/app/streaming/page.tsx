@@ -307,7 +307,7 @@ export default function StreamingPage() {
                   )}
                 </div>
               ) : (
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="bg-gray-800 border-gray-700 text-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Video className="w-6 h-6" />
@@ -361,7 +361,7 @@ export default function StreamingPage() {
                       <Button
                         onClick={() => setMode('browse')}
                         variant="outline"
-                        className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                        className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"
                       >
                         Cancel
                       </Button>
