@@ -160,13 +160,19 @@ export default function Home() {
                 <button
                   key={category.name}
                   onClick={() => setSelectedCategory(category.name)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors ${selectedCategory === category.name
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-700'
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors neon-hover ${selectedCategory === category.name
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700'
                     }`}
                 >
-                  <IconComponent className="w-5 h-5" />
-                  <span className="font-medium">{category.name}</span>
+                  <IconComponent
+                    className={`w-5 h-5 ${selectedCategory === category.name ? 'neon-purple-icon' : 'neon-target-icon'}`}
+                  />
+                  <span
+                    className={`font-medium ${selectedCategory === category.name ? 'neon-purple-text' : 'neon-target-text'}`}
+                  >
+                    {category.name}
+                  </span>
                   {category.name === "All Girls Cams" && (
                     <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
                   )}
@@ -185,15 +191,15 @@ export default function Home() {
                 <button
                   key={filter.name}
                   onClick={() => setSelectedCategory(filter.name)}
-                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-colors ${selectedCategory === filter.name
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-700'
+                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-colors neon-hover ${selectedCategory === filter.name
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700'
                     }`}
                 >
                   <span className="flex items-center gap-2">
-                    {filter.name}
+                    <span className={`${selectedCategory === filter.name ? 'neon-purple-text' : 'neon-target-text'}`}>{filter.name}</span>
                     {filter.hot && (
-                      <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5">
+                      <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 neon-red-badge">
                         hot
                       </Badge>
                     )}
@@ -341,8 +347,8 @@ export default function Home() {
           <div className="flex-1 p-4">
             {loading && streams.length === 0 ? (
               <div className={`grid gap-4 ${viewMode === 'grid'
-                  ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                  : 'grid-cols-1'
+                ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                : 'grid-cols-1'
                 }`}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                   <Card key={i} className="animate-pulse bg-gray-800 border-gray-700">
@@ -358,8 +364,8 @@ export default function Home() {
               </div>
             ) : filteredStreams.length > 0 ? (
               <div className={`grid gap-4 ${viewMode === 'grid'
-                  ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                  : 'grid-cols-1'
+                ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                : 'grid-cols-1'
                 }`}>
                 {filteredStreams.map((stream) => (
                   <StreamCard
