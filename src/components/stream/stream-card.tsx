@@ -176,7 +176,7 @@ export function StreamCard({
                 </div>
             </div>
 
-            <CardContent className="p-4">
+            <CardContent className="px-4 pb-4">
                 {/* Stream Title */}
                 <h3 className="font-semibold text-lg mb-2 line-clamp-2 text-white group-hover:text-purple-400 transition-colors">
                     {stream.title}

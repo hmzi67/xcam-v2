@@ -27,7 +27,7 @@ export function LoginForm() {
     const [error, setError] = useState<string | null>(null)
     const [showPassword, setShowPassword] = useState(false)
 
-    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+    const callbackUrl = searchParams.get("callbackUrl") || "/"
     const verified = searchParams.get("verified")
 
     const {
