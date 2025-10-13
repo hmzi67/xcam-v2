@@ -4,17 +4,28 @@ import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
     Video,
     LayoutDashboard,
     Settings,
     Shield,
     LogOut,
-    User,
-    Coins
+    User, Hand
 } from "lucide-react"
 
 export function Navigation() {
     const { data: session, status } = useSession()
+
+    const handleSignOut = () => {
+        void signOut({ callbackUrl: "/" })
+    }
 
     if (status === "loading") {
         return (
@@ -44,27 +55,6 @@ export function Navigation() {
 
                         {session?.user && (
                             <div className="hidden md:flex items-center space-x-1">
-                                <Link href="/streaming">
-                                    <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
-                                        <Video className="w-4 h-4 mr-2" />
-                                        Streaming
-                                    </Button>
-                                </Link>
-                                <Link href="/dashboard">
-                                    <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
-                                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                                        Dashboard
-                                    </Button>
-                                </Link>
-                                {((session.user as import("../../lib/auth-utils").SessionUser).role === "CREATOR" ||
-                                    (session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN") && (
-                                        <Link href="/creator">
-                                            <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
-                                                <Settings className="w-4 h-4 mr-2" />
-                                                Creator Studio
-                                            </Button>
-                                        </Link>
-                                    )}
                                 {(session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN" && (
                                     <Link href="/admin">
                                         <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
@@ -79,26 +69,48 @@ export function Navigation() {
 
                     <div className="flex items-center space-x-4">
                         {session?.user ? (
-                            <>
-                                <div className="hidden md:flex items-center space-x-3 px-3 py-1.5 bg-gray-800 rounded-lg">
-                                    <User className="w-4 h-4 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-300">
-                                        {(session.user as import("../../lib/auth-utils").SessionUser).email}
-                                    </span>
-                                    <span className="px-2 py-0.5 bg-purple-900 text-purple-300 text-xs font-semibold rounded">
-                                        {(session.user as import("../../lib/auth-utils").SessionUser).role}
-                                    </span>
-                                </div>
-                                <Button
-                                    onClick={() => signOut({ callbackUrl: "/" })}
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300"
-                                >
-                                    <LogOut className="w-4 h-4 mr-2" />
-                                    Sign Out
-                                </Button>
-                            </>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="flex items-center space-x-2 px-3 py-1.5 bg-gray-800 rounded-lg">
+                                        <User className="w-4 h-4 text-gray-400" />
+                                        {/*<span className="text-sm font-medium text-gray-300">*/}
+                                        {/*    /!*{(session.user as import("../../lib/auth-utils").SessionUser).email}*!/*/}
+                                        {/*</span>*/}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="bg-gray-800 border-gray-700 text-gray-300">
+                                    <DropdownMenuLabel className={'flex items-center justify-start'}>
+                                        <Hand className={'w-4 h-4 mr-2'} /> hi, {(session.user as import("../../lib/auth-utils").SessionUser).name}
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator className="bg-gray-700"/>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/dashboard" className="cursor-pointer">
+                                            <LayoutDashboard className="w-4 h-4 mr-2" />
+                                            <span>Dashboard</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/streaming" className="cursor-pointer">
+                                            <Video className="w-4 h-4 mr-2" />
+                                            <span>Streaming</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    {((session.user as import("../../lib/auth-utils").SessionUser).role === "CREATOR" ||
+                                        (session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN") && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/creator" className="cursor-pointer">
+                                                <Settings className="w-4 h-4 mr-2" />
+                                                <span>Creator Studio</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuSeparator className="bg-gray-700"/>
+                                    <DropdownMenuItem onSelect={handleSignOut} className="cursor-pointer text-red-400">
+                                        <LogOut className="w-4 h-4 mr-2" />
+                                        <span>Sign Out</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         ) : (
                             <div className="flex items-center space-x-3">
                                 <Link href="/login">
