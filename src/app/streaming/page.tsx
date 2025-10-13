@@ -50,7 +50,7 @@ export default function StreamingPage() {
       const response = await fetch('/api/streams/list');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: any) => ({
+        const streamsWithDates = (data.streams || []).map((stream: never) => ({
           ...stream,
           createdAt: new Date(stream.createdAt)
         }));
