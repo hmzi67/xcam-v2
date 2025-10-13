@@ -242,9 +242,9 @@ export default function StreamingPage() {
               <Button
                 onClick={() => setMode('create')}
                 variant={mode === 'create' ? 'default' : 'outline'}
-                className={mode === 'create' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"}
+                className={mode === 'create' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4" />
                 Go Live
               </Button>
             </div>
@@ -255,7 +255,7 @@ export default function StreamingPage() {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Live Streams</h2>
-                <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white">
+                <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white">
                   Refresh
                 </Button>
               </div>
