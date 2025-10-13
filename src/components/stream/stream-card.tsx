@@ -74,7 +74,7 @@ export function StreamCard({
             case 'LIVE':
                 return (
                     <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                        <div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                             LIVE
                         </div>
@@ -83,7 +83,7 @@ export function StreamCard({
             case 'SCHEDULED':
                 return (
                     <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                        <div className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             SCHEDULED
                         </div>
@@ -92,7 +92,7 @@ export function StreamCard({
             case 'ENDED':
                 return (
                     <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-gray-500 text-white px-2 py-1 rounded text-xs font-medium">
+                        <div className="bg-gray-600 text-white px-2 py-1 rounded text-xs font-medium">
                             ENDED
                         </div>
                     </div>
@@ -105,7 +105,7 @@ export function StreamCard({
     const getTimeDisplay = () => {
         if (stream.status === 'SCHEDULED' && stream.scheduledFor) {
             return (
-                <div className="flex items-center gap-1 text-sm text-gray-600">
+                <div className="flex items-center gap-1 text-sm text-gray-400">
                     <Clock className="w-4 h-4" />
                     <span>
                         Starts {formatDistanceToNow(new Date(stream.scheduledFor), { addSuffix: true })}
@@ -116,7 +116,7 @@ export function StreamCard({
 
         if (stream.status === 'LIVE') {
             return (
-                <div className="flex items-center gap-1 text-sm text-gray-600">
+                <div className="flex items-center gap-1 text-sm text-gray-400">
                     <Users className="w-4 h-4" />
                     <span>{participantCount} watching</span>
                 </div>
@@ -124,7 +124,7 @@ export function StreamCard({
         }
 
         return (
-            <div className="flex items-center gap-1 text-sm text-gray-600">
+            <div className="flex items-center gap-1 text-sm text-gray-400">
                 <Clock className="w-4 h-4" />
                 <span>
                     {formatDistanceToNow(new Date(stream.createdAt), { addSuffix: true })}
@@ -135,12 +135,12 @@ export function StreamCard({
 
     return (
         <Card
-            className={`group cursor-pointer transition-all duration-200 hover:shadow-lg ${className}`}
+            className={`group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden ${className}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={handleJoinStream}
         >
-            <div className="relative aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
+            <div className="relative aspect-video bg-gray-700">
                 {/* Thumbnail */}
                 {stream.thumbnailUrl ? (
                     <img
@@ -149,8 +149,8 @@ export function StreamCard({
                         className="w-full h-full object-cover"
                     />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                        <Play className="w-12 h-12 text-gray-400" />
+                    <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                        <Play className="w-12 h-12 text-gray-500" />
                     </div>
                 )}
 
@@ -168,9 +168,9 @@ export function StreamCard({
                 )}
 
                 {/* Play Overlay */}
-                <div className={`absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'
+                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'
                     }`}>
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/50">
+                    <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-purple-500/70">
                         <Play className="w-8 h-8 text-white ml-1" />
                     </div>
                 </div>
@@ -178,7 +178,7 @@ export function StreamCard({
 
             <CardContent className="p-4">
                 {/* Stream Title */}
-                <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <h3 className="font-semibold text-lg mb-2 line-clamp-2 text-white group-hover:text-purple-400 transition-colors">
                     {stream.title}
                 </h3>
 
@@ -191,7 +191,7 @@ export function StreamCard({
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-200">
                             {stream.creator.name}
                         </p>
                         {getTimeDisplay()}
@@ -200,7 +200,7 @@ export function StreamCard({
 
                 {/* Description */}
                 {stream.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                    <p className="text-sm text-gray-400 line-clamp-2 mb-3">
                         {stream.description}
                     </p>
                 )}
@@ -215,7 +215,7 @@ export function StreamCard({
                                     e.stopPropagation();
                                     handleJoinStream();
                                 }}
-                                className="bg-red-500 hover:bg-red-600 text-white"
+                                className="bg-purple-600 hover:bg-purple-700 text-white"
                             >
                                 <Play className="w-4 h-4 mr-1" />
                                 Watch Live
@@ -229,6 +229,7 @@ export function StreamCard({
                                     e.stopPropagation();
                                     // Handle remind/notify functionality
                                 }}
+                                className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white"
                             >
                                 <Clock className="w-4 h-4 mr-1" />
                                 Remind Me
@@ -242,6 +243,7 @@ export function StreamCard({
                                     e.stopPropagation();
                                     handleJoinStream();
                                 }}
+                                className="border-gray-600 text-gray-400 hover:bg-gray-700 hover:text-white"
                             >
                                 <Play className="w-4 h-4 mr-1" />
                                 Watch Replay
@@ -257,20 +259,20 @@ export function StreamCard({
 // Skeleton loader for loading states
 export function StreamCardSkeleton() {
     return (
-        <Card className="animate-pulse">
-            <div className="aspect-video bg-gray-200 rounded-t-lg" />
+        <Card className="animate-pulse bg-gray-800 border-gray-700 rounded-lg overflow-hidden">
+            <div className="aspect-video bg-gray-700" />
             <CardContent className="p-4">
-                <div className="h-6 bg-gray-200 rounded mb-2" />
+                <div className="h-6 bg-gray-700 rounded mb-2 w-3/4" />
                 <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full" />
+                    <div className="w-8 h-8 bg-gray-700 rounded-full" />
                     <div>
-                        <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
-                        <div className="h-3 bg-gray-200 rounded w-16" />
+                        <div className="h-4 bg-gray-700 rounded w-24 mb-1" />
+                        <div className="h-3 bg-gray-700 rounded w-16" />
                     </div>
                 </div>
-                <div className="h-4 bg-gray-200 rounded mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
-                <div className="h-8 bg-gray-200 rounded w-24" />
+                <div className="h-4 bg-gray-700 rounded mb-2 w-full" />
+                <div className="h-4 bg-gray-700 rounded w-1/2 mb-3" />
+                <div className="h-8 bg-gray-700 rounded w-28" />
             </CardContent>
         </Card>
     );
