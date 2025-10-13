@@ -7,7 +7,26 @@ import { Navigation } from "@/components/navigation";
 import { StreamCard } from "@/components/stream";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Video, Users, RefreshCw, Play } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Video,
+  Users,
+  RefreshCw,
+  Play,
+  Star,
+  MapPin,
+  Calendar,
+  Heart,
+  Languages,
+  Filter,
+  Search,
+  Grid3X3,
+  List,
+  MoreHorizontal,
+  Eye,
+  Flame
+} from "lucide-react";
 
 interface Stream {
   id: string;
@@ -29,7 +48,41 @@ interface Stream {
 export default function Home() {
   const { data: session } = useSession();
   const [streams, setStreams] = useState<Stream[]>([]);
+  const [filteredStreams, setFilteredStreams] = useState<Stream[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Girls Cams");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedAge, setSelectedAge] = useState("");
+  const [selectedEthnicity, setSelectedEthnicity] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Categories data
+  const categories = [
+    { name: "All Girls Cams", icon: Heart, count: 0, active: true },
+    { name: "New Models", icon: Star, count: 0 },
+    { name: "GOLD Shows", icon: Star, count: 0 },
+  ];
+
+  const categoryFilters = [
+    { name: "Models", count: 50 },
+    { name: "Characters", count: 353, hot: true },
+    { name: "AI Video", count: 125 },
+    { name: "AI Apps", count: 117 },
+    { name: "Video", count: 240 },
+    { name: "Effects", count: 60 },
+    { name: "Training", count: 58 },
+    { name: "Asian", count: 60 },
+    { name: "BBW", count: 58 },
+    { name: "Babes", count: 117 },
+    { name: "LGBTQ+", count: 1 },
+  ];
+
+  const regions = ["All Regions", "North America", "Europe", "Asia", "South America", "Africa", "Oceania"];
+  const ages = ["All Ages", "18-22", "23-30", "31-40", "40+"];
+  const ethnicities = ["All Ethnicities", "White", "Asian", "Latina", "Black", "Mixed", "Other"];
+  const languages = ["All Languages", "English", "Spanish", "French", "German", "Italian", "Portuguese"];
 
   const fetchStreams = async () => {
     setLoading(true);
@@ -61,6 +114,27 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  // Filter streams based on current filters
+  useEffect(() => {
+    let filtered = [...streams];
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(stream =>
+        stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stream.creator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stream.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (selectedCategory && selectedCategory !== "All Girls Cams") {
+      filtered = filtered.filter(stream => stream.category === selectedCategory);
+    }
+
+    setFilteredStreams(filtered);
+  }, [streams, searchQuery, selectedCategory, selectedRegion, selectedAge, selectedEthnicity, selectedLanguage]);
+
   const handleJoinStream = (streamId: string) => {
     if (!session) {
       // Redirect to login if not authenticated
@@ -75,75 +149,251 @@ export default function Home() {
     <div className="min-h-screen bg-gray-900 text-white">
       <Navigation />
 
-      <main className="container mx-auto px-4 py-8">
-
-        {/* Live Streams Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-              <h2 className="text-3xl font-bold">Live Now</h2>
-              <span className="text-gray-400">({streams.length})</span>
-            </div>
-            <Button
-              onClick={fetchStreams}
-              variant="outline"
-              size="sm"
-              disabled={loading}
-              className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <div className="w-64 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto">
+          {/* Main Categories */}
+          <div className="mb-6">
+            {categories.map((category) => {
+              const IconComponent = category.icon;
+              return (
+                <button
+                  key={category.name}
+                  onClick={() => setSelectedCategory(category.name)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors ${selectedCategory === category.name
+                      ? 'bg-purple-600 text-white'
+                      : 'text-gray-300 hover:bg-gray-700'
+                    }`}
+                >
+                  <IconComponent className="w-5 h-5" />
+                  <span className="font-medium">{category.name}</span>
+                  {category.name === "All Girls Cams" && (
+                    <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {loading && streams.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i} className="animate-pulse bg-gray-800 border-gray-700">
-                  <CardContent className="p-0">
-                    <div className="aspect-video bg-gray-700 rounded-t-lg" />
-                    <div className="p-4 space-y-3">
-                      <div className="h-4 bg-gray-700 rounded w-3/4" />
-                      <div className="h-3 bg-gray-700 rounded w-1/2" />
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* Category Pages */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
+              Category Pages
+            </h3>
+            <div className="space-y-1">
+              {categoryFilters.map((filter) => (
+                <button
+                  key={filter.name}
+                  onClick={() => setSelectedCategory(filter.name)}
+                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-colors ${selectedCategory === filter.name
+                      ? 'bg-purple-600 text-white'
+                      : 'text-gray-300 hover:bg-gray-700'
+                    }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {filter.name}
+                    {filter.hot && (
+                      <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5">
+                        hot
+                      </Badge>
+                    )}
+                  </span>
+                  <span className="text-gray-400 text-xs">{filter.count}</span>
+                </button>
               ))}
             </div>
-          ) : streams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {streams.map((stream) => (
-                <StreamCard
-                  key={stream.id}
-                  stream={stream}
-                  onJoinStream={handleJoinStream}
-                />
-              ))}\
-            </div>
-          ) : (
-            <Card className="border-2 border-dashed border-gray-700 bg-gray-800">
-              <CardContent className="p-12 text-center">
-                <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Play className="w-12 h-12 text-gray-500" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">No Live Streams</h3>
-                <p className="text-gray-500 mb-6">
-                  No one is streaming right now. Check back later!
-                </p>
-                {session && (
-                  <Link href="/streaming">
-                    <Button className="bg-purple-600 hover:bg-purple-700">
-                      <Video className="w-4 h-4 mr-2" />
-                      Be the First to Go Live
-                    </Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          </div>
         </div>
-      </main>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          {/* Top Filters Bar */}
+          <div className="bg-gray-800 border-b border-gray-700 p-4">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Regions Filter */}
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-purple-400" />
+                <select
+                  value={selectedRegion}
+                  onChange={(e) => setSelectedRegion(e.target.value)}
+                  className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  {regions.map((region) => (
+                    <option key={region} value={region}>
+                      {region}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Age Filter */}
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-purple-400" />
+                <select
+                  value={selectedAge}
+                  onChange={(e) => setSelectedAge(e.target.value)}
+                  className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  {ages.map((age) => (
+                    <option key={age} value={age}>
+                      {age}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Ethnicity Filter */}
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-purple-400" />
+                <select
+                  value={selectedEthnicity}
+                  onChange={(e) => setSelectedEthnicity(e.target.value)}
+                  className="bg-purple-600 border border-purple-500 rounded px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {ethnicities.map((ethnicity) => (
+                    <option key={ethnicity} value={ethnicity}>
+                      {ethnicity}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Features Filter */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                <Star className="w-4 h-4 mr-2" />
+                Features
+              </Button>
+
+              {/* Fetishes Filter */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Fetishes
+              </Button>
+
+              {/* Language Filter */}
+              <div className="flex items-center gap-2">
+                <Languages className="w-4 h-4 text-purple-400" />
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  {languages.map((language) => (
+                    <option key={language} value={language}>
+                      {language}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* View Mode Toggle */}
+              <div className="ml-auto flex items-center gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="bg-gray-800 border-b border-gray-700 p-4">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search models, categories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-gray-700 border-gray-600 focus:border-purple-500 text-white"
+              />
+            </div>
+          </div>
+
+          {/* Stream Grid */}
+          <div className="flex-1 p-4">
+            {loading && streams.length === 0 ? (
+              <div className={`grid gap-4 ${viewMode === 'grid'
+                  ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                  : 'grid-cols-1'
+                }`}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                  <Card key={i} className="animate-pulse bg-gray-800 border-gray-700">
+                    <CardContent className="p-0">
+                      <div className="aspect-video bg-gray-700 rounded-t-lg" />
+                      <div className="p-3 space-y-2">
+                        <div className="h-4 bg-gray-700 rounded w-3/4" />
+                        <div className="h-3 bg-gray-700 rounded w-1/2" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredStreams.length > 0 ? (
+              <div className={`grid gap-4 ${viewMode === 'grid'
+                  ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                  : 'grid-cols-1'
+                }`}>
+                {filteredStreams.map((stream) => (
+                  <StreamCard
+                    key={stream.id}
+                    stream={stream}
+                    onJoinStream={handleJoinStream}
+                    className={viewMode === 'list' ? 'flex-row' : ''}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Card className="border-2 border-dashed border-gray-700 bg-gray-800">
+                <CardContent className="p-12 text-center">
+                  <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Play className="w-12 h-12 text-gray-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">No Streams Found</h3>
+                  <p className="text-gray-500 mb-6">
+                    {searchQuery ? 'No streams match your search criteria.' : 'No streams available right now.'}
+                  </p>
+                  {session && (
+                    <Link href="/streaming">
+                      <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Video className="w-4 h-4 mr-2" />
+                        Be the First to Go Live
+                      </Button>
+                    </Link>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

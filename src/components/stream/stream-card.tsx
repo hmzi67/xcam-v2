@@ -10,7 +10,8 @@ import {
     Play,
     Users,
     Tag,
-    FolderOpen
+    FolderOpen,
+    Star
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -148,15 +149,33 @@ export function StreamCard({
                 {/* Status Badge */}
                 {getStatusBadge()}
 
-                {/* Participant Count (Live streams only) */}
-                {stream.status === 'LIVE' && (
-                    <div className="absolute top-3 right-3 z-10">
-                        <div className="bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                            <Eye className="w-3 h-3" />
-                            {participantCount}
-                        </div>
+                {/* Star Rating */}
+                <div className="absolute top-3 right-3 z-10">
+                    <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                                key={star}
+                                className={`w-3 h-3 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
+                                    }`}
+                            />
+                        ))}
                     </div>
-                )}
+                </div>
+
+                {/* Participant Count */}
+                <div className="absolute bottom-3 right-3 z-10">
+                    <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        {stream.status === 'LIVE' ? participantCount : Math.floor(Math.random() * 100) + 10}
+                    </div>
+                </div>
+
+                {/* Region Badge */}
+                <div className="absolute bottom-3 left-3 z-10">
+                    <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-bold">
+                        {['US', 'CA', 'GB', 'DE', 'FR', 'ES', 'IT', 'BR', 'RO', 'CO'][Math.floor(Math.random() * 10)]}
+                    </div>
+                </div>
 
                 {/* Play Overlay */}
                 <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'
@@ -182,14 +201,23 @@ export function StreamCard({
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-200 truncate">
-                            {stream.creator.name}
-                        </p>
-                        <div className="text-xs text-gray-400 flex items-center gap-1">
-                            {stream.status === 'LIVE' && <Users className="w-3 h-3" />}
-                            {stream.status === 'SCHEDULED' && <Clock className="w-3 h-3" />}
-                            {stream.status === 'ENDED' && <Clock className="w-3 h-3" />}
-                            <span>{getTimeDisplay()}</span>
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-gray-200 truncate">
+                                {stream.creator.name}
+                            </p>
+                            <span className="text-xs text-gray-400 bg-gray-700 px-1 rounded">
+                                {18 + Math.floor(Math.random() * 12)}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                                <div className={`w-2 h-2 rounded-full ${stream.status === 'LIVE' ? 'bg-green-400' : 'bg-gray-500'}`}></div>
+                                <span className="text-xs text-gray-400">
+                                    {stream.status === 'LIVE' ? 'Online' : 'Offline'}
+                                </span>
+                            </div>
+                            <span className="text-xs text-gray-400">•</span>
+                            <span className="text-xs text-gray-400">{getTimeDisplay()}</span>
                         </div>
                     </div>
                 </div>

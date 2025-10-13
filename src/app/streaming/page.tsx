@@ -141,22 +141,18 @@ export default function StreamingPage() {
 
   // Stream categories
   const streamCategories = [
-    'Solo Female',
-    'Solo Male',
-    'Couples',
-    'LGBTQ+',
-    'Trans & Non-Binary',
-    'Fetish & Kinks',
-    'Roleplay & Fantasy',
-    'Cosplay & Gaming',
-    'Mature & MILF',
-    'ASMR & Tease',
-    'Group & Party',
-    'Private Shows',
-    'New Performers',
-    'Verified & Premium',
-    'Other'
-  ];
+    "Models",
+    "Characters",
+    "AI Video",
+    "AI Apps",
+    "Video",
+    "Effects",
+    "Training",
+    "Asian",
+    "BBW",
+    "Babes",
+    "LGBTQ+"
+  ]
 
 
   // Fetch available streams
