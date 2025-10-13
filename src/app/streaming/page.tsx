@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { Loader2, Video, Users, Plus } from 'lucide-react';
+import { ChatContainer } from '@/components/chat';
 
 interface Stream {
   id: string;
@@ -374,13 +375,30 @@ export default function StreamingPage() {
               </Button>
             </div>
 
-            <CreatorBroadcast
-              streamId={selectedStream}
-              token={streamToken}
-              serverUrl={LIVEKIT_SERVER_URL}
-              streamTitle={currentStreamData?.title || newStream.title}
-              onStreamEnd={handleStreamEnd}
-            />
+            {/* Video + Chat Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Video Section - Takes 2/3 width on large screens */}
+              <div className="lg:col-span-2">
+                <CreatorBroadcast
+                  streamId={selectedStream}
+                  token={streamToken}
+                  serverUrl={LIVEKIT_SERVER_URL}
+                  streamTitle={currentStreamData?.title || newStream.title}
+                  onStreamEnd={handleStreamEnd}
+                />
+              </div>
+
+              {/* Chat Section - Takes 1/3 width on large screens */}
+              <div className="lg:col-span-1">
+                <div className="h-[600px] lg:h-full">
+                  <ChatContainer
+                    streamId={selectedStream}
+                    canModerate={true}
+                    className="h-full"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -397,14 +415,31 @@ export default function StreamingPage() {
               </Button>
             </div>
 
-            <ViewerPlayer
-              streamId={selectedStream}
-              token={streamToken}
-              serverUrl={LIVEKIT_SERVER_URL}
-              streamTitle={currentStreamData?.title}
-              creatorName={currentStreamData?.creator?.name}
-              className="aspect-video max-w-4xl mx-auto"
-            />
+            {/* Video + Chat Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Video Section - Takes 2/3 width on large screens */}
+              <div className="lg:col-span-2">
+                <ViewerPlayer
+                  streamId={selectedStream}
+                  token={streamToken}
+                  serverUrl={LIVEKIT_SERVER_URL}
+                  streamTitle={currentStreamData?.title}
+                  creatorName={currentStreamData?.creator?.name}
+                  className="aspect-video w-full"
+                />
+              </div>
+
+              {/* Chat Section - Takes 1/3 width on large screens */}
+              <div className="lg:col-span-1">
+                <div className="h-[600px] lg:h-full">
+                  <ChatContainer
+                    streamId={selectedStream}
+                    canModerate={false}
+                    className="h-full"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
