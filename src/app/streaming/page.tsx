@@ -234,7 +234,7 @@ export default function StreamingPage() {
               <Button
                 onClick={() => setMode('browse')}
                 variant={mode === 'browse' ? 'default' : 'outline'}
-                className={mode === 'browse' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"}
+                className={mode === 'browse' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"}
               >
                 <Users className="w-4 h-4 mr-2" />
                 Browse Streams
@@ -306,7 +306,7 @@ export default function StreamingPage() {
                   )}
                 </div>
               ) : (
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="bg-gray-800 border-gray-700 text-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Video className="w-6 h-6" />
@@ -321,22 +321,22 @@ export default function StreamingPage() {
                         onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
                         placeholder="Enter an engaging stream title"
                         maxLength={100}
-                        className="bg-gray-800 border-gray-700"
+                        className="bg-gray-800 border-gray-700 text-white"
                       />
-                      <p className="text-xs text-gray-500 mt-1">{newStream.title.length}/100</p>
+                      <p className="text-xs text-gray-300 mt-1">{newStream.title.length}/100</p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">Description (Optional)</label>
                       <textarea
-                        className="flex min-h-[100px] w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex min-h-[100px] w-full rounded-md border text-white border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         value={newStream.description}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
                         placeholder="Describe what you'll be streaming about..."
                         rows={4}
                         maxLength={500}
                       />
-                      <p className="text-xs text-gray-500 mt-1">{newStream.description.length}/500</p>
+                      <p className="text-xs text-gray-300 mt-1">{newStream.description.length}/500</p>
                     </div>
 
                     <div className="flex gap-3">
@@ -360,7 +360,7 @@ export default function StreamingPage() {
                       <Button
                         onClick={() => setMode('browse')}
                         variant="outline"
-                        className="border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"
+                        className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"
                       >
                         Cancel
                       </Button>
