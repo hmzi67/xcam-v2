@@ -9,8 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { Loader2, Video, Users, Plus } from 'lucide-react';
-import { ChatContainer } from '@/components/chat';
-import { Navigation } from "@/components/navigation";
+import { TabbedChatContainer } from '@/components/chat';
 
 interface Stream {
   id: string;
@@ -50,7 +49,7 @@ export default function StreamingPage() {
       const response = await fetch('/api/streams/list');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: never) => ({
+        const streamsWithDates = (data.streams || []).map((stream: any) => ({
           ...stream,
           createdAt: new Date(stream.createdAt)
         }));
@@ -95,8 +94,9 @@ export default function StreamingPage() {
       });
 
       if (response.ok) {
-        const stream = await response.json();
-        console.log('✅ Stream created successfully:', stream);
+        const responseData = await response.json();
+        console.log('✅ Stream created successfully:', responseData);
+        const stream = responseData.stream;
         setSelectedStream(stream.id);
 
         // Get creator token
@@ -187,7 +187,7 @@ export default function StreamingPage() {
 
   if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+      <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
@@ -195,19 +195,17 @@ export default function StreamingPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white">
-        <main className="container mx-auto px-4 py-8 flex items-center justify-center">
-          <Card className="max-w-md mx-auto bg-gray-800 border-gray-700">
-            <CardContent className="p-6 text-center">
-              <Video className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
-              <p className="text-gray-400 mb-4">Please sign in to access streaming features.</p>
-              <Button onClick={() => router.push('/login')} className="w-full bg-purple-600 hover:bg-purple-700">
-                Sign In
-              </Button>
-            </CardContent>
-          </Card>
-        </main>
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6 text-center">
+            <Video className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+            <p className="text-gray-600 mb-4">Please sign in to access streaming features.</p>
+            <Button onClick={() => router.push('/login')} className="w-full">
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -218,243 +216,234 @@ export default function StreamingPage() {
   console.log('Current state:', { mode, selectedStream, streamToken, currentStreamData });
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <div className="">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold">Live Streaming</h1>
-              <p className="text-gray-400">Create and watch live streams</p>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setMode('browse')}
-                variant={mode === 'browse' ? 'default' : 'outline'}
-                className={mode === 'browse' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Browse Streams
-              </Button>
-              <Button
-                onClick={() => setMode('create')}
-                variant={mode === 'create' ? 'default' : 'outline'}
-                className={mode === 'create' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"}
-              >
-                <Plus className="w-4 h-4" />
-                Go Live
-              </Button>
-            </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Live Streaming</h1>
+            <p className="text-gray-600">Create and watch live streams</p>
           </div>
 
-          {/* Browse Mode */}
-          {mode === 'browse' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Live Streams</h2>
-                <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white">
-                  Refresh
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {streams.map((stream) => (
-                  <StreamCard
-                    key={stream.id}
-                    stream={stream}
-                    onJoinStream={handleJoinStream}
-                  />
-                ))}
-              </div>
-
-              {streams.length === 0 && (
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardContent className="p-12 text-center">
-                    <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-xl font-semibold mb-2">No streams available</h3>
-                    <p className="text-gray-400 mb-4">Be the first to start streaming!</p>
-                    {isCreator && (
-                      <Button onClick={() => setMode('create')} className="bg-purple-600 hover:bg-purple-700">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Start Streaming
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {/* Create Stream Mode */}
-          {mode === 'create' && (
-            <div className="max-w-2xl mx-auto space-y-6">
-              {!hasMediaPermissions ? (
-                <div>
-                  <MediaPermissions
-                    onPermissionsGranted={() => setHasMediaPermissions(true)}
-                    onPermissionsDenied={(error) => setPermissionError(error)}
-                  />
-                  {permissionError && (
-                    <Card className="mt-4 border-red-500/50 bg-gray-800">
-                      <CardContent className="p-4">
-                        <p className="text-sm text-red-500">{permissionError}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              ) : (
-                <Card className="bg-gray-800 border-gray-700 text-white">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Video className="w-6 h-6" />
-                      Start a New Stream
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Stream Title *</label>
-                      <Input
-                        value={newStream.title}
-                        onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="Enter an engaging stream title"
-                        maxLength={100}
-                        className="bg-gray-800 border-gray-700 text-white"
-                      />
-                      <p className="text-xs text-gray-300 mt-1">{newStream.title.length}/100</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Description (Optional)</label>
-                      <textarea
-                        className="flex min-h-[100px] w-full rounded-md border text-white border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={newStream.description}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
-                        placeholder="Describe what you'll be streaming about..."
-                        rows={4}
-                        maxLength={500}
-                      />
-                      <p className="text-xs text-gray-300 mt-1">{newStream.description.length}/500</p>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={handleCreateStream}
-                        disabled={loading || !newStream.title.trim()}
-                        className="flex-1 bg-purple-600 hover:bg-purple-700"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Creating Stream...
-                          </>
-                        ) : (
-                          <>
-                            <Video className="w-4 h-4 mr-2" />
-                            Start Streaming
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => setMode('browse')}
-                        variant="outline"
-                        className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {/* Creator Broadcast */}
-          {mode === 'broadcast' && selectedStream && streamToken && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Broadcasting Live</h2>
-                <Button
-                  onClick={handleStreamEnd}
-                  variant="outline"
-                  className="border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"
-                >
-                  Back to Browse
-                </Button>
-              </div>
-
-              {/* Video + Chat Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Video Section - Takes 2/3 width on large screens */}
-                <div className="lg:col-span-2">
-                  <CreatorBroadcast
-                    streamId={selectedStream}
-                    token={streamToken}
-                    serverUrl={LIVEKIT_SERVER_URL}
-                    streamTitle={currentStreamData?.title || newStream.title}
-                    onStreamEnd={handleStreamEnd}
-                  />
-                </div>
-
-                {/* Chat Section - Takes 1/3 width on large screens */}
-                <div className="lg:col-span-1">
-                  <div className="h-[600px] lg:h-full">
-                    <ChatContainer
-                      streamId={selectedStream}
-                      canModerate={true}
-                      className="h-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Viewer Player */}
-          {mode === 'watch' && selectedStream && streamToken && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Watching Stream</h2>
-                <Button
-                  onClick={handleStreamEnd}
-                  variant="outline"
-                  className="border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"
-                >
-                  Leave Stream
-                </Button>
-              </div>
-
-              {/* Video + Chat Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Video Section - Takes 2/3 width on large screens */}
-                <div className="lg:col-span-2">
-                  <ViewerPlayer
-                    streamId={selectedStream}
-                    token={streamToken}
-                    serverUrl={LIVEKIT_SERVER_URL}
-                    streamTitle={currentStreamData?.title}
-                    creatorName={currentStreamData?.creator?.name}
-                    className="aspect-video w-full"
-                  />
-                </div>
-
-                {/* Chat Section - Takes 1/3 width on large screens */}
-                <div className="lg:col-span-1">
-                  <div className="h-[600px] lg:h-full">
-                    <ChatContainer
-                      streamId={selectedStream}
-                      canModerate={false}
-                      className="h-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Navigation */}
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setMode('browse')}
+              variant={mode === 'browse' ? 'default' : 'outline'}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Browse Streams
+            </Button>
+            <Button
+              onClick={() => setMode('create')}
+              variant={mode === 'create' ? 'default' : 'outline'}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Go Live
+            </Button>
+          </div>
         </div>
-      </main>
+
+        {/* Browse Mode */}
+        {mode === 'browse' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Live Streams</h2>
+              <Button onClick={fetchStreams} variant="outline">
+                Refresh
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {streams.map((stream) => (
+                <StreamCard
+                  key={stream.id}
+                  stream={stream}
+                  onJoinStream={handleJoinStream}
+                />
+              ))}
+            </div>
+
+            {streams.length === 0 && (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-semibold mb-2">No streams available</h3>
+                  <p className="text-gray-600 mb-4">Be the first to start streaming!</p>
+                  {isCreator && (
+                    <Button onClick={() => setMode('create')}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Start Streaming
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* Create Stream Mode */}
+        {mode === 'create' && (
+          <div className="max-w-2xl mx-auto space-y-6">
+            {!hasMediaPermissions ? (
+              <div>
+                <MediaPermissions
+                  onPermissionsGranted={() => setHasMediaPermissions(true)}
+                  onPermissionsDenied={(error) => setPermissionError(error)}
+                />
+                {permissionError && (
+                  <Card className="mt-4 border-red-200">
+                    <CardContent className="p-4">
+                      <p className="text-sm text-red-600">{permissionError}</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Video className="w-6 h-6" />
+                    Start a New Stream
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Stream Title *</label>
+                    <Input
+                      value={newStream.title}
+                      onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="Enter an engaging stream title"
+                      maxLength={100}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{newStream.title.length}/100</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (Optional)</label>
+                    <textarea
+                      className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={newStream.description}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Describe what you'll be streaming about..."
+                      rows={4}
+                      maxLength={500}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{newStream.description.length}/500</p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={handleCreateStream}
+                      disabled={loading || !newStream.title.trim()}
+                      className="flex-1"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating Stream...
+                        </>
+                      ) : (
+                        <>
+                          <Video className="w-4 h-4 mr-2" />
+                          Start Streaming
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => setMode('browse')}
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* Creator Broadcast */}
+        {mode === 'broadcast' && selectedStream && streamToken && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Broadcasting Live</h2>
+              <Button
+                onClick={handleStreamEnd}
+                variant="outline"
+              >
+                Back to Browse
+              </Button>
+            </div>
+
+            {/* Video + Chat Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Video Section - Takes 2/3 width on large screens */}
+              <div className="lg:col-span-2">
+                <CreatorBroadcast
+                  streamId={selectedStream}
+                  token={streamToken}
+                  serverUrl={LIVEKIT_SERVER_URL}
+                  streamTitle={currentStreamData?.title || newStream.title}
+                  onStreamEnd={handleStreamEnd}
+                />
+              </div>
+
+              {/* Chat Section - Takes 1/3 width on large screens */}
+              <div className="lg:col-span-1">
+                <div className="h-[600px] lg:h-full">
+                  <TabbedChatContainer
+                    streamId={selectedStream}
+                    canModerate={true}
+                    className="h-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Viewer Player */}
+        {mode === 'watch' && selectedStream && streamToken && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Watching Stream</h2>
+              <Button
+                onClick={handleStreamEnd}
+                variant="outline"
+              >
+                Leave Stream
+              </Button>
+            </div>
+
+            {/* Video + Chat Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Video Section - Takes 2/3 width on large screens */}
+              <div className="lg:col-span-2">
+                <ViewerPlayer
+                  streamId={selectedStream}
+                  token={streamToken}
+                  serverUrl={LIVEKIT_SERVER_URL}
+                  streamTitle={currentStreamData?.title}
+                  creatorName={currentStreamData?.creator?.name}
+                  className="aspect-video w-full"
+                />
+              </div>
+
+              {/* Chat Section - Takes 1/3 width on large screens */}
+              <div className="lg:col-span-1">
+                <div className="h-[600px] lg:h-full">
+                  <TabbedChatContainer
+                    streamId={selectedStream}
+                    canModerate={false}
+                    className="h-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

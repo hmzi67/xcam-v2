@@ -99,11 +99,13 @@ model User {
   streams           Stream[]
   follows           Follow[]           @relation("UserFollows")
   followers         Follow[]           @relation("CreatorFollowers")
-  chatMessages      ChatMessage[]
-  moderationActions ModerationAction[] @relation("ModeratorActions")
-  moderationTargets ModerationAction[] @relation("TargetUser")
-  streamSessions    StreamSession[]
-  meterEvents       MeterEvent[]
+  chatMessages         ChatMessage[]
+  sentPrivateMessages  PrivateMessage[] @relation("SentPrivateMessages")
+  receivedPrivateMessages PrivateMessage[] @relation("ReceivedPrivateMessages")
+  moderationActions    ModerationAction[] @relation("ModeratorActions")
+  moderationTargets    ModerationAction[] @relation("TargetUser")
+  streamSessions       StreamSession[]
+  meterEvents          MeterEvent[]
 
   @@index([email])
   @@index([status])
@@ -167,6 +169,7 @@ model Stream {
   creator           User               @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   sessions          StreamSession[]
   chatMessages      ChatMessage[]
+  privateMessages   PrivateMessage[]
   moderationActions ModerationAction[] @relation("TargetStream")
 
   @@index([creatorId])
@@ -367,6 +370,30 @@ model ChatMessage {
   @@index([streamId, createdAt])
   @@index([userId])
   @@map("chat_messages")
+}
+
+model PrivateMessage {
+  id         String @id @default(cuid())
+  senderId   String @map("sender_id")
+  receiverId String @map("receiver_id")
+  streamId   String @map("stream_id")
+  message    String @db.Text
+
+  isRead    Boolean @default(false) @map("is_read")
+  isDeleted Boolean @default(false) @map("is_deleted")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+
+  // Relations
+  sender   User   @relation("SentPrivateMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User   @relation("ReceivedPrivateMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, isRead])
+  @@index([streamId, createdAt])
+  @@map("private_messages")
 }
 
 // ============================================

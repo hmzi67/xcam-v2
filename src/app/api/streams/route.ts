@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "../../../../lib/auth-config";
+import { auth } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { createRoom, getRoomNameFromStreamId } from "@/lib/livekit";

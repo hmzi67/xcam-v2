@@ -8,16 +8,17 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Trash2, Ban, Volume2, VolumeX } from "lucide-react";
+import { MoreVertical, Trash2, Ban, Volume2, VolumeX, MessageCircle } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "@/hooks/use-chat";
 
 interface ChatMessageProps {
-    message: ChatMessageType;
-    currentUserId?: string;
-    canModerate?: boolean;
-    onDelete?: (messageId: string) => void;
-    onMute?: (userId: string) => void;
-    onBan?: (userId: string) => void;
+  message: ChatMessageType;
+  currentUserId?: string;
+  canModerate?: boolean;
+  onDelete?: (messageId: string) => void;
+  onMute?: (userId: string) => void;
+  onBan?: (userId: string) => void;
+  onPrivateMessage?: (userId: string, userName: string) => void;
 }
 
 export function ChatMessage({
@@ -27,6 +28,7 @@ export function ChatMessage({
     onDelete,
     onMute,
     onBan,
+    onPrivateMessage,
 }: ChatMessageProps) {
     const isOwnMessage = message.userId === currentUserId;
     const roleColors = {
@@ -85,8 +87,8 @@ export function ChatMessage({
                 </div>
             </div>
 
-            {/* Moderation Actions */}
-            {canModerate && !isOwnMessage && (
+            {/* Actions Menu */}
+            {!isOwnMessage && (canModerate || onPrivateMessage) && (
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -95,24 +97,36 @@ export function ChatMessage({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                onClick={() => onDelete?.(message.id)}
-                                className="text-red-600"
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Message
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onMute?.(message.userId)}>
-                                <VolumeX className="h-4 w-4 mr-2" />
-                                Mute User (60 min)
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => onBan?.(message.userId)}
-                                className="text-red-600"
-                            >
-                                <Ban className="h-4 w-4 mr-2" />
-                                Ban User
-                            </DropdownMenuItem>
+                            {onPrivateMessage && (
+                                <DropdownMenuItem
+                                    onClick={() => onPrivateMessage(message.userId, message.user.displayName)}
+                                >
+                                    <MessageCircle className="h-4 w-4 mr-2" />
+                                    Send Private Message
+                                </DropdownMenuItem>
+                            )}
+                            {canModerate && (
+                                <>
+                                    <DropdownMenuItem
+                                        onClick={() => onDelete?.(message.id)}
+                                        className="text-red-600"
+                                    >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete Message
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => onMute?.(message.userId)}>
+                                        <VolumeX className="h-4 w-4 mr-2" />
+                                        Mute User (60 min)
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => onBan?.(message.userId)}
+                                        className="text-red-600"
+                                    >
+                                        <Ban className="h-4 w-4 mr-2" />
+                                        Ban User
+                                    </DropdownMenuItem>
+                                </>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

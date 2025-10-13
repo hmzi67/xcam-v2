@@ -9,12 +9,11 @@ import { Card } from "@/components/ui/card";
 import { Loader2, AlertCircle, Wifi, WifiOff, ChevronUp } from "lucide-react";
 
 interface ChatContainerProps {
-    streamId: string;
-    canModerate?: boolean;
-    className?: string;
-}
-
-export function ChatContainer({ streamId, canModerate = false, className }: ChatContainerProps) {
+  streamId: string;
+  canModerate?: boolean;
+  className?: string;
+  onStartPrivateChat?: (userId: string, userName: string) => void;
+}export function ChatContainer({ streamId, canModerate = false, className, onStartPrivateChat }: ChatContainerProps) {
     const { data: session } = useSession();
     const [chatToken, setChatToken] = useState<string | null>(null);
     const [canChat, setCanChat] = useState(true);
@@ -237,19 +236,18 @@ export function ChatContainer({ streamId, canModerate = false, className }: Chat
                 )}
 
                 {/* Messages list */}
-                {messages.map((message) => (
-                    <ChatMessage
-                        key={message.id}
-                        message={message}
-                        currentUserId={session?.user?.id || ''}
-                        canModerate={canModerate}
-                        onDelete={handleDeleteMessage}
-                        onMute={handleMuteUser}
-                        onBan={handleBanUser}
-                    />
-                ))}
-
-                {/* Empty state */}
+        {messages.map((message) => (
+          <ChatMessage
+            key={message.id}
+            message={message}
+            currentUserId={session?.user?.id || ''}
+            canModerate={canModerate}
+            onDelete={handleDeleteMessage}
+            onMute={handleMuteUser}
+            onBan={handleBanUser}
+            onPrivateMessage={onStartPrivateChat}
+          />
+        ))}                {/* Empty state */}
                 {messages.length === 0 && !messagesLoading && (
                     <div className="flex items-center justify-center h-full text-center p-6">
                         <div>
