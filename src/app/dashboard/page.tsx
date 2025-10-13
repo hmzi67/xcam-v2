@@ -17,9 +17,9 @@ export default async function DashboardPage() {
                 <div className="bg-white shadow rounded-lg p-6">
                     <h2 className="text-xl font-semibold mb-4">Welcome back!</h2>
                     <div className="space-y-2">
-                        <p><strong>Email:</strong> {session.user.email}</p>
-                        <p><strong>Role:</strong> {session.user.role}</p>
-                        <p><strong>Email Verified:</strong> {session.user.emailVerified ? "Yes" : "No"}</p>
+                        <p><strong>Email:</strong> {(session.user as import("../../../lib/auth-utils").SessionUser).email}</p>
+                        <p><strong>Role:</strong> {(session.user as import("../../../lib/auth-utils").SessionUser).role}</p>
+                        <p><strong>Email Verified:</strong> {(session.user as import("../../../lib/auth-utils").SessionUser).emailVerified ? "Yes" : "No"}</p>
                     </div>
                 </div>
             </div>

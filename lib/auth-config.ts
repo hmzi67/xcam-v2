@@ -95,14 +95,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.name = session.user.name || session.user.email || "";
-
         // Add custom fields to session user
-        const sessionUser = session.user as typeof session.user & {
-          role: string;
-          emailVerified: boolean;
-        };
-        sessionUser.role = token.role as string;
-        sessionUser.emailVerified = token.emailVerified as boolean;
+        (session.user as any).role = token.role as string;
+        (session.user as any).emailVerified = token.emailVerified === true;
       }
       return session;
     },

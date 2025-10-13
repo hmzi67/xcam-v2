@@ -4,10 +4,12 @@ import { UserRole } from "@prisma/client";
 import { auth } from "./auth";
 import { redirect } from "next/navigation";
 
-interface SessionUser {
-  user?: {
-    emailVerified?: boolean;
-  };
+export interface SessionUser {
+  id?: string;
+  email?: string;
+  name?: string;
+  role?: string;
+  emailVerified?: boolean;
 }
 
 /**
@@ -40,11 +42,11 @@ export function generateVerificationToken(): string {
  */
 export async function requireAuth() {
   const session = await auth();
-
   if (!session?.user) {
     redirect("/login");
   }
-
+  // Cast session.user to SessionUser
+  session.user = session.user as SessionUser;
   return session;
 }
 
@@ -53,11 +55,10 @@ export async function requireAuth() {
  */
 export async function requireRole(allowedRoles: UserRole[]) {
   const session = await requireAuth();
-
-  if (!allowedRoles.includes(session.user.role)) {
+  const user = session.user as SessionUser;
+  if (!user.role || !allowedRoles.includes(user.role as UserRole)) {
     throw new Error("Insufficient permissions");
   }
-
   return session;
 }
 
@@ -72,12 +73,12 @@ export function hasRole(userRole: UserRole, allowedRoles: UserRole[]): boolean {
  * Check if user is authenticated (client-side helper)
  */
 export function isAuthenticated(session: SessionUser | null): boolean {
-  return !!session?.user;
+  return !!session?.email;
 }
 
 /**
  * Check if user has verified email
  */
 export function isEmailVerified(session: SessionUser | null): boolean {
-  return session?.user?.emailVerified === true;
+  return session?.emailVerified === true;
 }

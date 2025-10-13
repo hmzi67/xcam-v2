@@ -50,6 +50,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: user.profile?.displayName || user.email,
             role: user.role,
             emailVerified: user.emailVerified,
+          } as {
+            id: string;
+            email: string;
+            name: string;
+            role: string;
+            emailVerified: boolean;
           };
         } catch {
           return null;
@@ -61,16 +67,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
-        token.emailVerified = user.emailVerified;
+        const u = user as { role?: string; emailVerified?: boolean };
+        token.role = u.role;
+        token.emailVerified = u.emailVerified;
       }
       return token;
     },
     session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!;
-        session.user.role = token.role;
-        session.user.emailVerified = token.emailVerified;
+        (session.user as any).id = token.sub!;
+        (session.user as any).role = token.role;
+        (session.user as any).emailVerified = token.emailVerified;
       }
       return session;
     },

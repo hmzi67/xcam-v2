@@ -9,7 +9,7 @@ export default async function VerifyEmailPage() {
         redirect("/login")
     }
 
-    if (session.user.emailVerified) {
+    if ((session.user as import("../../../lib/auth-utils").SessionUser).emailVerified) {
         redirect("/dashboard")
     }
 

@@ -25,17 +25,17 @@ export function Navigation() {
                         {session?.user ? (
                             <>
                                 <span className="text-sm text-gray-700">
-                                    {session.user.email} ({session.user.role})
+                                    {(session.user as import("../../lib/auth-utils").SessionUser).email} ({(session.user as import("../../lib/auth-utils").SessionUser).role})
                                 </span>
                                 <Link href="/dashboard" className="text-blue-600 hover:text-blue-500">
                                     Dashboard
                                 </Link>
-                                {session.user.role === "CREATOR" || session.user.role === "ADMIN" ? (
+                                {((session.user as import("../../lib/auth-utils").SessionUser).role === "CREATOR" || (session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN") ? (
                                     <Link href="/creator" className="text-blue-600 hover:text-blue-500">
                                         Creator Studio
                                     </Link>
                                 ) : null}
-                                {session.user.role === "ADMIN" ? (
+                                {(session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN" ? (
                                     <Link href="/admin" className="text-blue-600 hover:text-blue-500">
                                         Admin
                                     </Link>
