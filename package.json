@@ -11,6 +11,8 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.0",
     "@hookform/resolvers": "^5.2.2",
+    "@livekit/components-core": "^0.12.10",
+    "@livekit/components-react": "^2.9.15",
     "@prisma/client": "^6.17.1",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -18,6 +20,9 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "livekit-client": "^2.15.8",
+    "livekit-server-sdk": "^2.14.0",
     "lucide-react": "^0.545.0",
     "next": "15.5.4",
     "next-auth": "^5.0.0-beta.29",
