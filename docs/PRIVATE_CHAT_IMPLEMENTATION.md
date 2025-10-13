@@ -44,7 +44,9 @@ model PrivateMessage {
 ### API Endpoints
 
 #### 1. Send/Receive Private Messages
+
 - **GET** `/api/streams/[streamId]/private-messages/[receiverId]`
+
   - Fetch conversation history between current user and receiver
   - Automatically marks messages as read
   - Returns last 50 messages in chronological order
@@ -55,6 +57,7 @@ model PrivateMessage {
   - Validates message content (XSS protection, length limits)
 
 #### 2. Conversation Management
+
 - **GET** `/api/streams/[streamId]/private-conversations`
   - Get list of all conversation partners for current user
   - Includes unread message counts per conversation
@@ -63,30 +66,35 @@ model PrivateMessage {
 ### Components
 
 #### 1. `TabbedChatContainer`
+
 - Main chat interface with tabs for public and private chat
 - Handles switching between chat modes
 - Shows unread private message count badge
 - Integrates with existing stream layout
 
 #### 2. `PrivateChatContainer`
+
 - Core private messaging interface
 - Two-view system: conversation list → individual chat
 - Handles message sending and receiving
 - Polling-based real-time updates
 
 #### 3. `ConversationList`
+
 - Displays all conversation partners
 - Shows unread message counts
 - User avatars with role indicators
 - Last message timestamps
 
 #### 4. `PrivateMessageBubble`
+
 - Individual message display
 - WhatsApp-like bubble interface
 - Own messages aligned right, others left
 - Sender info and timestamps
 
 #### 5. `ChatMessage` (Enhanced)
+
 - Added "Send Private Message" option to dropdown menu
 - Available for all users (not just moderators)
 - Initiates private conversation when clicked
@@ -94,21 +102,22 @@ model PrivateMessage {
 ### React Hooks
 
 #### `usePrivateChat`
+
 ```typescript
 const {
-  messages,           // Current conversation messages
-  conversations,      // List of all conversations
-  loading,           // Loading state for messages
-  error,             // Error state
-  sending,           // Sending state
-  sendMessage,       // Send a new message
-  fetchMessages,     // Manually fetch messages
-  fetchConversations // Manually fetch conversations
+  messages, // Current conversation messages
+  conversations, // List of all conversations
+  loading, // Loading state for messages
+  error, // Error state
+  sending, // Sending state
+  sendMessage, // Send a new message
+  fetchMessages, // Manually fetch messages
+  fetchConversations, // Manually fetch conversations
 } = usePrivateChat({
   streamId,
-  receiverId,        // Optional: specific conversation
+  receiverId, // Optional: specific conversation
   token,
-  enabled
+  enabled,
 });
 ```
 
@@ -117,6 +126,7 @@ const {
 ### 1. Starting a Private Conversation
 
 From public chat:
+
 1. Click the menu button (⋮) next to any message
 2. Select "Send Private Message"
 3. Automatically switches to private chat tab
@@ -125,7 +135,9 @@ From public chat:
 ### 2. Managing Conversations
 
 In private chat tab:
+
 1. **Conversation List View**: See all your conversations
+
    - Unread message counts
    - Last message timestamps
    - User roles and avatars
@@ -166,6 +178,7 @@ In private chat tab:
 ### Polling vs WebSocket
 
 Currently uses **polling** (5-second intervals) for simplicity:
+
 - ✅ Simple implementation
 - ✅ Works with existing Next.js App Router
 - ✅ No additional infrastructure needed
@@ -201,6 +214,7 @@ Currently uses **polling** (5-second intervals) for simplicity:
 ## Monitoring
 
 Monitor these metrics:
+
 - Private message send success rate
 - Average conversation length
 - Polling request frequency

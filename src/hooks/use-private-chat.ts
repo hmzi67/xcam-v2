@@ -42,7 +42,7 @@ export function usePrivateChat({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  
+
   // Polling refs
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -92,7 +92,7 @@ export function usePrivateChat({
         if (response.ok) {
           const data = await response.json();
           setMessages(data.messages || []);
-          
+
           // Refresh conversations to update unread counts
           fetchConversations();
         } else {
@@ -136,7 +136,7 @@ export function usePrivateChat({
           if (targetReceiverId === receiverId) {
             setMessages((prev) => [...prev, data.message]);
           }
-          
+
           // Refresh conversations list
           fetchConversations();
           return true;
@@ -163,7 +163,7 @@ export function usePrivateChat({
     // Poll conversations every 5 seconds
     pollIntervalRef.current = setInterval(() => {
       fetchConversations();
-      
+
       // If we have an active conversation, refresh its messages too
       if (receiverId) {
         fetchMessages(receiverId);

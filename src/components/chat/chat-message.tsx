@@ -12,13 +12,13 @@ import { MoreVertical, Trash2, Ban, Volume2, VolumeX, MessageCircle } from "luci
 import { ChatMessage as ChatMessageType } from "@/hooks/use-chat";
 
 interface ChatMessageProps {
-  message: ChatMessageType;
-  currentUserId?: string;
-  canModerate?: boolean;
-  onDelete?: (messageId: string) => void;
-  onMute?: (userId: string) => void;
-  onBan?: (userId: string) => void;
-  onPrivateMessage?: (userId: string, userName: string) => void;
+    message: ChatMessageType;
+    currentUserId?: string;
+    canModerate?: boolean;
+    onDelete?: (messageId: string) => void;
+    onMute?: (userId: string) => void;
+    onBan?: (userId: string) => void;
+    onPrivateMessage?: (userId: string, userName: string) => void;
 }
 
 export function ChatMessage({

@@ -22,10 +22,7 @@ export async function GET(
     const conversations = await prisma.privateMessage.findMany({
       where: {
         streamId,
-        OR: [
-          { senderId: userId },
-          { receiverId: userId },
-        ],
+        OR: [{ senderId: userId }, { receiverId: userId }],
         isDeleted: false,
       },
       select: {
@@ -81,12 +78,17 @@ export async function GET(
     });
 
     const conversationList = Array.from(conversationMap.values()).sort(
-      (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+      (a, b) =>
+        new Date(b.lastMessageAt).getTime() -
+        new Date(a.lastMessageAt).getTime()
     );
 
     return NextResponse.json({ conversations: conversationList });
   } catch (error) {
     console.error("Error fetching private conversations:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
