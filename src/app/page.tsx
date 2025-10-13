@@ -84,7 +84,7 @@ export default function Home() {
               variant="outline"
               size="sm"
               disabled={loading}
-              className="border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"
+              className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
