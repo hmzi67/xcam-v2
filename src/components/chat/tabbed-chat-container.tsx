@@ -65,27 +65,31 @@ export function TabbedChatContainer({
     };
 
     return (
-        <Card className={cn("flex flex-col h-full", className)}>
+        <Card className={cn("flex flex-col h-full bg-gray-900 border-gray-700", className)}>
             {/* Tab Header */}
-            <div className="flex border-b bg-gray-50 dark:bg-gray-800">
+            <div className="flex border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm">
                 <Button
                     variant={activeTab === "public" ? "default" : "ghost"}
                     className={cn(
-                        "flex-1 rounded-none border-0 justify-center gap-2",
-                        activeTab === "public" && "bg-white dark:bg-gray-900 shadow-none"
+                        "flex-1 rounded-none border-0 justify-center gap-2 text-white transition-all duration-200",
+                        activeTab === "public"
+                            ? "bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-600/20"
+                            : "bg-transparent hover:bg-gray-700/50 text-gray-300 hover:text-white"
                     )}
                     onClick={() => setActiveTab("public")}
                 >
                     <Users className="w-4 h-4" />
-                    <span className="hidden sm:inline">Public Chat</span>
-                    <span className="sm:hidden">Public</span>
+                    <span className="hidden sm:inline">Live Chat</span>
+                    <span className="sm:hidden">Live</span>
                 </Button>
 
                 <Button
                     variant={activeTab === "private" ? "default" : "ghost"}
                     className={cn(
-                        "flex-1 rounded-none border-0 justify-center gap-2 relative",
-                        activeTab === "private" && "bg-white dark:bg-gray-900 shadow-none"
+                        "flex-1 rounded-none border-0 justify-center gap-2 relative text-white transition-all duration-200",
+                        activeTab === "private"
+                            ? "bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-600/20"
+                            : "bg-transparent hover:bg-gray-700/50 text-gray-300 hover:text-white"
                     )}
                     onClick={() => setActiveTab("private")}
                 >
@@ -94,8 +98,7 @@ export function TabbedChatContainer({
                     <span className="sm:hidden">DMs</span>
                     {totalUnreadPrivateMessages > 0 && (
                         <Badge
-                            variant="destructive"
-                            className="absolute -top-1 -right-1 px-1 py-0 text-xs min-w-[16px] h-4 rounded-full"
+                            className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs min-w-[18px] h-5 rounded-full bg-red-500 text-white border border-red-400 shadow-lg animate-pulse"
                         >
                             {totalUnreadPrivateMessages > 99 ? "99+" : totalUnreadPrivateMessages}
                         </Badge>
@@ -123,13 +126,15 @@ export function TabbedChatContainer({
             </div>
 
             {/* Footer info */}
-            <div className="border-t px-3 py-2 bg-gray-50 dark:bg-gray-800">
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>
+            <div className="border-t border-gray-700 px-3 py-2 bg-gray-800/30 backdrop-blur-sm">
+                <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">
                         {activeTab === "public" ? "Stream Chat" : "Private Messages"}
                     </span>
                     {session && (
-                        <span>Signed in as {session.user?.name}</span>
+                        <span className="text-purple-400 font-medium">
+                            Signed in as {session.user?.name}
+                        </span>
                     )}
                 </div>
             </div>

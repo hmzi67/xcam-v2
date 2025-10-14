@@ -42,33 +42,40 @@ export function ConversationList({
 
     if (conversations.length === 0) {
         return (
-            <div className={cn("flex flex-col items-center justify-center p-6 text-gray-500", className)}>
-                <MessageCircle className="w-8 h-8 mb-2 opacity-50" />
-                <p className="text-xs text-center">No active conversations</p>
+            <div className={cn("flex flex-col items-center justify-center p-8", className)}>
+                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
+                    <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <MessageCircle className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <p className="text-sm text-gray-300 font-medium mb-1">No active conversations</p>
+                    <p className="text-xs text-gray-500">Start messaging to see your chats here</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className={cn("space-y-1", className)}>
+        <div className={cn("space-y-2", className)}>
             {conversations.map((conversation) => (
                 <Button
                     key={conversation.partnerId}
                     variant="ghost"
                     className={cn(
-                        "w-full justify-start p-3 h-auto",
-                        selectedPartnerId === conversation.partnerId && "bg-gray-100 dark:bg-gray-700"
+                        "w-full justify-start p-4 h-auto rounded-lg transition-all duration-200 border border-transparent",
+                        selectedPartnerId === conversation.partnerId
+                            ? "bg-purple-600/20 border-purple-500/30 text-white shadow-lg shadow-purple-600/10"
+                            : "bg-gray-800/30 hover:bg-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white"
                     )}
                     onClick={() => onSelectConversation(conversation.partnerId)}
                 >
-                    <div className="flex items-center gap-3 w-full">
+                    <div className="flex items-center gap-4 w-full">
                         {/* Avatar */}
                         <div className="relative">
-                            <Avatar className="w-10 h-10">
+                            <Avatar className="w-12 h-12 ring-2 ring-gray-600/50 transition-all duration-200 group-hover:ring-purple-500/30">
                                 <img
                                     src={conversation.partnerImage || "/default-avatar.png"}
                                     alt={conversation.partnerName}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover rounded-full"
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
                                         target.src = "/default-avatar.png";
@@ -78,7 +85,7 @@ export function ConversationList({
                             {conversation.partnerRole !== "VIEWER" && (
                                 <div
                                     className={cn(
-                                        "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white",
+                                        "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-800 shadow-sm",
                                         roleColors[conversation.partnerRole as keyof typeof roleColors] ||
                                         "bg-gray-500"
                                     )}
@@ -88,22 +95,22 @@ export function ConversationList({
 
                         {/* Conversation info */}
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-left truncate">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-sm font-semibold text-left truncate">
                                     {conversation.partnerName}
                                 </p>
-                                <span className="text-xs text-gray-500 flex-shrink-0">
+                                <span className="text-xs text-gray-400 flex-shrink-0 bg-gray-700/30 px-2 py-1 rounded">
                                     {formatLastMessage(conversation.lastMessageAt)}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between mt-1">
-                                <span className="text-xs text-gray-500 capitalize">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-purple-300 capitalize flex items-center gap-1">
+                                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                                     {conversation.partnerRole.toLowerCase()}
                                 </span>
                                 {conversation.unreadCount > 0 && (
                                     <Badge
-                                        variant="default"
-                                        className="bg-blue-500 text-white text-xs px-2 py-0 rounded-full min-w-[20px] h-5 flex items-center justify-center"
+                                        className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-2 py-1 rounded-full min-w-[22px] h-6 flex items-center justify-center shadow-lg shadow-purple-600/25 animate-pulse"
                                     >
                                         {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
                                     </Badge>

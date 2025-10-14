@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navigation } from "@/components/navigation";
 import { StreamCard } from "@/components/stream";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { PrivateChatContainer } from "@/components/chat";
 import {
   Video,
   Users,
@@ -25,7 +27,9 @@ import {
   List,
   MoreHorizontal,
   Eye,
-  Flame
+  Flame,
+  MessageCircle,
+  DollarSign
 } from "lucide-react";
 
 interface Stream {
@@ -47,6 +51,7 @@ interface Stream {
 
 export default function Home() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [streams, setStreams] = useState<Stream[]>([]);
   const [filteredStreams, setFilteredStreams] = useState<Stream[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,9 +63,17 @@ export default function Home() {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Categories data
+  const handleCategoryClick = (categoryName: string) => {
+    if (categoryName === "Creator Earnings") {
+      router.push("/earnings");
+    } else {
+      setSelectedCategory(categoryName);
+    }
+  };
   const categories = [
     { name: "All Girls Cams", icon: Heart, count: 0, active: true },
+    { name: "Private Messages", icon: MessageCircle, count: 0 },
+    { name: "Creator Earnings", icon: DollarSign, count: 0 },
     { name: "New Models", icon: Star, count: 0 },
     { name: "GOLD Shows", icon: Star, count: 0 },
   ];
@@ -159,7 +172,7 @@ export default function Home() {
               return (
                 <button
                   key={category.name}
-                  onClick={() => setSelectedCategory(category.name)}
+                  onClick={() => handleCategoryClick(category.name)}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors neon-hover ${selectedCategory === category.name
                     ? 'bg-purple-600 text-white'
                     : 'text-gray-300 hover:bg-gray-700'
@@ -175,6 +188,12 @@ export default function Home() {
                   </span>
                   {category.name === "All Girls Cams" && (
                     <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
+                  )}
+                  {category.name === "Private Messages" && (
+                    <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
+                  )}
+                  {category.name === "Creator Earnings" && (
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full ml-auto animate-pulse" />
                   )}
                 </button>
               );
@@ -343,9 +362,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Stream Grid */}
+          {/* Content Area */}
           <div className="flex-1 p-4">
-            {loading && streams.length === 0 ? (
+            {selectedCategory === "Private Messages" ? (
+              <PrivateChatContainer streamId="homepage" token={null} />
+            ) : loading && streams.length === 0 ? (
               <div className={`grid gap-4 ${viewMode === 'grid'
                 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
                 : 'grid-cols-1'

@@ -17,7 +17,9 @@ import {
     Settings,
     Shield,
     LogOut,
-    User, Hand
+    User,
+    Hand,
+    DollarSign
 } from "lucide-react"
 
 export function Navigation() {
@@ -55,6 +57,12 @@ export function Navigation() {
 
                         {session?.user && (
                             <div className="hidden md:flex items-center space-x-1">
+                                <Link href="/earnings">
+                                    <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
+                                        <DollarSign className="w-4 h-4 mr-2" />
+                                        Earnings
+                                    </Button>
+                                </Link>
                                 {(session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN" && (
                                     <Link href="/admin">
                                         <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
@@ -82,7 +90,7 @@ export function Navigation() {
                                     <DropdownMenuLabel className={'flex items-center justify-start'}>
                                         <Hand className={'w-4 h-4 mr-2'} /> hi, {(session.user as import("../../lib/auth-utils").SessionUser).name}
                                     </DropdownMenuLabel>
-                                    <DropdownMenuSeparator className="bg-gray-700"/>
+                                    <DropdownMenuSeparator className="bg-gray-700" />
                                     <DropdownMenuItem asChild>
                                         <Link href="/dashboard" className="cursor-pointer">
                                             <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -95,16 +103,22 @@ export function Navigation() {
                                             <span>Streaming</span>
                                         </Link>
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/earnings" className="cursor-pointer">
+                                            <DollarSign className="w-4 h-4 mr-2" />
+                                            <span>Earnings</span>
+                                        </Link>
+                                    </DropdownMenuItem>
                                     {((session.user as import("../../lib/auth-utils").SessionUser).role === "CREATOR" ||
                                         (session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN") && (
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/creator" className="cursor-pointer">
-                                                <Settings className="w-4 h-4 mr-2" />
-                                                <span>Creator Studio</span>
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuSeparator className="bg-gray-700"/>
+                                            <DropdownMenuItem asChild>
+                                                <Link href="/creator" className="cursor-pointer">
+                                                    <Settings className="w-4 h-4 mr-2" />
+                                                    <span>Creator Studio</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        )}
+                                    <DropdownMenuSeparator className="bg-gray-700" />
                                     <DropdownMenuItem onSelect={handleSignOut} className="cursor-pointer text-red-400">
                                         <LogOut className="w-4 h-4 mr-2" />
                                         <span>Sign Out</span>

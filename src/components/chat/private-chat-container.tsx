@@ -39,13 +39,13 @@ export function PrivateChatContainer({
         sending,
         sendMessage,
     } = usePrivateChat({
-        streamId,
+        streamId: streamId === "homepage" ? "global" : streamId,
         receiverId: selectedPartnerId || undefined,
         token,
-        enabled: !!token,
+        enabled: streamId !== "homepage" && !!token,
     });
 
-    // Fetch stream creator info
+    // Fetch stream creator info (skip for homepage)
     useEffect(() => {
         const fetchCreatorInfo = async () => {
             try {
@@ -63,7 +63,7 @@ export function PrivateChatContainer({
             }
         };
 
-        if (streamId) {
+        if (streamId && streamId !== "homepage") {
             fetchCreatorInfo();
         }
     }, [streamId]);
@@ -103,12 +103,14 @@ export function PrivateChatContainer({
 
     if (!session) {
         return (
-            <Card className={cn("flex items-center justify-center h-[400px]", className)}>
-                <div className="text-center p-6">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-semibold mb-2">Sign In Required</h3>
-                    <p className="text-sm text-gray-600">
-                        Please sign in to use private chat.
+            <Card className={cn("flex items-center justify-center h-[400px] bg-gray-900 border-gray-700", className)}>
+                <div className="text-center p-8 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 max-w-sm">
+                    <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <MessageCircle className="h-8 w-8 text-purple-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-white">Sign In Required</h3>
+                    <p className="text-sm text-gray-400 leading-relaxed">
+                        Please sign in to use private chat and connect with creators.
                     </p>
                 </div>
             </Card>
@@ -116,44 +118,45 @@ export function PrivateChatContainer({
     }
 
     return (
-        <Card className={cn("flex flex-col h-[400px]", className)}>
+        <Card className={cn("flex flex-col h-[400px] bg-gray-900 border-gray-700", className)}>
             {!selectedPartnerId ? (
                 // Conversation list view
                 <>
-                    <div className="border-b p-3 bg-gray-50 dark:bg-gray-800">
-                        <h3 className="font-semibold text-sm flex items-center gap-2">
-                            <MessageCircle className="w-4 h-4" />
+                    <div className="border-b border-gray-700 p-4 bg-gray-800/50 backdrop-blur-sm">
+                        <h3 className="font-semibold text-sm flex items-center gap-3 text-white">
+                            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                            <MessageCircle className="w-5 h-5 text-purple-400" />
                             Private Messages
                         </h3>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto bg-gray-900/50 backdrop-blur-sm">
                         {/* Show "Message Creator" option if user is not the creator and no existing conversation */}
                         {creatorInfo && session?.user?.id !== creatorInfo.id && (
-                            <div className="p-2">
+                            <div className="p-3">
                                 {!conversations.find(c => c.partnerId === creatorInfo.id) && (
-                                    <div className="mb-2">
+                                    <div className="mb-3">
                                         <Button
                                             variant="outline"
-                                            className="w-full justify-start p-3 h-auto border-dashed"
+                                            className="w-full justify-start p-4 h-auto border-dashed border-purple-500/30 bg-gray-800/30 hover:bg-purple-600/10 hover:border-purple-400 text-white transition-all duration-200"
                                             onClick={() => setSelectedPartnerId(creatorInfo.id)}
                                         >
-                                            <div className="flex items-center gap-3 w-full">
+                                            <div className="flex items-center gap-4 w-full">
                                                 <div className="relative">
-                                                    <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
                                                         {creatorInfo.name.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-purple-500 border-2 border-white" />
+                                                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-gray-800 animate-pulse" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-left">
+                                                    <p className="text-sm font-semibold text-left text-white">
                                                         Message {creatorInfo.name}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 text-left">
+                                                    <p className="text-xs text-purple-300 text-left">
                                                         Creator • Start a private conversation
                                                     </p>
                                                 </div>
-                                                <MessageCircle className="w-4 h-4 text-gray-400" />
+                                                <MessageCircle className="w-5 h-5 text-purple-400" />
                                             </div>
                                         </Button>
                                     </div>
@@ -165,28 +168,43 @@ export function PrivateChatContainer({
                             conversations={conversations}
                             selectedPartnerId={selectedPartnerId || undefined}
                             onSelectConversation={setSelectedPartnerId}
-                            className="p-2"
+                            className="p-3"
                         />
+
+                        {/* Show available creators for homepage */}
+                        {streamId === "homepage" && conversations.length === 0 && (
+                            <div className="p-4 text-center">
+                                <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <MessageCircle className="h-8 w-8 text-purple-400" />
+                                </div>
+                                <h3 className="text-lg font-semibold mb-2 text-white">No Conversations Yet</h3>
+                                <p className="text-sm text-gray-400 leading-relaxed">
+                                    Start watching streams to chat with creators privately.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </>
             ) : (
                 // Individual conversation view
                 <>
                     {/* Header */}
-                    <div className="border-b p-3 bg-gray-50 dark:bg-gray-800 flex items-center gap-3">
+                    <div className="border-b border-gray-700 p-4 bg-gray-800/50 backdrop-blur-sm flex items-center gap-3">
                         <Button
                             variant="ghost"
                             size="sm"
+                            className="text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
                             onClick={() => setSelectedPartnerId(null)}
                         >
                             <ArrowLeft className="w-4 h-4" />
                         </Button>
                         <div className="flex-1">
-                            <h3 className="font-semibold text-sm">
+                            <h3 className="font-semibold text-sm text-white">
                                 {selectedPartner?.partnerName || "Private Chat"}
                             </h3>
                             {selectedPartner && (
-                                <p className="text-xs text-gray-500 capitalize">
+                                <p className="text-xs text-purple-300 capitalize flex items-center gap-1">
+                                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                                     {selectedPartner.partnerRole.toLowerCase()}
                                 </p>
                             )}
@@ -196,18 +214,23 @@ export function PrivateChatContainer({
                     {/* Messages */}
                     <div
                         ref={messagesContainerRef}
-                        className="flex-1 overflow-y-auto bg-white dark:bg-gray-900"
+                        className="flex-1 overflow-y-auto bg-gray-900/50 backdrop-blur-sm p-3 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
                     >
                         {loading ? (
                             <div className="flex items-center justify-center h-full">
-                                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
+                                    <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-2" />
+                                    <p className="text-sm text-gray-300">Loading messages...</p>
+                                </div>
                             </div>
                         ) : messages.length === 0 ? (
-                            <div className="flex items-center justify-center h-full text-gray-500">
-                                <div className="text-center">
-                                    <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                    <p className="text-sm">No messages yet</p>
-                                    <p className="text-xs">Start the conversation!</p>
+                            <div className="flex items-center justify-center h-full">
+                                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 border border-gray-700">
+                                    <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <MessageCircle className="w-8 h-8 text-purple-400" />
+                                    </div>
+                                    <p className="text-sm text-gray-300 font-medium mb-1">No messages yet</p>
+                                    <p className="text-xs text-gray-500">Start the conversation!</p>
                                 </div>
                             </div>
                         ) : (
@@ -233,11 +256,16 @@ export function PrivateChatContainer({
                     </div>
 
                     {/* Message input */}
-                    <form onSubmit={handleSendMessage} className="border-t p-3 bg-gray-50 dark:bg-gray-800">
+                    <form onSubmit={handleSendMessage} className="border-t border-gray-700 p-4 bg-gray-800/50 backdrop-blur-sm">
                         {error && (
-                            <div className="text-xs text-red-500 mb-2">{error}</div>
+                            <div className="text-sm text-red-300 bg-red-900/20 border border-red-500/30 p-3 rounded-lg mb-3 backdrop-blur-sm">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
+                                    <span>{error}</span>
+                                </div>
+                            </div>
                         )}
-                        <div className="flex gap-2">
+                        <div className="flex gap-3">
                             <Input
                                 value={messageInput}
                                 onChange={(e) => setMessageInput(e.target.value)}
@@ -245,12 +273,13 @@ export function PrivateChatContainer({
                                 placeholder="Type a private message..."
                                 disabled={sending}
                                 maxLength={500}
-                                className="flex-1"
+                                className="flex-1 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 backdrop-blur-sm"
                             />
                             <Button
                                 type="submit"
                                 size="sm"
                                 disabled={!messageInput.trim() || sending}
+                                className="bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg shadow-purple-600/25 transition-all duration-200 disabled:bg-gray-700 disabled:shadow-none"
                             >
                                 {sending ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -259,8 +288,14 @@ export function PrivateChatContainer({
                                 )}
                             </Button>
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                            {messageInput.length}/500 characters
+                        <div className="text-xs text-gray-400 mt-2 flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded ${messageInput.length > 400
+                                    ? "text-orange-400 bg-orange-900/20"
+                                    : "text-gray-400"
+                                }`}>
+                                {messageInput.length}/500 characters
+                            </span>
+                            <div className="flex-1 h-px bg-gradient-to-r from-gray-700 to-transparent"></div>
                         </div>
                     </form>
                 </>

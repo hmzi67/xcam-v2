@@ -6,7 +6,7 @@ import { ChatInput } from "./chat-input";
 import { ChatGatePrompt } from "./chat-gate-prompt";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, AlertCircle, Wifi, WifiOff, ChevronUp } from "lucide-react";
+import { Loader2, AlertCircle, Wifi, WifiOff, ChevronUp, MessageCircle } from "lucide-react";
 
 interface ChatContainerProps {
     streamId: string;
@@ -165,10 +165,10 @@ interface ChatContainerProps {
     // Loading state
     if (loading) {
         return (
-            <Card className="flex items-center justify-center h-[600px]">
-                <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-600">Loading chat...</p>
+            <Card className="flex items-center justify-center h-[600px] bg-gray-900 border-gray-700">
+                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 border border-gray-700">
+                    <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4 text-purple-400" />
+                    <p className="text-sm text-gray-300 font-medium">Loading chat...</p>
                 </div>
             </Card>
         );
@@ -177,12 +177,14 @@ interface ChatContainerProps {
     // Not authenticated
     if (!session) {
         return (
-            <Card className="flex items-center justify-center h-[600px]">
-                <div className="text-center p-6">
-                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-semibold mb-2">Sign In Required</h3>
-                    <p className="text-sm text-gray-600">
-                        Please sign in to participate in chat.
+            <Card className="flex items-center justify-center h-[600px] bg-gray-900 border-gray-700">
+                <div className="text-center p-8 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 max-w-sm">
+                    <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <AlertCircle className="h-8 w-8 text-purple-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-white">Sign In Required</h3>
+                    <p className="text-sm text-gray-400 leading-relaxed">
+                        Please sign in to participate in chat and connect with other viewers.
                     </p>
                 </div>
             </Card>
@@ -195,18 +197,27 @@ interface ChatContainerProps {
     }
 
     return (
-        <Card className={`flex flex-col h-[600px] ${className || ''}`}>
+        <Card className={`flex flex-col h-[600px] bg-gray-900 border-gray-700 ${className || ''}`}>
             {/* Header */}
-            <div className="border-b p-3 flex items-center justify-between bg-gray-50">
-                <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-sm">Live Chat</h3>
+            <div className="border-b border-gray-700 p-3 flex items-center justify-between bg-gray-800/50 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <h3 className="font-semibold text-sm text-white">Live Chat</h3>
+                    </div>
                     {connected ? (
-                        <Wifi className="h-4 w-4 text-green-500" />
+                        <div className="flex items-center gap-1">
+                            <Wifi className="h-4 w-4 text-green-400" />
+                            <span className="text-xs text-green-400 font-medium">Connected</span>
+                        </div>
                     ) : (
-                        <WifiOff className="h-4 w-4 text-red-500" />
+                        <div className="flex items-center gap-1">
+                            <WifiOff className="h-4 w-4 text-red-400" />
+                            <span className="text-xs text-red-400 font-medium">Disconnected</span>
+                        </div>
                     )}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
                     {messages.length} {messages.length === 1 ? "message" : "messages"}
                 </div>
             </div>
@@ -215,19 +226,22 @@ interface ChatContainerProps {
             <div
                 ref={messagesContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-2 space-y-1"
+                className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-900/50 backdrop-blur-sm scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
             >
                 {/* Load more indicator */}
                 {hasMore && (
-                    <div className="text-center py-2">
+                    <div className="text-center py-3">
                         {messagesLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin mx-auto text-gray-400" />
+                            <div className="flex items-center justify-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
+                                <span className="text-xs text-gray-400">Loading messages...</span>
+                            </div>
                         ) : (
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={loadMoreMessages}
-                                className="text-xs"
+                                className="text-xs text-gray-400 hover:text-white hover:bg-gray-700/50 border border-gray-600 hover:border-purple-500/50 transition-all duration-200"
                             >
                                 Load earlier messages
                             </Button>
@@ -250,9 +264,12 @@ interface ChatContainerProps {
                 ))}                {/* Empty state */}
                 {messages.length === 0 && !messagesLoading && (
                     <div className="flex items-center justify-center h-full text-center p-6">
-                        <div>
-                            <p className="text-sm text-gray-500 mb-2">No messages yet</p>
-                            <p className="text-xs text-gray-400">Be the first to say something!</p>
+                        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
+                            <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <MessageCircle className="w-6 h-6 text-purple-400" />
+                            </div>
+                            <p className="text-sm text-gray-300 mb-2 font-medium">No messages yet</p>
+                            <p className="text-xs text-gray-500">Be the first to say something!</p>
                         </div>
                     </div>
                 )}
@@ -265,9 +282,8 @@ interface ChatContainerProps {
                 <div className="absolute bottom-32 right-4">
                     <Button
                         size="icon"
-                        variant="secondary"
                         onClick={scrollToBottom}
-                        className="rounded-full shadow-lg"
+                        className="rounded-full shadow-lg bg-purple-600 hover:bg-purple-700 text-white border-2 border-gray-700 hover:border-purple-500 transition-all duration-200 animate-bounce"
                     >
                         <ChevronUp className="h-5 w-5" />
                     </Button>
@@ -276,8 +292,11 @@ interface ChatContainerProps {
 
             {/* Error display */}
             {error && (
-                <div className="mx-4 mb-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
-                    {error}
+                <div className="mx-4 mb-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-sm text-red-400 backdrop-blur-sm">
+                    <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{error}</span>
+                    </div>
                 </div>
             )}
 

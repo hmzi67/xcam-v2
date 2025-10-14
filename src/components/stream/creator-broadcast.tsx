@@ -20,6 +20,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Radio,
   Video,
   VideoOff,
@@ -36,7 +42,9 @@ import {
   PhoneOff,
   Eye,
   Wifi,
-  Play
+  Play,
+  MoreVertical,
+  Menu
 } from 'lucide-react';
 
 interface CreatorBroadcastProps {
@@ -115,9 +123,9 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
   const room = useRoomContext();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
   const [isMicEnabled, setIsMicEnabled] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [streamStats, setStreamStats] = useState({
     viewers: 0,
     duration: 0,
@@ -165,24 +173,29 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     enableDevices();
   }, [connectionState, localParticipant, isCameraEnabled]);
 
-  // Auto-hide controls
-  useEffect(() => {
-    if (!showControls) return;
 
-    const timer = setTimeout(() => {
-      setShowControls(false);
-    }, 5000);
 
-    return () => clearTimeout(timer);
-  }, [showControls]);
-
-  // Update viewer count
+  // Update viewer count and device states
   useEffect(() => {
     setStreamStats(prev => ({
       ...prev,
       viewers: participants.length
     }));
   }, [participants.length]);
+
+  // Update device states based on tracks
+  useEffect(() => {
+    const cameraTrack = tracks.find(track => track.source === Track.Source.Camera);
+    const screenShareTrack = tracks.find(track => track.source === Track.Source.ScreenShare);
+
+    if (cameraTrack) {
+      setIsCameraEnabled(cameraTrack.publication.isEnabled);
+    }
+
+    if (screenShareTrack) {
+      setIsScreenSharing(screenShareTrack.publication.isEnabled);
+    }
+  }, [tracks]);
 
   const handleStartBroadcast = async () => {
     if (!localParticipant) return;
@@ -196,6 +209,39 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
       console.log('Manual broadcast started successfully');
     } catch (error) {
       console.error('Failed to start broadcast manually:', error);
+    }
+  };
+
+  const toggleCamera = async () => {
+    if (!localParticipant) return;
+    try {
+      const newState = !isCameraEnabled;
+      await localParticipant.setCameraEnabled(newState);
+      setIsCameraEnabled(newState);
+    } catch (error) {
+      console.error('Failed to toggle camera:', error);
+    }
+  };
+
+  const toggleMicrophone = async () => {
+    if (!localParticipant) return;
+    try {
+      const newState = !isMicEnabled;
+      await localParticipant.setMicrophoneEnabled(newState);
+      setIsMicEnabled(newState);
+    } catch (error) {
+      console.error('Failed to toggle microphone:', error);
+    }
+  };
+
+  const toggleScreenShare = async () => {
+    if (!localParticipant) return;
+    try {
+      const newState = !isScreenSharing;
+      await localParticipant.setScreenShareEnabled(newState);
+      setIsScreenSharing(newState);
+    } catch (error) {
+      console.error('Failed to toggle screen share:', error);
     }
   };
 
@@ -238,12 +284,9 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
   return (
     <div
       className={`relative ${isFullscreen ? 'h-screen' : 'h-[600px]'} bg-black overflow-hidden`}
-      onMouseMove={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
     >
       {/* Top Stats Bar */}
-      <div className={`absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent p-6 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'
-        }`}>
+      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4">
         <div className="flex justify-between items-center text-white">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
@@ -363,22 +406,60 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
         )}
       </div>
 
-      {/* Professional Control Bar */}
-      <div className={`absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 to-transparent p-6 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'
-        }`}>
-        <div className="flex justify-center">
-          <div className="bg-black/60 backdrop-blur-lg rounded-2xl p-4 border border-gray-700">
-            <ControlBar
-              controls={{
-                camera: true,
-                microphone: true,
-                screenShare: true,
-                leave: false,
-              }}
-              className="bg-transparent border-none"
-            />
-          </div>
-        </div>
+      {/* Stream Controls Menu */}
+      <div className="absolute bottom-6 left-6 z-20">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-black/60 backdrop-blur-lg border-gray-600 text-white hover:bg-black/80 hover:text-white"
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-gray-900 border-gray-700 text-white">
+            <DropdownMenuItem
+              onClick={toggleCamera}
+              className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+            >
+              {isCameraEnabled ? (
+                <Video className="w-4 h-4 text-green-400" />
+              ) : (
+                <VideoOff className="w-4 h-4 text-red-400" />
+              )}
+              <span>
+                {isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={toggleMicrophone}
+              className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+            >
+              {isMicEnabled ? (
+                <Mic className="w-4 h-4 text-green-400" />
+              ) : (
+                <MicOff className="w-4 h-4 text-red-400" />
+              )}
+              <span>
+                {isMicEnabled ? 'Turn Off Microphone' : 'Turn On Microphone'}
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={toggleScreenShare}
+              className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+            >
+              {isScreenSharing ? (
+                <MonitorOff className="w-4 h-4 text-orange-400" />
+              ) : (
+                <Monitor className="w-4 h-4 text-blue-400" />
+              )}
+              <span>
+                {isScreenSharing ? 'Stop Screen Share' : 'Share Screen'}
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Quality Indicator */}
