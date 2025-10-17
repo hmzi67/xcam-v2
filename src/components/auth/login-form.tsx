@@ -1,17 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
+import React, { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import { Alert } from "@/components/ui/alert"
-import { Eye, EyeOff } from "lucide-react"
+import {Mail, Lock, Eye, EyeOff, MessageSquare, Video} from "lucide-react"
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -20,12 +16,15 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export function LoginForm() {
+export default function LoginForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
+
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [showPassword, setShowPassword] = useState(false)
+    const [rememberMe, setRememberMe] = useState(false)
+    const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
     const callbackUrl = searchParams.get("callbackUrl") || "/"
     const verified = searchParams.get("verified")
@@ -38,11 +37,16 @@ export function LoginForm() {
         resolver: zodResolver(loginSchema),
     })
 
+    useEffect(() => {
+        if (verified === "true") {
+            setSuccessMessage("Email verified successfully! You can now sign in.")
+        }
+    }, [verified])
+
     const onSubmit = async (data: LoginFormData) => {
         try {
             setIsLoading(true)
             setError(null)
-
             const result = await signIn("credentials", {
                 email: data.email,
                 password: data.password,
@@ -55,8 +59,8 @@ export function LoginForm() {
                 router.push(callbackUrl)
                 router.refresh()
             }
-        } catch (error) {
-            console.error("Login error:", error)
+        } catch (err) {
+            console.error(err)
             setError("An unexpected error occurred")
         } finally {
             setIsLoading(false)
@@ -64,125 +68,208 @@ export function LoginForm() {
     }
 
     return (
-        <div className="w-full flex items-center justify-center">
-            <div className="w-full min-h-screen overflow-hidden shadow-2xl bg-gray-900 flex flex-col md:flex-row">
-                {/* Left side - Image and branding */}
-                <div
-                    className="md:w-1/2 bg-gradient-to-br from-purple-900 to-gray-900 p-8 sm:flex flex-col justify-between relative hidden"
-                    style={{
-                        backgroundImage: `url('https://images.unsplash.com/photo-1511884642898-4c92249e20b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80')`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat'
-                    }}
-                >
-                    {/* Add a semi-transparent overlay to improve text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 to-gray-900/80 z-0"></div>
+        <div className="min-h-screen bg-gray-50 flex">
+            {/* Left Side - Image & Branding */}
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+                <div className="absolute inset-0 overflow-hidden">
+                    <img
+                        src="/login.jpeg"
+                        alt="Login Background"
+                        className="w-full h-full object-cover opacity-20"
+                    />
+                </div>
 
-                    <div className="relative z-10">
-                        <div className="flex justify-between items-center mb-8">
-                            <h1 className="text-white text-2xl font-bold">XCam</h1>
+                <div className="relative z-10 flex flex-col justify-between p-12 text-white">
+                    {/* Logo */}
+                    <div className="flex items-center space-x-2">
+                        <Video className="w-8 h-8 text-purple-400" />
+                        <span className="text-2xl font-bold">XCam</span>
+                    </div>
+
+                    {/* Tagline / Testimonial */}
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <div className="w-20 h-1 bg-purple-400"></div>
+                            <blockquote className="text-3xl font-semibold leading-relaxed">
+                                “Capture, create, and connect — all in one seamless experience.”
+                            </blockquote>
+                        </div>
+                        <div>
+                            <p className="font-semibold">John Doe</p>
+                            <p className="text-purple-300 text-sm">
+                                Founder of <a href="#" className="underline">XCam Studio</a>
+                            </p>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Right side - Login Form */}
-                <div className="md:w-1/2 sm:p-8 flex items-center justify-center min-h-screen">
-                    <Card className="bg-transparent border-none shadow-none w-full max-w-lg text-center">
-                        <CardHeader>
-                            <CardTitle className="text-white text-3xl font-bold">Sign In</CardTitle>
-                            <CardDescription className="text-gray-400 mt-2">
-                                Already have an account?{" "}
-                                <Link href="/register" className="text-blue-400 hover:underline">
-                                    Sign up
-                                </Link>
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {verified && (
-                                <Alert className="mb-4 bg-green-900 border-green-700 text-green-100">
-                                    <p className="text-sm">Email verified successfully! You can now sign in.</p>
-                                </Alert>
-                            )}
+            {/* Right Side - Login Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+                <div className="w-full max-w-md">
+                    {/* Mobile Logo */}
+                    <div className="lg:hidden flex items-center space-x-2 mb-8">
+                        <MessageSquare className="w-8 h-8 text-purple-600" />
+                        <span className="text-2xl font-bold text-gray-900">XCam</span>
+                    </div>
 
-                            {error && (
-                                <Alert variant="destructive" className="mb-4 bg-red-900 border-red-700 text-red-100">
-                                    <p className="text-sm">{error}</p>
-                                </Alert>
-                            )}
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            Welcome back to XCam
+                        </h1>
+                        <p className="text-gray-600">
+                            Sign in to continue creating amazing experiences.
+                        </p>
+                    </div>
 
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                                <div>
-                                    <Input
-                                        {...register("email")}
-                                        type="email"
-                                        placeholder="Email"
-                                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-purple-500"
-                                        disabled={isLoading}
-                                    />
-                                    {errors.email && (
-                                        <p className="text-sm text-red-400 mt-1">{errors.email.message}</p>
-                                    )}
-                                </div>
+                    {/* Alerts */}
+                    {successMessage && (
+                        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                            {successMessage}
+                        </div>
+                    )}
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
 
-                                <div className="relative">
-                                    <Input
-                                        {...register("password")}
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Enter your password"
-                                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-purple-500 pr-10"
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
-                                    {errors.password && (
-                                        <p className="text-sm text-red-400 mt-1">{errors.password.message}</p>
-                                    )}
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    {/* Form */}
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Email */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Email
+                            </label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input
+                                    {...register("email")}
+                                    type="email"
+                                    placeholder="alex.jordan@gmail.com"
                                     disabled={isLoading}
-                                >
-                                    {isLoading ? "Signing in..." : "Sign In"}
-                                </Button>
-                            </form>
-
-                            <div className="mt-6">
-                                <div className="flex items-center my-4">
-                                    <div className="flex-1 border-t border-gray-700"></div>
-                                    <span className="px-4 text-gray-400 text-sm">Or register with</span>
-                                    <div className="flex-1 border-t border-gray-700"></div>
-                                </div>
-
-                                <div className="flex gap-4">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-                                    >
-                                        <svg width="80px" height="80px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                                            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                <g id="Dribbble-Light-Preview" transform="translate(-300.000000, -7399.000000)" fill="#ffffff">
-                                                    <g id="icons" transform="translate(56.000000, 160.000000)">
-                                                        <path d="M263.821537,7247.00386 L254.211298,7247.00386 C254.211298,7248.0033 254.211298,7250.00218 254.205172,7251.00161 L259.774046,7251.00161 C259.560644,7252.00105 258.804036,7253.40026 257.734984,7254.10487 C257.733963,7254.10387 257.732942,7254.11086 257.7309,7254.10986 C256.309581,7255.04834 254.43389,7255.26122 253.041161,7254.98137 C250.85813,7254.54762 249.130492,7252.96451 248.429023,7250.95364 C248.433107,7250.95064 248.43617,7250.92266 248.439233,7250.92066 C248.000176,7249.67336 248.000176,7248.0033 248.439233,7247.00386 L248.438212,7247.00386 C249.003881,7245.1669 250.783592,7243.49084 252.969687,7243.0321 C254.727956,7242.65931 256.71188,7243.06308 258.170978,7244.42831 C258.36498,7244.23842 260.856372,7241.80579 261.043226,7241.6079 C256.0584,7237.09344 248.076756,7238.68155 245.090149,7244.51127 L245.089128,7244.51127 C245.089128,7244.51127 245.090149,7244.51127 245.084023,7244.52226 L245.084023,7244.52226 C243.606545,7247.38565 243.667809,7250.75975 245.094233,7253.48622 C245.090149,7253.48921 245.087086,7253.49121 245.084023,7253.49421 C246.376687,7256.0028 248.729215,7257.92672 251.563684,7258.6593 C254.574796,7259.44886 258.406843,7258.90916 260.973794,7256.58747 C260.974815,7256.58847 260.975836,7256.58947 260.976857,7256.59047 C263.15172,7254.63157 264.505648,7251.29445 263.821537,7247.00386" id="google-[#178]">
-
-                                                        </path>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                        Google
-                                    </Button>
-                                </div>
+                                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                                />
                             </div>
-                        </CardContent>
-                    </Card>
+                            {errors.email && (
+                                <p className="text-sm text-red-500 mt-1">
+                                    {errors.email.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Password */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input
+                                    {...register("password")}
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    disabled={isLoading}
+                                    className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="w-5 h-5" />
+                                    ) : (
+                                        <Eye className="w-5 h-5" />
+                                    )}
+                                </button>
+                            </div>
+                            {errors.password && (
+                                <p className="text-sm text-red-500 mt-1">
+                                    {errors.password.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Remember me */}
+                        <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">
+                Remember sign in details
+              </span>
+                            <button
+                                type="button"
+                                onClick={() => setRememberMe(!rememberMe)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                    rememberMe ? "bg-purple-600" : "bg-gray-300"
+                                }`}
+                            >
+                <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        rememberMe ? "translate-x-6" : "translate-x-1"
+                    }`}
+                />
+                            </button>
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ${
+                                isLoading ? "opacity-70 cursor-not-allowed" : ""
+                            }`}
+                        >
+                            {isLoading ? "Signing in..." : "Sign in"}
+                        </button>
+
+                        {/* Divider */}
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-gray-50 text-gray-500">OR</span>
+                            </div>
+                        </div>
+
+                        {/* Google Button */}
+                        <button
+                            type="button"
+                            className="w-full flex items-center justify-center space-x-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg transition"
+                        >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <path
+                                    fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                />
+                                <path
+                                    fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                />
+                                <path
+                                    fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                />
+                                <path
+                                    fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                />
+                            </svg>
+                            <span>Continue with Google</span>
+                        </button>
+                    </form>
+
+                    {/* Sign Up Link */}
+                    <p className="mt-8 text-center text-sm text-gray-600">
+                        Don't have an account?{" "}
+                        <Link
+                            href="/register"
+                            className="text-purple-600 hover:text-purple-700 font-semibold transition"
+                        >
+                            Sign up
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>

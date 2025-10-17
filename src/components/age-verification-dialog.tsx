@@ -62,7 +62,7 @@ export function AgeVerificationDialog() {
                         <Button
                             onClick={() => window.location.href = 'https://google.com'}
                             variant="outline"
-                            className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 py-3 rounded-lg font-medium"
+                            className="w-full border-gray-600 text-gray-900 hover:text-gray-200 hover:bg-gray-700 py-3 rounded-lg font-medium"
                         >
                             <XCircle className="w-5 h-5 mr-2" />
                             I'm under 18 – Exit

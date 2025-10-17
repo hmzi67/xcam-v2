@@ -164,7 +164,7 @@ export default function Home() {
 
       <div className="flex min-h-screen">
         {/* Sidebar */}
-        <div className="w-64 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto">
+        <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 border-r border-gray-700 p-4 pt-20 overflow-y-auto">
           {/* Main Categories */}
           <div className="mb-6">
             {categories.map((category) => {
@@ -231,7 +231,7 @@ export default function Home() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col ml-64">
           {/* Top Filters Bar */}
           <div className="bg-gray-800 border-b border-gray-700 p-4">
             <div className="flex flex-wrap items-center gap-4">
