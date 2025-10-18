@@ -1,34 +1,32 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import React, { useState } from "react"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert } from "@/components/ui/alert"
-import { Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, User, Video, MessageSquare } from "lucide-react"
 
-const registerSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-    displayName: z.string().min(3, "Display name must be at least 3 characters").max(50, "Display name must be less than 50 characters"),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-})
+const registerSchema = z
+    .object({
+        name: z.string().min(3, "Full name must be at least 3 characters"),
+        email: z.string().email("Invalid email address"),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Passwords don't match",
+        path: ["confirmPassword"],
+    })
 
 type RegisterFormData = z.infer<typeof registerSchema>
 
-export function RegisterForm() {
+export default function RegisterForm() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false)
+    const [successMessage, setSuccessMessage] = useState<string | null>(null)
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -45,206 +43,232 @@ export function RegisterForm() {
             setIsLoading(true)
             setError(null)
 
-            const response = await fetch("/api/auth/register", {
+            const res = await fetch("/api/auth/signup", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    name: data.name,
                     email: data.email,
                     password: data.password,
-                    displayName: data.displayName,
                 }),
             })
 
-            const result = await response.json()
+            const result = await res.json()
+            if (!res.ok) throw new Error(result.error || "Something went wrong")
 
-            if (!response.ok) {
-                throw new Error(result.error || "Registration failed")
-            }
-
-            setSuccess(true)
-
-        } catch (error: unknown) {
-            console.error("Registration error:", error)
-            setError((error as Error).message || "An unexpected error occurred")
+            setSuccessMessage("Account created! Please check your email to verify.")
+        } catch (err: unknown) {
+            setError((err as Error).message || "Unexpected error occurred")
         } finally {
             setIsLoading(false)
         }
     }
 
-    if (success) {
-        return (
-            <div className="w-full flex items-center justify-center">
-                <div className="w-full min-h-screen overflow-hidden shadow-2xl bg-gray-900 flex items-center justify-center">
-                    <Card className="bg-transparent border-none shadow-none w-full max-w-lg text-center text-white">
-                        <CardHeader>
-                            <CardTitle className="text-3xl font-bold">Registration Successful!</CardTitle>
-                            <CardDescription className="text-gray-400 mt-2">
-                                Please check your email to verify your account.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Alert className="mb-4 bg-green-900 border-green-700 text-green-100">
-                                <p className="text-sm">
-                                    We've sent a verification link to your email address.
-                                    Please click the link to activate your account.
-                                </p>
-                            </Alert>
-                            <p className="text-sm text-gray-400 mt-4">
-                                You can now <Link href="/login" className="text-blue-400 hover:underline">sign in</Link>.
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
-
     return (
-        <div className="w-full flex items-center justify-center">
-            <div className="w-full min-h-screen overflow-hidden shadow-2xl bg-gray-900 flex flex-col md:flex-row">
-                {/* Left side - Image and branding */}
-                <div
-                    className="md:w-1/2 bg-gradient-to-br from-purple-900 to-gray-900 p-8 sm:flex flex-col justify-between relative hidden"
-                    style={{
-                        backgroundImage: `url('https://images.unsplash.com/photo-1511884642898-4c92249e20b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80')`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat'
-                    }}
-                >
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 to-gray-900/80 z-0"></div>
-                    <div className="relative z-10">
-                        <div className="flex justify-between items-center mb-8">
-                            <h1 className="text-white text-2xl font-bold">XCam</h1>
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex">
+            {/* LEFT SIDE */}
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
+                <div className="absolute inset-0 overflow-hidden">
+                    <img
+                        src="/login.jpeg"
+                        alt="Signup Background"
+                        className="w-full h-full object-cover opacity-20"
+                    />
+                </div>
+
+                <div className="relative z-10 flex flex-col justify-between p-12 text-gray-100">
+                    <div className="flex items-center space-x-2">
+                        <Video className="w-8 h-8 text-purple-400" />
+                        <span className="text-2xl font-bold">XCam</span>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <div className="w-20 h-1 bg-purple-500"></div>
+                            <blockquote className="text-3xl font-semibold leading-relaxed text-gray-100">
+                                “Join the XCam creator community and capture your next big moment.”
+                            </blockquote>
+                        </div>
+                        <div>
+                            <p className="font-semibold">Jane Doe</p>
+                            <p className="text-purple-400 text-sm">
+                                Creator at{" "}
+                                <a href="#" className="underline hover:text-purple-300">
+                                    XCam Studio
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Right side - Register Form */}
-                <div className="md:w-1/2 sm:p-8 flex items-center justify-center min-h-screen">
-                    <Card className="bg-transparent border-none shadow-none w-full max-w-lg text-center">
-                        <CardHeader>
-                            <CardTitle className="text-white text-3xl font-bold">Create Account</CardTitle>
-                            <CardDescription className="text-gray-400 mt-2">
-                                Already have an account?{" "}
-                                <Link href="/login" className="text-blue-400 hover:underline">
-                                    Sign in
-                                </Link>
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {error && (
-                                <Alert variant="destructive" className="mb-4 bg-red-900 border-red-700 text-red-100">
-                                    <p className="text-sm">{error}</p>
-                                </Alert>
-                            )}
+            {/* RIGHT SIDE */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+                <div className="w-full max-w-lg p-8">
+                    {/* Mobile Logo */}
+                    <div className="lg:hidden flex items-center space-x-2 mb-8">
+                        <MessageSquare className="w-8 h-8 text-purple-400" />
+                        <span className="text-2xl font-bold text-gray-100">XCam</span>
+                    </div>
 
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                                <div>
-                                    <Input
-                                        {...register("displayName")}
-                                        type="text"
-                                        placeholder="Display Name"
-                                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-purple-500"
-                                        disabled={isLoading}
-                                    />
-                                    {errors.displayName && (
-                                        <p className="text-sm text-red-400 mt-1">{errors.displayName.message}</p>
-                                    )}
-                                </div>
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-white mb-2">Create your XCam account</h1>
+                        <p className="text-gray-400">Sign up to start creating, sharing, and connecting.</p>
+                    </div>
 
-                                <div>
-                                    <Input
-                                        {...register("email")}
-                                        type="email"
-                                        placeholder="Email"
-                                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-purple-500"
-                                        disabled={isLoading}
-                                    />
-                                    {errors.email && (
-                                        <p className="text-sm text-red-400 mt-1">{errors.email.message}</p>
-                                    )}
-                                </div>
+                    {/* Alerts */}
+                    {successMessage && (
+                        <div className="mb-4 p-3 bg-green-900/40 border border-green-700 text-green-300 rounded">
+                            {successMessage}
+                        </div>
+                    )}
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-900/40 border border-red-700 text-red-300 rounded">
+                            {error}
+                        </div>
+                    )}
 
-                                <div className="relative">
-                                    <Input
-                                        {...register("password")}
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Password"
-                                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-purple-500 pr-10"
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
-                                    {errors.password && (
-                                        <p className="text-sm text-red-400 mt-1">{errors.password.message}</p>
-                                    )}
-                                </div>
-
-                                <div className="relative">
-                                    <Input
-                                        {...register("confirmPassword")}
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        placeholder="Confirm Password"
-                                        className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-purple-500 pr-10"
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                                    >
-                                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
-                                    {errors.confirmPassword && (
-                                        <p className="text-sm text-red-400 mt-1">{errors.confirmPassword.message}</p>
-                                    )}
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Full Name */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                                <input
+                                    {...register("name")}
+                                    type="text"
+                                    placeholder="Alex Jordan"
                                     disabled={isLoading}
-                                >
-                                    {isLoading ? "Creating account..." : "Create Account"}
-                                </Button>
-                            </form>
-
-                            <div className="mt-6">
-                                <div className="flex items-center my-4">
-                                    <div className="flex-1 border-t border-gray-700"></div>
-                                    <span className="px-4 text-gray-400 text-sm">Or register with</span>
-                                    <div className="flex-1 border-t border-gray-700"></div>
-                                </div>
-
-                                <div className="flex gap-4">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-                                    >
-                                        <svg width="80px" height="80px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                                            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                <g id="Dribbble-Light-Preview" transform="translate(-300.000000, -7399.000000)" fill="#ffffff">
-                                                    <g id="icons" transform="translate(56.000000, 160.000000)">
-                                                        <path d="M263.821537,7247.00386 L254.211298,7247.00386 C254.211298,7248.0033 254.211298,7250.00218 254.205172,7251.00161 L259.774046,7251.00161 C259.560644,7252.00105 258.804036,7253.40026 257.734984,7254.10487 C257.733963,7254.10387 257.732942,7254.11086 257.7309,7254.10986 C256.309581,7255.04834 254.43389,7255.26122 253.041161,7254.98137 C250.85813,7254.54762 249.130492,7252.96451 248.429023,7250.95364 C248.433107,7250.95064 248.43617,7250.92266 248.439233,7250.92066 C248.000176,7249.67336 248.000176,7248.0033 248.439233,7247.00386 L248.438212,7247.00386 C249.003881,7245.1669 250.783592,7243.49084 252.969687,7243.0321 C254.727956,7242.65931 256.71188,7243.06308 258.170978,7244.42831 C258.36498,7244.23842 260.856372,7241.80579 261.043226,7241.6079 C256.0584,7237.09344 248.076756,7238.68155 245.090149,7244.51127 L245.089128,7244.51127 C245.089128,7244.51127 245.090149,7244.51127 245.084023,7244.52226 L245.084023,7244.52226 C243.606545,7247.38565 243.667809,7250.75975 245.094233,7253.48622 C245.090149,7253.48921 245.087086,7253.49121 245.084023,7253.49421 C246.376687,7256.0028 248.729215,7257.92672 251.563684,7258.6593 C254.574796,7259.44886 258.406843,7258.90916 260.973794,7256.58747 C260.974815,7256.58847 260.975836,7256.58947 260.976857,7256.59047 C263.15172,7254.63157 264.505648,7251.29445 263.821537,7247.00386" id="google-[#178]">
-                                                        </path>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                        Google
-                                    </Button>
-                                </div>
+                                    className="w-full bg-gray-800 text-gray-100 pl-11 pr-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                                />
                             </div>
-                        </CardContent>
-                    </Card>
+                            {errors.name && <p className="text-sm text-red-400 mt-1">{errors.name.message}</p>}
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                                <input
+                                    {...register("email")}
+                                    type="email"
+                                    placeholder="alex.jordan@gmail.com"
+                                    disabled={isLoading}
+                                    className="w-full bg-gray-800 text-gray-100 pl-11 pr-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                                />
+                            </div>
+                            {errors.email && <p className="text-sm text-red-400 mt-1">{errors.email.message}</p>}
+                        </div>
+
+                        {/* Password */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                                <input
+                                    {...register("password")}
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    disabled={isLoading}
+                                    className="w-full bg-gray-800 text-gray-100 pl-11 pr-12 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                                >
+                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
+                            {errors.password && (
+                                <p className="text-sm text-red-400 mt-1">{errors.password.message}</p>
+                            )}
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                                <input
+                                    {...register("confirmPassword")}
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    disabled={isLoading}
+                                    className="w-full bg-gray-800 text-gray-100 pl-11 pr-12 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                                >
+                                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
+                            {errors.confirmPassword && (
+                                <p className="text-sm text-red-400 mt-1">{errors.confirmPassword.message}</p>
+                            )}
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition ${
+                                isLoading ? "opacity-70 cursor-not-allowed" : ""
+                            }`}
+                        >
+                            {isLoading ? "Creating Account..." : "Sign Up"}
+                        </button>
+
+                        {/* Divider */}
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-700"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-gray-900 text-gray-400">OR</span>
+                            </div>
+                        </div>
+
+                        {/* Google Button */}
+                        <button
+                            type="button"
+                            className="w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition"
+                        >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <path
+                                    fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                />
+                                <path
+                                    fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                />
+                                <path
+                                    fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                />
+                                <path
+                                    fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                />
+                            </svg>
+                            <span>Continue with Google</span>
+                        </button>
+                    </form>
+
+                    <p className="mt-8 text-center text-sm text-gray-400">
+                        Already have an account?{" "}
+                        <Link
+                            href="/login"
+                            className="text-purple-400 hover:text-purple-300 font-semibold transition"
+                        >
+                            Sign in
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>
