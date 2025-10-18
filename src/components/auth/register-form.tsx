@@ -70,7 +70,7 @@ export default function RegisterForm() {
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
                     <img
-                        src="/login.jpeg"
+                        src="/signup.jpeg"
                         alt="Signup Background"
                         className="w-full h-full object-cover opacity-20"
                     />
