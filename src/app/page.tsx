@@ -287,9 +287,9 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
               >
-                <Star className="w-4 h-4 mr-2" />
+                <Star className="w-4 h-4" />
                 Features
               </Button>
 
@@ -297,9 +297,9 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
               >
-                <Heart className="w-4 h-4 mr-2" />
+                <Heart className="w-4 h-4" />
                 Fetishes
               </Button>
 
@@ -325,7 +325,7 @@ export default function Home() {
                   variant={viewMode === 'grid' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
-                  className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}
+                  className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
                 >
                   <Grid3X3 className="w-4 h-4" />
                 </Button>
@@ -333,14 +333,14 @@ export default function Home() {
                   variant={viewMode === 'list' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}
+                  className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
                 >
                   <List className="w-4 h-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>

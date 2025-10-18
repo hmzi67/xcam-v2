@@ -38,10 +38,10 @@ interface StreamCardProps {
 }
 
 export function StreamCard({
-    stream,
-    onJoinStream,
-    className = ""
-}: StreamCardProps) {
+                               stream,
+                               onJoinStream,
+                               className = ""
+                           }: StreamCardProps) {
     const [participantCount, setParticipantCount] = useState(stream.participantCount || 0);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -61,12 +61,8 @@ export function StreamCard({
             }
         };
 
-        // Initial fetch
         pollParticipants();
-
-        // Poll every 30 seconds
         const interval = setInterval(pollParticipants, 30000);
-
         return () => clearInterval(interval);
     }, [stream.id, stream.status]);
 
@@ -111,28 +107,27 @@ export function StreamCard({
         if (stream.status === 'SCHEDULED' && stream.scheduledFor) {
             return `Starts ${formatDistanceToNow(new Date(stream.scheduledFor), { addSuffix: true })}`;
         }
-
         if (stream.status === 'LIVE') {
             return `${participantCount} watching`;
         }
-
         return formatDistanceToNow(new Date(stream.createdAt), { addSuffix: true });
     };
 
     return (
         <Card
-            className={`p-0 max-w-sm group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden ${className}`}
+            className={`p-0 w-full group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden ${className}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={handleJoinStream}
         >
-            <div className="relative aspect-video bg-gray-700">
-                {/* Thumbnail */}
+            {/* Thumbnail Wrapper with fixed height */}
+            <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700 overflow-hidden">
+                {/* Thumbnail Image */}
                 {stream.thumbnailUrl ? (
                     <img
                         src={stream.thumbnailUrl}
                         alt={stream.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-center"
                     />
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-gray-800 flex flex-col items-center justify-center">
@@ -156,13 +151,13 @@ export function StreamCard({
                             <Star
                                 key={star}
                                 className={`w-3 h-3 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
-                                    }`}
+                                }`}
                             />
                         ))}
                     </div>
                 </div>
 
-                {/* Participant Count */}
+                {/* Viewer Count */}
                 <div className="absolute bottom-3 right-3 z-10">
                     <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1">
                         <Eye className="w-3 h-3" />
@@ -170,16 +165,16 @@ export function StreamCard({
                     </div>
                 </div>
 
-                {/* Region Badge */}
+                {/* Region */}
                 <div className="absolute bottom-3 left-3 z-10">
                     <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-bold">
                         {['US', 'CA', 'GB', 'DE', 'FR', 'ES', 'IT', 'BR', 'RO', 'CO'][Math.floor(Math.random() * 10)]}
                     </div>
                 </div>
 
-                {/* Play Overlay */}
+                {/* Hover Overlay */}
                 <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'
-                    }`}>
+                }`}>
                     <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-purple-500/70">
                         <Play className="w-8 h-8 text-white ml-1" />
                     </div>
@@ -187,12 +182,10 @@ export function StreamCard({
             </div>
 
             <CardContent className="px-4 pb-4">
-                {/* Stream Title */}
                 <h3 className="font-semibold text-base mb-2 line-clamp-2 text-white group-hover:text-purple-400 transition-colors">
                     {stream.title}
                 </h3>
 
-                {/* Creator Info */}
                 <div className="flex items-center gap-2 mb-2">
                     <Avatar className="w-6 h-6">
                         <AvatarImage src={stream.creator.image} />
@@ -222,14 +215,12 @@ export function StreamCard({
                     </div>
                 </div>
 
-                {/* Description */}
                 {stream.description && (
                     <p className="text-xs text-gray-400 line-clamp-2 mb-2">
                         {stream.description}
                     </p>
                 )}
 
-                {/* Category */}
                 {stream.category && (
                     <div className="flex items-center gap-1 mb-2">
                         <FolderOpen className="w-3 h-3 text-purple-400" />
@@ -239,7 +230,6 @@ export function StreamCard({
                     </div>
                 )}
 
-                {/* Tags */}
                 {stream.tags && stream.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
                         {stream.tags.slice(0, 2).map((tag) => (
@@ -259,51 +249,47 @@ export function StreamCard({
                     </div>
                 )}
 
-                {/* Action Button */}
                 <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        {stream.status === 'LIVE' && (
-                            <Button
-                                size="sm"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleJoinStream();
-                                }}
-                                className="bg-purple-600 hover:bg-purple-700 text-white"
-                            >
-                                <Play className="w-4 h-4 mr-1" />
-                                Watch Live
-                            </Button>
-                        )}
-                        {stream.status === 'SCHEDULED' && (
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    // Handle remind/notify functionality
-                                }}
-                                className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white"
-                            >
-                                <Clock className="w-4 h-4 mr-1" />
-                                Remind Me
-                            </Button>
-                        )}
-                        {stream.status === 'ENDED' && (
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleJoinStream();
-                                }}
-                                className="border-gray-600 text-gray-400 hover:bg-gray-700 hover:text-white"
-                            >
-                                <Play className="w-4 h-4 mr-1" />
-                                Watch Replay
-                            </Button>
-                        )}
-                    </div>
+                    {stream.status === 'LIVE' && (
+                        <Button
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleJoinStream();
+                            }}
+                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                            <Play className="w-4 h-4 mr-1" />
+                            Watch Live
+                        </Button>
+                    )}
+                    {stream.status === 'SCHEDULED' && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                            className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white"
+                        >
+                            <Clock className="w-4 h-4 mr-1" />
+                            Remind Me
+                        </Button>
+                    )}
+                    {stream.status === 'ENDED' && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleJoinStream();
+                            }}
+                            className="border-gray-600 text-gray-400 hover:bg-gray-700 hover:text-white"
+                        >
+                            <Play className="w-4 h-4 mr-1" />
+                            Watch Replay
+                        </Button>
+                    )}
                 </div>
             </CardContent>
         </Card>
@@ -314,7 +300,7 @@ export function StreamCard({
 export function StreamCardSkeleton() {
     return (
         <Card className="animate-pulse bg-gray-800 border-gray-700 rounded-lg overflow-hidden">
-            <div className="aspect-video bg-gray-700" />
+            <div className="w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700" />
             <CardContent className="p-4">
                 <div className="h-6 bg-gray-700 rounded mb-2 w-3/4" />
                 <div className="flex items-center gap-3 mb-3">
