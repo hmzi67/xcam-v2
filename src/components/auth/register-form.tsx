@@ -57,6 +57,19 @@ export default function RegisterForm() {
             if (!res.ok) throw new Error(result.error || "Something went wrong")
 
             setSuccessMessage("Account created! Please check your email to verify.")
+
+            // ✅ Save minimal user info to localStorage
+            localStorage.setItem(
+                "user",
+                JSON.stringify({
+                    userId: result.userId,
+                    email: data.email,
+                    displayName: data.displayName,
+                    verified: false,
+                })
+            )
+
+
         } catch (err: unknown) {
             setError((err as Error).message || "Unexpected error occurred")
         } finally {

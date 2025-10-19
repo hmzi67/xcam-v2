@@ -107,7 +107,7 @@ export async function sendVerificationEmail(
     baseUrl?: string
 ) {
     const appBaseUrl = baseUrl || process.env.APP_BASE_URL || 'http://localhost:3000';
-    const verificationUrl = `${appBaseUrl}/verify-email?token=${token}`;
+    const verificationUrl = `${appBaseUrl}/verify?token=${token}`;
     const appName = process.env.APP_NAME || 'CryptoForex';
 
     return sendEmail({

@@ -17,7 +17,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, password, displayName } = registerSchema.parse(body)
 
-    console.log(email)
 
     // Check if a user already exists
     const existingUser = await prisma.user.findFirst({
