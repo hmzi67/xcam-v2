@@ -23,7 +23,7 @@ export interface ChatMessage {
 
 export interface ChatEvent {
   type: "message" | "delete" | "mute" | "ban" | "connection";
-  data: any;
+  data: unknown;
   timestamp: Date;
 }
 
@@ -263,6 +263,16 @@ export async function canUserChat(
   const muted = await isUserMuted(userId, streamId);
   if (muted) {
     return { canChat: false, reason: "You are muted in this stream" };
+  }
+
+  // Creators are exempt from credit requirements in their own streams
+  const stream = await prisma.stream.findUnique({
+    where: { id: streamId },
+    select: { creatorId: true },
+  });
+
+  if (stream && stream.creatorId === userId) {
+    return { canChat: true };
   }
 
   // Check wallet balance

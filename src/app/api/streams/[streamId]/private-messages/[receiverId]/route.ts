@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { validateMessage } from "@/lib/chat-server";
 import jwt from "jsonwebtoken";
 
@@ -100,10 +101,14 @@ export async function POST(
     }
 
     const token = authHeader.substring(7);
-    let decoded: any;
+    let decoded: { userId: string; streamId: string; role: string };
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+      decoded = jwt.verify(token, JWT_SECRET) as {
+        userId: string;
+        streamId: string;
+        role: string;
+      };
+    } catch {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
@@ -118,26 +123,6 @@ export async function POST(
       );
     }
 
-    // Check if sender has sufficient balance for private messaging
-    const sender = await prisma.user.findUnique({
-      where: { id: senderId },
-      include: { wallet: true },
-    });
-
-    if (!sender) {
-      return NextResponse.json({ error: "Sender not found" }, { status: 404 });
-    }
-
-    if (!sender.wallet || Number(sender.wallet.balance) < 1) {
-      return NextResponse.json(
-        {
-          error: "Insufficient credits for private messaging",
-          balance: sender.wallet?.balance ? Number(sender.wallet.balance) : 0,
-        },
-        { status: 402 }
-      );
-    }
-
     // Verify stream exists
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
@@ -148,22 +133,88 @@ export async function POST(
       return NextResponse.json({ error: "Stream not found" }, { status: 404 });
     }
 
-    // Create private message
-    const privateMessage = await prisma.privateMessage.create({
-      data: {
-        senderId,
-        receiverId,
-        streamId,
-        message: validationResult.sanitized!,
-      },
-      include: {
-        sender: {
-          include: {
-            profile: true,
-          },
-        },
-      },
+    // Check if sender has sufficient balance for private messaging unless sender is the stream creator
+    const sender = await prisma.user.findUnique({
+      where: { id: senderId },
+      include: { wallet: true },
     });
+
+    if (!sender) {
+      return NextResponse.json({ error: "Sender not found" }, { status: 404 });
+    }
+
+    const isCreator = stream.creatorId === senderId;
+
+    // Atomically create message and (if needed) debit wallet + ledger
+    const privateMessage = await prisma.$transaction(async (tx) => {
+      if (!isCreator) {
+        // Conditionally debit only if balance >= 1 to avoid negative balances
+        const debit = await tx.wallet.updateMany({
+          where: { userId: senderId, balance: { gte: new Prisma.Decimal(1) } },
+          data: { balance: { decrement: new Prisma.Decimal(1) } },
+        });
+        if (debit.count === 0) {
+          throw new Error("INSUFFICIENT_CREDITS");
+        }
+
+        const created = await tx.privateMessage.create({
+          data: {
+            senderId,
+            receiverId,
+            streamId,
+            message: validationResult.sanitized!,
+          },
+          include: {
+            sender: { include: { profile: true } },
+          },
+        });
+
+        const updatedWallet = await tx.wallet.findUnique({
+          where: { userId: senderId },
+          select: { balance: true },
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            userId: senderId,
+            type: "DEBIT",
+            amount: new Prisma.Decimal(1),
+            currency: "USD",
+            balanceAfter: updatedWallet ? updatedWallet.balance : new Prisma.Decimal(0),
+            referenceType: "PRIVATE_MESSAGE",
+            referenceId: created.id,
+            description: "Private chat message debit",
+          },
+        });
+
+        return created;
+      }
+
+      // Creator: create message only
+      return tx.privateMessage.create({
+        data: {
+          senderId,
+          receiverId,
+          streamId,
+          message: validationResult.sanitized!,
+        },
+        include: {
+          sender: { include: { profile: true } },
+        },
+      });
+    }).catch((err) => {
+      if (err instanceof Error && err.message === "INSUFFICIENT_CREDITS") {
+        return null;
+      }
+      throw err;
+    });
+
+    if (!privateMessage) {
+      return NextResponse.json(
+        { error: "Insufficient credits for private messaging" },
+        { status: 402 }
+      );
+    }
 
     const formattedMessage = {
       id: privateMessage.id,

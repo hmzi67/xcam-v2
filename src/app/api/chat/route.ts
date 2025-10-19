@@ -1,32 +1,29 @@
 import { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import {
-  storeChatMessage,
-  validateMessage,
-  RateLimiter,
-  canUserChat,
-} from "@/lib/chat-server";
+import { validateMessage, RateLimiter, canUserChat } from "@/lib/chat-server";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "your-secret-key";
 
 // Message batching for high-throughput scenarios
-const messageBatchQueue = new Map<string, Array<any>>();
+const messageBatchQueue = new Map<string, Array<unknown>>();
 const batchTimers = new Map<string, NodeJS.Timeout>();
 const BATCH_DELAY = 50; // milliseconds
 const BATCH_SIZE = 10; // max messages per batch
 
-function broadcastMessage(streamId: string, event: any) {
+function broadcastMessage(streamId: string, event: unknown) {
   const streamConnections = connections.get(streamId);
   if (!streamConnections) return;
 
   const eventStr = `data: ${JSON.stringify(event)}\n\n`;
 
-  streamConnections.forEach(({ controller, lastActivity }) => {
+  streamConnections.forEach((conn) => {
     try {
-      controller.enqueue(eventStr);
+      conn.controller.enqueue(eventStr);
       // Update last activity on successful send
-      (controller as any).lastActivity = Date.now();
-    } catch (error) {
+      conn.lastActivity = Date.now();
+    } catch {
       // Client disconnected, will be cleaned up
     }
   });
@@ -160,7 +157,7 @@ export async function POST(request: NextRequest) {
       role: string;
     };
 
-    const { userId, streamId, role } = decoded;
+    const { userId, streamId } = decoded;
 
     // Check if user can still chat
     const chatCheck = await canUserChat(userId, streamId);
@@ -192,12 +189,102 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Store message in database
-    const chatMessage = await storeChatMessage(
-      streamId,
-      userId,
-      validation.sanitized!
-    );
+    // Determine if user is the stream creator (exempt from debit)
+    const stream = await prisma.stream.findUnique({
+      where: { id: streamId },
+      select: { creatorId: true },
+    });
+    if (!stream) {
+      return Response.json({ error: "Stream not found" }, { status: 404 });
+    }
+
+    const isCreator = stream.creatorId === userId;
+
+    // Atomically handle debit (if needed) and message creation
+    const chatMessage = await prisma.$transaction(async (tx) => {
+      // For non-creators, ensure balance and debit 1 credit
+      if (!isCreator) {
+        // Conditionally debit only if balance >= 1 to avoid negative balances
+        const debit = await tx.wallet.updateMany({
+          where: { userId, balance: { gte: new Prisma.Decimal(1) } },
+          data: { balance: { decrement: new Prisma.Decimal(1) } },
+        });
+
+        if (debit.count === 0) {
+          throw new Error("INSUFFICIENT_CREDITS");
+        }
+
+        // Fetch updated balance for ledger entry
+        const updatedWallet = await tx.wallet.findUnique({
+          where: { userId },
+          select: { balance: true },
+        });
+
+        // Create the message and reference it in the ledger entry
+        const createdMessage = await tx.chatMessage.create({
+          data: {
+            streamId,
+            userId,
+            message: validation.sanitized!,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                role: true,
+                profile: { select: { displayName: true, avatarUrl: true } },
+              },
+            },
+          },
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            userId,
+            type: "DEBIT",
+            amount: new Prisma.Decimal(1),
+            currency: "USD",
+            balanceAfter: updatedWallet!.balance,
+            referenceType: "CHAT_MESSAGE",
+            referenceId: createdMessage.id,
+            description: "Public chat message debit",
+          },
+        });
+
+        return createdMessage;
+      }
+
+      // Creator path: just create the message without debit
+      const createdMessage = await tx.chatMessage.create({
+        data: {
+          streamId,
+          userId,
+          message: validation.sanitized!,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              role: true,
+              profile: { select: { displayName: true, avatarUrl: true } },
+            },
+          },
+        },
+      });
+      return createdMessage;
+    }).catch((err) => {
+      if (err instanceof Error && err.message === "INSUFFICIENT_CREDITS") {
+        return null;
+      }
+      throw err;
+    });
+
+    if (!chatMessage) {
+      return Response.json(
+        { error: "Insufficient credits" },
+        { status: 402 }
+      );
+    }
 
     // Increment rate limit
     rateLimiter.increment(userId);
