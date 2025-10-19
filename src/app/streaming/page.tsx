@@ -141,17 +141,21 @@ export default function StreamingPage() {
 
   // Stream categories
   const streamCategories = [
-    "Models",
-    "Characters",
-    "AI Video",
-    "AI Apps",
-    "Video",
-    "Effects",
-    "Training",
     "Asian",
-    "BBW",
-    "Babes",
-    "LGBTQ+"
+    "BDSM",
+    "Big Cock",
+    "Big Tits",
+    "Black",
+    "Huge Tits",
+    "Latino",
+    "Mature",
+    "Medium Tits",
+    "Mobile",
+    "Small Tits",
+    "Teen 18+",
+    "Transgirl",
+    "Transguy",
+    "Uncut"
   ]
 
 
