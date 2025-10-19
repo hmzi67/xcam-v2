@@ -87,6 +87,10 @@ model User {
   googleId String? @unique @map("google_id")
   appleId  String? @unique @map("apple_id")
 
+  // Email Verification
+  verificationToken   String?   @unique @map("verification_token")
+  verificationTokenExpires DateTime? @map("verification_token_expires")
+
   // Password Reset
   passwordResetToken   String?   @unique @map("password_reset_token")
   passwordResetExpires DateTime? @map("password_reset_expires")

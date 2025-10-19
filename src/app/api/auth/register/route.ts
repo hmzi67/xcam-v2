@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient, UserStatus } from "@prisma/client"
 import { hashPassword, generateVerificationToken } from "../../../../../lib/auth-utils"
 import { z } from "zod"
+import { sendVerificationEmail } from "@/lib/email"
 
 const prisma = new PrismaClient()
 
@@ -16,7 +17,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, password, displayName } = registerSchema.parse(body)
 
-    // Check if user already exists
+    console.log(email)
+
+    // Check if a user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
@@ -47,6 +50,7 @@ export async function POST(request: NextRequest) {
     
     // Generate verification token
     const verificationToken = generateVerificationToken()
+    const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
 
     // Create user and profile in a transaction
     const user = await prisma.$transaction(async (tx) => {
@@ -56,6 +60,8 @@ export async function POST(request: NextRequest) {
           passwordHash,
           status: UserStatus.PENDING_VERIFICATION,
           emailVerified: false,
+          verificationToken,
+          verificationTokenExpires,
         },
       })
 
@@ -66,7 +72,7 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // Create wallet for the user
+      // Create a wallet for the user
       await tx.wallet.create({
         data: {
           userId: newUser.id,
@@ -74,15 +80,11 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // Store verification token (you might want to add this to your schema)
-      // For now, we'll just log it or send it via email
-      console.log(`Verification token for ${email}: ${verificationToken}`)
-
       return newUser
     })
 
-    // TODO: Send verification email
-    // await sendVerificationEmail(email, verificationToken)
+    // Send verification email
+    await sendVerificationEmail(email, verificationToken)
 
     return NextResponse.json(
       {

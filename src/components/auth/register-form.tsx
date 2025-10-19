@@ -10,7 +10,7 @@ import { Mail, Lock, Eye, EyeOff, User, Video, MessageSquare } from "lucide-reac
 
 const registerSchema = z
     .object({
-        name: z.string().min(3, "Full name must be at least 3 characters"),
+        displayName: z.string().min(3, "Full name must be at least 3 characters"),
         email: z.string().email("Invalid email address"),
         password: z.string().min(8, "Password must be at least 8 characters"),
         confirmPassword: z.string(),
@@ -43,11 +43,11 @@ export default function RegisterForm() {
             setIsLoading(true)
             setError(null)
 
-            const res = await fetch("/api/auth/signup", {
+            const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    name: data.name,
+                    displayName: data.displayName,
                     email: data.email,
                     password: data.password,
                 }),
@@ -136,14 +136,14 @@ export default function RegisterForm() {
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                                 <input
-                                    {...register("name")}
+                                    {...register("displayName")}
                                     type="text"
                                     placeholder="Alex Jordan"
                                     disabled={isLoading}
                                     className="w-full bg-gray-800 text-gray-100 pl-11 pr-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                                 />
                             </div>
-                            {errors.name && <p className="text-sm text-red-400 mt-1">{errors.name.message}</p>}
+                            {errors.displayName && <p className="text-sm text-red-400 mt-1">{errors.displayName.message}</p>}
                         </div>
 
                         {/* Email */}
