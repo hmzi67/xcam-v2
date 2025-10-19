@@ -1,4 +1,4 @@
-import { auth } from "../../../lib/auth"
+import { auth } from "../../../../lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 
@@ -9,8 +9,8 @@ export default async function VerifyEmailPage() {
         redirect("/login")
     }
 
-    if ((session.user as import("../../../lib/auth-utils").SessionUser).emailVerified) {
-        redirect("/dashboard")
+    if ((session.user as import("../../../../lib/auth-utils").SessionUser).emailVerified) {
+        redirect("/")
     }
 
     return (
