@@ -15,6 +15,8 @@ export function PrivateMessageBubble({
     isOwnMessage,
     showAvatar = true,
 }: PrivateMessageBubbleProps) {
+    const isPending = message.isPending || false;
+    
     const roleColors = {
         CREATOR: "bg-purple-500",
         MODERATOR: "bg-green-500",
@@ -38,7 +40,8 @@ export function PrivateMessageBubble({
         <div
             className={cn(
                 "flex gap-3 px-2 py-3 group transition-all duration-200 hover:bg-gray-800/20 rounded-lg",
-                isOwnMessage ? "flex-row-reverse" : "flex-row"
+                isOwnMessage ? "flex-row-reverse" : "flex-row",
+                isPending ? "opacity-60" : ""
             )}
         >
             {showAvatar && (
@@ -108,7 +111,13 @@ export function PrivateMessageBubble({
 
                 {/* Timestamp */}
                 <span className="text-xs text-gray-500 mt-2 bg-gray-700/30 px-2 py-1 rounded">
-                    {formatTime(message.createdAt)}
+                    {isPending ? (
+                        <span className="flex items-center gap-1">
+                            <span className="animate-pulse">Sending...</span>
+                        </span>
+                    ) : (
+                        formatTime(message.createdAt)
+                    )}
                 </span>
             </div>
         </div>

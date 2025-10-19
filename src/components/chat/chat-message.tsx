@@ -31,6 +31,7 @@ export function ChatMessage({
     onPrivateMessage,
 }: ChatMessageProps) {
     const isOwnMessage = message.userId === currentUserId;
+    const isPending = message.isPending || false;
     const roleColors = {
         CREATOR: "bg-purple-500",
         MODERATOR: "bg-green-500",
@@ -49,7 +50,7 @@ export function ChatMessage({
     const roleBadge = roleBadges[message.user.role as keyof typeof roleBadges];
 
     return (
-        <div className="flex items-start gap-3 py-3 px-3 hover:bg-gray-800/30 group rounded-lg transition-all duration-200 border border-transparent hover:border-gray-700/50">
+        <div className={`flex items-start gap-3 py-3 px-3 hover:bg-gray-800/30 group rounded-lg transition-all duration-200 border border-transparent hover:border-gray-700/50 ${isPending ? 'opacity-60' : ''}`}>
             {/* Avatar */}
             <Avatar className="h-9 w-9 flex-shrink-0 ring-2 ring-gray-600/50 hover:ring-purple-500/30 transition-all duration-200">
                 {message.user.avatarUrl ? (
@@ -75,10 +76,16 @@ export function ChatMessage({
                     )}
 
                     <span className="text-xs text-gray-500 bg-gray-700/30 px-2 py-1 rounded">
-                        {new Date(message.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
+                        {isPending ? (
+                            <span className="flex items-center gap-1">
+                                <span className="animate-pulse">Sending...</span>
+                            </span>
+                        ) : (
+                            new Date(message.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })
+                        )}
                     </span>
                 </div>
 

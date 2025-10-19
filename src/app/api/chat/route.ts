@@ -9,14 +9,60 @@ import {
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "your-secret-key";
 
+// Message batching for high-throughput scenarios
+const messageBatchQueue = new Map<string, Array<any>>();
+const batchTimers = new Map<string, NodeJS.Timeout>();
+const BATCH_DELAY = 50; // milliseconds
+const BATCH_SIZE = 10; // max messages per batch
+
+function broadcastMessage(streamId: string, event: any) {
+  const streamConnections = connections.get(streamId);
+  if (!streamConnections) return;
+
+  const eventStr = `data: ${JSON.stringify(event)}\n\n`;
+
+  streamConnections.forEach(({ controller, lastActivity }) => {
+    try {
+      controller.enqueue(eventStr);
+      // Update last activity on successful send
+      (controller as any).lastActivity = Date.now();
+    } catch (error) {
+      // Client disconnected, will be cleaned up
+    }
+  });
+}
+
 // Store active connections by streamId
-const connections = new Map<string, Set<{ userId: string; controller: ReadableStreamDefaultController }>>();
+const connections = new Map<string, Set<{ userId: string; controller: ReadableStreamDefaultController; lastActivity: number }>>();
 
 // Global rate limiter
 const rateLimiter = new RateLimiter(10, 30);
 
 // Cleanup rate limiter every 5 minutes
 setInterval(() => rateLimiter.cleanup(), 5 * 60 * 1000);
+
+// Cleanup stale connections every minute
+setInterval(() => {
+  const now = Date.now();
+  const STALE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+  
+  connections.forEach((streamConnections, streamId) => {
+    streamConnections.forEach((connection) => {
+      if (now - connection.lastActivity > STALE_TIMEOUT) {
+        try {
+          connection.controller.close();
+        } catch (err) {
+          // Already closed
+        }
+        streamConnections.delete(connection);
+      }
+    });
+    
+    if (streamConnections.size === 0) {
+      connections.delete(streamId);
+    }
+  });
+}, 60 * 1000);
 
 /**
  * SSE endpoint for real-time chat
@@ -49,7 +95,7 @@ export async function GET(request: NextRequest) {
         if (!connections.has(streamId)) {
           connections.set(streamId, new Set());
         }
-        const connection = { userId, controller };
+        const connection = { userId, controller, lastActivity: Date.now() };
         connections.get(streamId)!.add(connection);
 
         // Send initial connection event
@@ -65,6 +111,7 @@ export async function GET(request: NextRequest) {
         const heartbeat = setInterval(() => {
           try {
             controller.enqueue(`: heartbeat\n\n`);
+            connection.lastActivity = Date.now();
           } catch {
             clearInterval(heartbeat);
           }
@@ -155,34 +202,25 @@ export async function POST(request: NextRequest) {
     // Increment rate limit
     rateLimiter.increment(userId);
 
-    // Broadcast to all connected clients
-    const streamConnections = connections.get(streamId);
-    if (streamConnections) {
-      const event = JSON.stringify({
-        type: "message",
-        data: {
-          id: chatMessage.id,
-          message: chatMessage.message,
-          userId: chatMessage.userId,
-          user: {
-            id: chatMessage.user.id,
-            displayName: chatMessage.user.profile?.displayName || "Anonymous",
-            avatarUrl: chatMessage.user.profile?.avatarUrl,
-            role: chatMessage.user.role,
-          },
-          createdAt: chatMessage.createdAt.toISOString(),
+    // Broadcast to all connected clients using optimized broadcast
+    const event = {
+      type: "message",
+      data: {
+        id: chatMessage.id,
+        message: chatMessage.message,
+        userId: chatMessage.userId,
+        user: {
+          id: chatMessage.user.id,
+          displayName: chatMessage.user.profile?.displayName || "Anonymous",
+          avatarUrl: chatMessage.user.profile?.avatarUrl,
+          role: chatMessage.user.role,
         },
-        timestamp: new Date().toISOString(),
-      });
+        createdAt: chatMessage.createdAt.toISOString(),
+      },
+      timestamp: new Date().toISOString(),
+    };
 
-      streamConnections.forEach(({ controller }) => {
-        try {
-          controller.enqueue(`data: ${event}\n\n`);
-        } catch (error) {
-          // Client disconnected, will be cleaned up
-        }
-      });
-    }
+    broadcastMessage(streamId, event);
 
     return Response.json({
       success: true,
@@ -216,20 +254,11 @@ export function broadcastModerationEvent(
     duration?: number;
   }
 ) {
-  const streamConnections = connections.get(streamId);
-  if (streamConnections) {
-    const data = JSON.stringify({
-      type: "moderation",
-      data: event,
-      timestamp: new Date().toISOString(),
-    });
+  const moderationEvent = {
+    type: "moderation",
+    data: event,
+    timestamp: new Date().toISOString(),
+  };
 
-    streamConnections.forEach(({ controller }) => {
-      try {
-        controller.enqueue(`data: ${data}\n\n`);
-      } catch {
-        // Client disconnected
-      }
-    });
-  }
+  broadcastMessage(streamId, moderationEvent);
 }

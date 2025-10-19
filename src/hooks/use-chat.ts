@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { getCachedMessages, setCachedMessages, addMessageToCache, removeMessageFromCache } from "@/lib/chat-cache";
 
 export interface ChatMessage {
   id: string;
@@ -11,6 +12,7 @@ export interface ChatMessage {
     role: string;
   };
   createdAt: string;
+  isPending?: boolean; // For optimistic updates
 }
 
 export interface ChatEvent {
@@ -37,6 +39,7 @@ export interface UseChatReturn {
   hasMore: boolean;
   loading: boolean;
   remaining: number | null;
+  connectionQuality: "good" | "poor" | "disconnected";
 }
 
 export function useChat({
@@ -51,15 +54,103 @@ export function useChat({
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [connectionQuality, setConnectionQuality] = useState<"good" | "poor" | "disconnected">("disconnected");
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  const messageSeenRef = useRef<Set<string>>(new Set()); // Deduplication
+  const lastHeartbeatRef = useRef<number>(Date.now());
+  const pendingMessagesRef = useRef<Map<string, ChatMessage>>(new Map());
+  const sendQueueRef = useRef<Array<{message: string, resolve: (value: boolean) => void, reject: (reason?: any) => void}>>([]);
+  const isSendingRef = useRef(false);
+
+  // Monitor connection quality
+  useEffect(() => {
+    if (!connected) {
+      setConnectionQuality("disconnected");
+      return;
+    }
+
+    const checkQuality = setInterval(() => {
+      const timeSinceLastHeartbeat = Date.now() - lastHeartbeatRef.current;
+      if (timeSinceLastHeartbeat > 60000) {
+        setConnectionQuality("poor");
+      } else {
+        setConnectionQuality("good");
+      }
+    }, 5000);
+
+    return () => clearInterval(checkQuality);
+  }, [connected]);
+
+  // Process send queue
+  const processSendQueue = useCallback(async () => {
+    if (isSendingRef.current || sendQueueRef.current.length === 0) return;
+    
+    isSendingRef.current = true;
+    const item = sendQueueRef.current.shift();
+    
+    if (!item) {
+      isSendingRef.current = false;
+      return;
+    }
+
+    try {
+      if (!token || !connected) {
+        item.reject(new Error("Not connected to chat"));
+        return;
+      }
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, message: item.message }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        
+        if (response.status === 429) {
+          setError(`Rate limit exceeded. Try again in ${data.resetIn} seconds.`);
+        } else {
+          setError(data.error || "Failed to send message");
+        }
+        
+        item.resolve(false);
+        return;
+      }
+
+      const data = await response.json();
+      setRemaining(data.remaining);
+      setError(null);
+      item.resolve(true);
+    } catch (err) {
+      console.error("Error sending message:", err);
+      setError("Failed to send message");
+      item.resolve(false);
+    } finally {
+      isSendingRef.current = false;
+      // Process next message in queue
+      if (sendQueueRef.current.length > 0) {
+        setTimeout(processSendQueue, 100); // Small delay between messages
+      }
+    }
+  }, [token, connected]);
 
   // Load initial messages
   const loadMessages = useCallback(
     async (beforeId?: string) => {
       if (!streamId) return;
+
+      // Load from cache first for instant display
+      if (!beforeId) {
+        const cached = getCachedMessages(streamId);
+        if (cached && cached.length > 0) {
+          setMessages(cached);
+          cached.forEach((msg) => messageSeenRef.current.add(msg.id));
+        }
+      }
 
       setLoading(true);
       try {
@@ -80,9 +171,18 @@ export function useChat({
         const data = await response.json();
 
         if (beforeId) {
-          setMessages((prev) => [...data.messages, ...prev]);
+          setMessages((prev) => {
+            const newMessages = data.messages.filter(
+              (msg: ChatMessage) => !messageSeenRef.current.has(msg.id)
+            );
+            newMessages.forEach((msg: ChatMessage) => messageSeenRef.current.add(msg.id));
+            return [...newMessages, ...prev];
+          });
         } else {
           setMessages(data.messages);
+          data.messages.forEach((msg: ChatMessage) => messageSeenRef.current.add(msg.id));
+          // Cache the messages for future quick loads
+          setCachedMessages(streamId, data.messages);
         }
 
         setHasMore(data.hasMore);
@@ -125,9 +225,17 @@ export function useChat({
         setConnected(true);
         setError(null);
         reconnectAttemptsRef.current = 0;
+        lastHeartbeatRef.current = Date.now();
       };
 
       eventSource.onmessage = (event) => {
+        lastHeartbeatRef.current = Date.now(); // Update heartbeat timestamp
+        
+        // Handle heartbeat
+        if (event.data.startsWith(":")) {
+          return;
+        }
+
         try {
           const chatEvent: ChatEvent = JSON.parse(event.data);
 
@@ -138,7 +246,30 @@ export function useChat({
 
             case "message":
               if (chatEvent.data) {
-                setMessages((prev) => [...prev, chatEvent.data as ChatMessage]);
+                const newMessage = chatEvent.data as ChatMessage;
+                
+                // Deduplicate messages
+                if (messageSeenRef.current.has(newMessage.id)) {
+                  return;
+                }
+                
+                messageSeenRef.current.add(newMessage.id);
+                
+                // Remove pending message if it exists
+                if (pendingMessagesRef.current.has(newMessage.id)) {
+                  pendingMessagesRef.current.delete(newMessage.id);
+                }
+                
+                setMessages((prev) => {
+                  // Remove any pending version
+                  const filtered = prev.filter(msg => msg.id !== newMessage.id);
+                  const updated = [...filtered, newMessage];
+                  
+                  // Cache the updated messages
+                  setCachedMessages(streamId, updated);
+                  
+                  return updated;
+                });
               }
               break;
 
@@ -147,9 +278,15 @@ export function useChat({
                 chatEvent.data?.type === "delete" &&
                 chatEvent.data?.messageId
               ) {
-                setMessages((prev) =>
-                  prev.filter((msg) => msg.id !== chatEvent.data.messageId)
-                );
+                setMessages((prev) => {
+                  const filtered = prev.filter((msg) => msg.id !== chatEvent.data.messageId);
+                  
+                  // Update cache
+                  removeMessageFromCache(streamId, chatEvent.data.messageId);
+                  
+                  return filtered;
+                });
+                messageSeenRef.current.delete(chatEvent.data.messageId);
               }
               break;
           }
@@ -201,46 +338,54 @@ export function useChat({
     setConnected(false);
   }, []);
 
-  // Send message
+  // Send message with optimistic updates
   const sendMessage = useCallback(
     async (message: string): Promise<boolean> => {
-      if (!token || !connected) {
-        setError("Not connected to chat");
-        return false;
-      }
+      return new Promise((resolve, reject) => {
+        // Generate temporary ID for optimistic update
+        const tempId = `temp-${Date.now()}-${Math.random()}`;
+        const optimisticMessage: ChatMessage = {
+          id: tempId,
+          message,
+          userId: "current-user", // This should be replaced with actual user ID
+          user: {
+            id: "current-user",
+            displayName: "You",
+            avatarUrl: null,
+            role: "VIEWER",
+          },
+          createdAt: new Date().toISOString(),
+          isPending: true,
+        };
 
-      try {
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token, message }),
+        // Add optimistic message
+        pendingMessagesRef.current.set(tempId, optimisticMessage);
+        setMessages((prev) => [...prev, optimisticMessage]);
+
+        // Add to send queue
+        sendQueueRef.current.push({
+          message,
+          resolve: (success) => {
+            if (!success) {
+              // Remove optimistic message on failure
+              setMessages((prev) => prev.filter(msg => msg.id !== tempId));
+              pendingMessagesRef.current.delete(tempId);
+            }
+            resolve(success);
+          },
+          reject: (error) => {
+            // Remove optimistic message on error
+            setMessages((prev) => prev.filter(msg => msg.id !== tempId));
+            pendingMessagesRef.current.delete(tempId);
+            reject(error);
+          }
         });
 
-        if (!response.ok) {
-          const data = await response.json();
-          setError(data.error || "Failed to send message");
-
-          if (response.status === 429) {
-            // Rate limited
-            setError(
-              `Rate limit exceeded. Try again in ${data.resetIn} seconds.`
-            );
-          }
-
-          return false;
-        }
-
-        const data = await response.json();
-        setRemaining(data.remaining);
-        setError(null);
-        return true;
-      } catch (err) {
-        console.error("Error sending message:", err);
-        setError("Failed to send message");
-        return false;
-      }
+        // Start processing queue
+        processSendQueue();
+      });
     },
-    [token, connected]
+    [processSendQueue]
   );
 
   // Load initial messages on mount
@@ -270,5 +415,6 @@ export function useChat({
     hasMore,
     loading,
     remaining,
+    connectionQuality,
   };
 }

@@ -76,6 +76,7 @@ interface ChatContainerProps {
         hasMore,
         loading: messagesLoading,
         remaining,
+        connectionQuality,
     } = useChat({
         streamId,
         token: chatToken,
@@ -207,8 +208,20 @@ interface ChatContainerProps {
                     </div>
                     {connected ? (
                         <div className="flex items-center gap-1">
-                            <Wifi className="h-4 w-4 text-green-400" />
-                            <span className="text-xs text-green-400 font-medium">Connected</span>
+                            <Wifi className={`h-4 w-4 ${
+                                connectionQuality === 'good' ? 'text-green-400' : 
+                                connectionQuality === 'poor' ? 'text-orange-400' : 
+                                'text-red-400'
+                            }`} />
+                            <span className={`text-xs font-medium ${
+                                connectionQuality === 'good' ? 'text-green-400' : 
+                                connectionQuality === 'poor' ? 'text-orange-400' : 
+                                'text-red-400'
+                            }`}>
+                                {connectionQuality === 'good' ? 'Connected' : 
+                                 connectionQuality === 'poor' ? 'Poor Connection' : 
+                                 'Connecting...'}
+                            </span>
                         </div>
                     ) : (
                         <div className="flex items-center gap-1">

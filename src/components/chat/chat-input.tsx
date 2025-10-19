@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Smile } from "lucide-react";
+import { Send, Smile, Loader2 } from "lucide-react";
 
 interface ChatInputProps {
     onSend: (message: string) => Promise<boolean>;
@@ -18,11 +18,20 @@ export function ChatInput({
 }: ChatInputProps) {
     const [message, setMessage] = useState("");
     const [sending, setSending] = useState(false);
+    const [lastSendTime, setLastSendTime] = useState(0);
 
     const handleSend = async () => {
         if (!message.trim() || sending || disabled) return;
 
+        // Debounce: prevent sending messages too quickly
+        const now = Date.now();
+        if (now - lastSendTime < 500) { // 500ms debounce
+            return;
+        }
+
         setSending(true);
+        setLastSendTime(now);
+        
         const success = await onSend(message.trim());
 
         if (success) {
@@ -104,7 +113,11 @@ export function ChatInput({
                     className="flex-shrink-0 bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg shadow-purple-600/25 transition-all duration-200 disabled:bg-gray-700 disabled:shadow-none"
                     size="icon"
                 >
-                    <Send className="h-5 w-5" />
+                    {sending ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                        <Send className="h-5 w-5" />
+                    )}
                 </Button>
             </div>
 
