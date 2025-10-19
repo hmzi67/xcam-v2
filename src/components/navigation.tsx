@@ -55,7 +55,7 @@ export function Navigation() {
                             </span>
                         </Link>
 
-                        {session?.user && (
+                        {session?.user && ((session.user as any).role === "CREATOR" || (session.user as any).role === "ADMIN") && (
                             <div className="hidden md:flex items-center space-x-1">
                                 <Link href="/earnings">
                                     <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
@@ -63,7 +63,7 @@ export function Navigation() {
                                         Earnings
                                     </Button>
                                 </Link>
-                                {(session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN" && (
+                                {(session.user as any).role === "ADMIN" && (
                                     <Link href="/admin">
                                         <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
                                             <Shield className="w-4 h-4 mr-2" />
@@ -103,12 +103,14 @@ export function Navigation() {
                                             <span>Streaming</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/earnings" className="cursor-pointer">
-                                            <DollarSign className="w-4 h-4 mr-2" />
-                                            <span>Earnings</span>
-                                        </Link>
-                                    </DropdownMenuItem>
+                                    {((session.user as any).role === "CREATOR" || (session.user as any).role === "ADMIN") && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/earnings" className="cursor-pointer">
+                                                <DollarSign className="w-4 h-4 mr-2" />
+                                                <span>Earnings</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
                                     {((session.user as import("../../lib/auth-utils").SessionUser).role === "CREATOR" ||
                                         (session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN") && (
                                             <DropdownMenuItem asChild>

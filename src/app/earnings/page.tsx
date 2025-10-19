@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { Navigation } from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,22 @@ import {
 } from "lucide-react";
 
 export default function EarningsPage() {
+    const { data: session, status } = useSession();
+    const userRole = (session?.user as any)?.role;
+    if (status === "loading") {
+        return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>;
+    }
+    if (!session?.user || (userRole !== "CREATOR" && userRole !== "ADMIN")) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+                <div className="bg-gray-800/80 p-8 rounded-lg shadow-lg border border-gray-700 text-center max-w-md">
+                    <h2 className="text-2xl font-bold mb-4 text-red-400">Unauthorized</h2>
+                    <p className="text-gray-300 mb-4">You do not have permission to view this page.</p>
+                    <a href="/" className="text-purple-400 underline">Go back to Home</a>
+                </div>
+            </div>
+        );
+    }
     const [calculatorMinutes, setCalculatorMinutes] = useState(60);
     const [calculatorCustomers, setCalculatorCustomers] = useState(3);
 
