@@ -79,18 +79,31 @@ export default function Home() {
   ];
 
   const categoryFilters = [
-    { name: "Models", count: 50 },
-    { name: "Characters", count: 353, hot: true },
-    { name: "AI Video", count: 125 },
-    { name: "AI Apps", count: 117 },
-    { name: "Video", count: 240 },
-    { name: "Effects", count: 60 },
-    { name: "Training", count: 58 },
-    { name: "Asian", count: 60 },
-    { name: "BBW", count: 58 },
-    { name: "Babes", count: 117 },
-    { name: "LGBTQ+", count: 1 },
+    { name: "Asian", hot: false },
+    { name: "BDSM", hot: true },
+    { name: "Big Cock", hot: false },
+    { name: "Big Tits", hot: false },
+    { name: "Black", hot: false },
+    { name: "Huge Tits", hot: false },
+    { name: "Latino", hot: false },
+    { name: "Mature", hot: false },
+    { name: "Medium Tits", hot: false },
+    { name: "Mobile", hot: false },
+    { name: "Small Tits", hot: false },
+    { name: "Teen 18+", hot: false },
+    { name: "Transgirl", hot: false },
+    { name: "Transguy", hot: false },
+    { name: "Uncut", hot: false },
   ];
+
+  // Calculate category counts from streams
+  const categoryCounts = categoryFilters.map((filter) => {
+    const count = streams.filter(
+      (stream) => stream.category === filter.name
+    ).length;
+    return { ...filter, count };
+  });
+
 
   const regions = ["All Regions", "North America", "Europe", "Asia", "South America", "Africa", "Oceania"];
   const ages = ["All Ages", "18-22", "23-30", "31-40", "40+"];
@@ -164,7 +177,7 @@ export default function Home() {
 
       <div className="flex min-h-screen">
         {/* Sidebar */}
-        <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 border-r border-gray-700 p-4 pt-20 overflow-y-auto">
+        <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 border-r border-gray-700 p-4 pt-20 overflow-y-auto scrollbar-hide">
           {/* Main Categories */}
           <div className="mb-6">
             {categories.map((category) => {
@@ -203,10 +216,10 @@ export default function Home() {
           {/* Category Pages */}
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
-              Category Pages
+              Categories
             </h3>
             <div className="space-y-1">
-              {categoryFilters.map((filter) => (
+              {categoryCounts.map((filter) => (
                 <button
                   key={filter.name}
                   onClick={() => setSelectedCategory(filter.name)}
