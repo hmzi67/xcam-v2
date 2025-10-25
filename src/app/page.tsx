@@ -182,33 +182,48 @@ export default function Home() {
           <div className="mb-6">
             {categories.map((category) => {
               const IconComponent = category.icon;
+              const isCreator = !!(
+              session?.user &&
+              (
+                // common possible flags for "creator" role
+                (session.user as any).isCreator ||
+                (session.user as any).role === "CREATOR" ||
+                (Array.isArray((session.user as any).roles) && (session.user as any).roles.includes("CREATOR"))
+              )
+              );
+
+              // Only show "Creator Earnings" to creators
+              if (category.name === "Creator Earnings" && !isCreator) {
+              return null;
+              }
+
               return (
-                <button
-                  key={category.name}
-                  onClick={() => handleCategoryClick(category.name)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors neon-hover ${selectedCategory === category.name
-                    ? 'bg-purple-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-700'
-                    }`}
+              <button
+                key={category.name}
+                onClick={() => handleCategoryClick(category.name)}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors neon-hover ${selectedCategory === category.name
+                ? 'bg-purple-600 text-white'
+                : 'text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <IconComponent
+                className={`w-5 h-5 ${selectedCategory === category.name ? 'neon-purple-icon' : 'neon-target-icon'}`}
+                />
+                <span
+                className={`font-medium ${selectedCategory === category.name ? 'neon-purple-text' : 'neon-target-text'}`}
                 >
-                  <IconComponent
-                    className={`w-5 h-5 ${selectedCategory === category.name ? 'neon-purple-icon' : 'neon-target-icon'}`}
-                  />
-                  <span
-                    className={`font-medium ${selectedCategory === category.name ? 'neon-purple-text' : 'neon-target-text'}`}
-                  >
-                    {category.name}
-                  </span>
-                  {category.name === "All Girls Cams" && (
-                    <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
-                  )}
-                  {category.name === "Private Messages" && (
-                    <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
-                  )}
-                  {category.name === "Creator Earnings" && (
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full ml-auto animate-pulse" />
-                  )}
-                </button>
+                {category.name}
+                </span>
+                {category.name === "All Girls Cams" && (
+                <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
+                )}
+                {category.name === "Private Messages" && (
+                <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
+                )}
+                {category.name === "Creator Earnings" && (
+                <div className="w-2 h-2 bg-yellow-400 rounded-full ml-auto animate-pulse" />
+                )}
+              </button>
               );
             })}
           </div>
