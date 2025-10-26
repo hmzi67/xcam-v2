@@ -64,8 +64,8 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const handleCategoryClick = (categoryName: string) => {
-   
-      setSelectedCategory(categoryName);
+
+    setSelectedCategory(categoryName);
   };
   const categories = [
     { name: "All Girls Cams", icon: Heart, count: 0, active: true },
@@ -179,41 +179,41 @@ export default function Home() {
             {categories.map((category) => {
               const IconComponent = category.icon;
               const isCreator = !!(
-              session?.user &&
-              (
-                // common possible flags for "creator" role
-                (session.user as any).isCreator ||
-                (session.user as any).role === "CREATOR" ||
-                (Array.isArray((session.user as any).roles) && (session.user as any).roles.includes("CREATOR"))
-              )
+                session?.user &&
+                (
+                  // common possible flags for "creator" role
+                  (session.user as any).isCreator ||
+                  (session.user as any).role === "CREATOR" ||
+                  (Array.isArray((session.user as any).roles) && (session.user as any).roles.includes("CREATOR"))
+                )
               );
 
 
               return (
-              <button
-                key={category.name}
-                onClick={() => handleCategoryClick(category.name)}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors neon-hover ${selectedCategory === category.name
-                ? 'bg-purple-600 text-white'
-                : 'text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                <IconComponent
-                className={`w-5 h-5 ${selectedCategory === category.name ? 'neon-purple-icon' : 'neon-target-icon'}`}
-                />
-                <span
-                className={`font-medium ${selectedCategory === category.name ? 'neon-purple-text' : 'neon-target-text'}`}
+                <button
+                  key={category.name}
+                  onClick={() => handleCategoryClick(category.name)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors neon-hover ${selectedCategory === category.name
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700'
+                    }`}
                 >
-                {category.name}
-                </span>
-                {category.name === "All Girls Cams" && (
-                <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
-                )}
-                {category.name === "Private Messages" && (
-                <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
-                )}
-              
-              </button>
+                  <IconComponent
+                    className={`w-5 h-5 ${selectedCategory === category.name ? 'neon-purple-icon' : 'neon-target-icon'}`}
+                  />
+                  <span
+                    className={`font-medium ${selectedCategory === category.name ? 'neon-purple-text' : 'neon-target-text'}`}
+                  >
+                    {category.name}
+                  </span>
+                  {category.name === "All Girls Cams" && (
+                    <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
+                  )}
+                  {category.name === "Private Messages" && (
+                    <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
+                  )}
+
+                </button>
               );
             })}
           </div>
@@ -250,135 +250,138 @@ export default function Home() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col ml-64">
-          {/* Top Filters Bar */}
-          <div className="bg-gray-800 border-b border-gray-700 p-4">
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Regions Filter */}
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-purple-400" />
-                <select
-                  value={selectedRegion}
-                  onChange={(e) => setSelectedRegion(e.target.value)}
-                  className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {regions.map((region) => (
-                    <option key={region} value={region}>
-                      {region}
-                    </option>
-                  ))}
-                </select>
+          {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
+          {selectedCategory !== "Private Messages" && (
+            <>
+              <div className="bg-gray-800 border-b border-gray-700 p-4">
+                <div className="flex flex-wrap items-center gap-4">
+                  {/* Regions Filter */}
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-purple-400" />
+                    <select
+                      value={selectedRegion}
+                      onChange={(e) => setSelectedRegion(e.target.value)}
+                      className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {regions.map((region) => (
+                        <option key={region} value={region}>
+                          {region}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Age Filter */}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-purple-400" />
+                    <select
+                      value={selectedAge}
+                      onChange={(e) => setSelectedAge(e.target.value)}
+                      className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {ages.map((age) => (
+                        <option key={age} value={age}>
+                          {age}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Ethnicity Filter */}
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-purple-400" />
+                    <select
+                      value={selectedEthnicity}
+                      onChange={(e) => setSelectedEthnicity(e.target.value)}
+                      className="bg-purple-600 border border-purple-500 rounded px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    >
+                      {ethnicities.map((ethnicity) => (
+                        <option key={ethnicity} value={ethnicity}>
+                          {ethnicity}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Features Filter */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
+                  >
+                    <Star className="w-4 h-4" />
+                    Features
+                  </Button>
+
+                  {/* Fetishes Filter */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Fetishes
+                  </Button>
+
+                  {/* Language Filter */}
+                  <div className="flex items-center gap-2">
+                    <Languages className="w-4 h-4 text-purple-400" />
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => setSelectedLanguage(e.target.value)}
+                      className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {languages.map((language) => (
+                        <option key={language} value={language}>
+                          {language}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* View Mode Toggle */}
+                  <div className="ml-auto flex items-center gap-2">
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                      className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
-
-              {/* Age Filter */}
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-purple-400" />
-                <select
-                  value={selectedAge}
-                  onChange={(e) => setSelectedAge(e.target.value)}
-                  className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {ages.map((age) => (
-                    <option key={age} value={age}>
-                      {age}
-                    </option>
-                  ))}
-                </select>
+              {/* Search Bar */}
+              <div className="bg-gray-800 border-b border-gray-700 p-4">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search models, categories..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-gray-700 border-gray-600 focus:border-purple-500 text-white"
+                  />
+                </div>
               </div>
-
-              {/* Ethnicity Filter */}
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-purple-400" />
-                <select
-                  value={selectedEthnicity}
-                  onChange={(e) => setSelectedEthnicity(e.target.value)}
-                  className="bg-purple-600 border border-purple-500 rounded px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {ethnicities.map((ethnicity) => (
-                    <option key={ethnicity} value={ethnicity}>
-                      {ethnicity}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Features Filter */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
-              >
-                <Star className="w-4 h-4" />
-                Features
-              </Button>
-
-              {/* Fetishes Filter */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
-              >
-                <Heart className="w-4 h-4" />
-                Fetishes
-              </Button>
-
-              {/* Language Filter */}
-              <div className="flex items-center gap-2">
-                <Languages className="w-4 h-4 text-purple-400" />
-                <select
-                  value={selectedLanguage}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                  className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {languages.map((language) => (
-                    <option key={language} value={language}>
-                      {language}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* View Mode Toggle */}
-              <div className="ml-auto flex items-center gap-2">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="bg-gray-800 border-b border-gray-700 p-4">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search models, categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-gray-700 border-gray-600 focus:border-purple-500 text-white"
-              />
-            </div>
-          </div>
+            </>
+          )}
 
           {/* Content Area */}
           <div className="flex-1 p-4">
