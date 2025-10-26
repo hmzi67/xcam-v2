@@ -64,16 +64,12 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const handleCategoryClick = (categoryName: string) => {
-    if (categoryName === "Creator Earnings") {
-      router.push("/earnings");
-    } else {
+   
       setSelectedCategory(categoryName);
-    }
   };
   const categories = [
     { name: "All Girls Cams", icon: Heart, count: 0, active: true },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
-    { name: "Creator Earnings", icon: DollarSign, count: 0 },
     { name: "New Models", icon: Star, count: 0 },
     { name: "GOLD Shows", icon: Star, count: 0 },
   ];
@@ -192,10 +188,6 @@ export default function Home() {
               )
               );
 
-              // Only show "Creator Earnings" to creators
-              if (category.name === "Creator Earnings" && !isCreator) {
-              return null;
-              }
 
               return (
               <button
@@ -220,9 +212,7 @@ export default function Home() {
                 {category.name === "Private Messages" && (
                 <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
                 )}
-                {category.name === "Creator Earnings" && (
-                <div className="w-2 h-2 bg-yellow-400 rounded-full ml-auto animate-pulse" />
-                )}
+              
               </button>
               );
             })}

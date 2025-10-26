@@ -55,12 +55,11 @@ export function Navigation() {
                             </span>
                         </Link>
 
-                        {session?.user && ((session.user as any).role === "CREATOR" || (session.user as any).role === "ADMIN") && (
+                        {session?.user && ((session.user as any).role === "CREATOR" || (session.user as any).role === "VIEWER" || (session.user as any).role === "ADMIN") && (
                             <div className="hidden md:flex items-center space-x-1">
-                                <Link href="/earnings">
+                                <Link href="/pricing">
                                     <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
-                                        <DollarSign className="w-4 h-4 mr-2" />
-                                        Earnings
+                                        Pricing
                                     </Button>
                                 </Link>
                                 {(session.user as any).role === "ADMIN" && (

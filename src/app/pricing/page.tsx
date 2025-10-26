@@ -2,15 +2,15 @@
 
 import React from "react";
 import { useSession } from "next-auth/react";
-import ViewerTokenPage from "../viewer-tokens/page";
-import EarningsPage from "../earnings/page";
+import EarningsPage from "@/components/pricing/earning-page";
+import ViewerTokenPage from "@/components/pricing/viewer-token-page";
 
 export default function page() {
   const { data: session, status } = useSession();
 
   return (
     <div>
-      { session?.user && ((session.user as any).role === "CREATOR") && (<EarningsPage />) }
+      { session?.user && ((session.user as any).role === "CREATOR") && (<EarningsPage/>) }
       { session?.user && ((session.user as any).role === "VIEWER") && (<ViewerTokenPage />) }
     </div>
   );
