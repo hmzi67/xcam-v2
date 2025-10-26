@@ -1220,8 +1220,7 @@ export default function UpgradePage() {
           </Card>
 
           {/* Footer Links */}
-          <div className="mt-8 space-y-4">
-            
+          <div className="mt-8 space-y-4">            
             <div className="flex justify-center items-center gap-6 pt-4">
               <a
                 href="https://www.rtalabel.org/"
