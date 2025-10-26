@@ -1,6 +1,14 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { Mail, Phone, MapPin, Calendar, User, Edit2, ChevronLeft } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  User,
+  Edit2,
+  ChevronLeft,
+} from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
 import Link from "next/link";
@@ -74,7 +82,7 @@ const ProfilePage = () => {
     if (!userData) return null;
 
     return (
-      <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="flex items-center gap-6">
           <div className="relative">
             {isEditingAvatar ? (
@@ -88,7 +96,7 @@ const ProfilePage = () => {
               />
             ) : (
               <div className="relative group">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-yellow-500 flex items-center justify-center text-white text-3xl font-semibold overflow-hidden">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-3xl font-semibold overflow-hidden">
                   {userData.profile?.avatarUrl ? (
                     <img
                       src={userData.profile.avatarUrl}
@@ -120,16 +128,16 @@ const ProfilePage = () => {
           {!isEditingAvatar && (
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-semibold text-gray-800">
+                <h2 className="text-2xl font-semibold text-white">
                   {userData.profile?.displayName || userData.email}
                 </h2>
                 —
-                <p className="text-gray-600 capitalize">
+                <p className="text-gray-400 capitalize">
                   {userData.role?.toLowerCase()}
                 </p>
                 <button
                   onClick={() => setIsEditingAvatar(true)}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                  className="text-gray-400 hover:text-purple-300 transition-colors"
                   title="Edit avatar"
                 >
                   <Edit2 className="w-4 h-4" />
@@ -137,17 +145,17 @@ const ProfilePage = () => {
               </div>
               {userData.profile?.bio && (
                 <div className="py-2 italic">
-                  <p className="text-gray-700 text-sm leading-relaxed">
+                  <p className="text-gray-300 text-sm leading-relaxed">
                     "{userData.profile.bio}"
                   </p>
                 </div>
               )}
               {userData.profile?.isCreator && (
-                <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full mt-1">
+                <span className="inline-block bg-purple-100/10 text-purple-300 text-xs px-2 py-1 rounded-full mt-1">
                   Content Creator
                 </span>
               )}
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-400 text-sm">
                 Status:{" "}
                 <span className="capitalize">
                   {userData.status?.toLowerCase()}
@@ -161,7 +169,7 @@ const ProfilePage = () => {
           <div className="flex justify-center mt-4">
             <button
               onClick={() => setIsEditingAvatar(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
             >
               Cancel
             </button>
@@ -175,63 +183,63 @@ const ProfilePage = () => {
     if (!userData) return null;
 
     return (
-      <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">
+          <h3 className="text-xl font-semibold text-white">
             Personal Information
           </h3>
-          <button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
+          <button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30">
             <Edit2 size={16} />
             Edit
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Display Name
             </label>
-            <p className="text-gray-800 font-medium">
+            <p className="text-gray-200 font-medium">
               {userData.profile?.displayName || "Not set"}
             </p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Email Address
             </label>
-            <p className="text-gray-800 font-medium">{userData.email}</p>
+            <p className="text-gray-200 font-medium">{userData.email}</p>
             {userData.emailVerified && (
               <span className="text-green-600 text-xs">✓ Verified</span>
             )}
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               User Role
             </label>
-            <p className="text-gray-800 font-medium capitalize">
+            <p className="text-gray-200 font-medium capitalize">
               {userData.role?.toLowerCase()}
             </p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Account Status
             </label>
-            <p className="text-gray-800 font-medium capitalize">
+            <p className="text-gray-200 font-medium capitalize">
               {userData.status?.toLowerCase()}
             </p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Member Since
             </label>
-            <p className="text-gray-800 font-medium">
+            <p className="text-gray-200 font-medium">
               {new Date(userData.createdAt).toLocaleDateString()}
             </p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Last Login
             </label>
-            <p className="text-gray-800 font-medium">
+            <p className="text-gray-200 font-medium">
               {userData.lastLoginAt
                 ? new Date(userData.lastLoginAt).toLocaleDateString()
                 : "Never"}
@@ -246,34 +254,34 @@ const ProfilePage = () => {
     if (!userData?.profile?.isCreator) return null;
 
     return (
-      <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">
+          <h3 className="text-xl font-semibold text-white">
             Creator Information
           </h3>
-          <button className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg border border-gray-300 hover:border-gray-400 transition-colors">
+          <button className="flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-lg border border-gray-600 hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors">
             <Edit2 size={16} />
             Edit
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">Category</label>
-            <p className="text-gray-800 font-medium">
+            <label className="text-sm text-gray-400 mb-1 block">Category</label>
+            <p className="text-gray-200 font-medium">
               {userData.profile.category || "Not specified"}
             </p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">Language</label>
-            <p className="text-gray-800 font-medium">
+            <label className="text-sm text-gray-400 mb-1 block">Language</label>
+            <p className="text-gray-200 font-medium">
               {userData.profile.language || "Not specified"}
             </p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Total Streams
             </label>
-            <p className="text-gray-800 font-medium">
+            <p className="text-gray-200 font-medium">
               {userData._count?.streams || 0}
             </p>
           </div>
@@ -286,18 +294,18 @@ const ProfilePage = () => {
     if (!userData) return null;
 
     return (
-      <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
+      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">
+          <h3 className="text-xl font-semibold text-white">
             Wallet & Activity
           </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Wallet Balance
             </label>
-            <p className="text-gray-800 font-medium text-lg">
+            <p className="text-gray-200 font-medium text-lg">
               {userData.wallet
                 ? `${userData.wallet.balance} Tokens`
                 : // ? `${userData.wallet.balance} ${userData.wallet.currency}`
@@ -305,10 +313,10 @@ const ProfilePage = () => {
             </p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Payment History
             </label>
-            <p className="text-gray-800 font-medium underline">
+            <p className="text-gray-200 font-medium underline">
               <Link href={`/profile/${userData.id}/payments`}>view all</Link>
             </p>
           </div>
@@ -321,28 +329,26 @@ const ProfilePage = () => {
     if (!userData) return null;
 
     return (
-      <div className="bg-white rounded-lg shadow-sm p-8">
+      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">
-            Account Settings
-          </h3>
-          <button className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg border border-gray-300 hover:border-gray-400 transition-colors">
+          <h3 className="text-xl font-semibold text-white">Account Settings</h3>
+          <button className="flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-lg border border-gray-600 hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors">
             <Edit2 size={16} />
             Edit
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Account ID
             </label>
-            <p className="text-gray-800 font-mono text-sm">{userData.id}</p>
+            <p className="text-gray-200 font-mono text-sm">{userData.id}</p>
           </div>
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">
+            <label className="text-sm text-gray-400 mb-1 block">
               Authentication Method
             </label>
-            <p className="text-gray-800 font-medium">
+            <p className="text-gray-200 font-medium">
               {userData.googleId
                 ? "Google OAuth"
                 : userData.appleId
@@ -356,20 +362,20 @@ const ProfilePage = () => {
   }, [userData]);
 
   return (
-    <div className="">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
       <Navigation />
-      <div className="container mx-auto my-8">
-        <div className="flex justify-start items-center mt-6 mb-3">
-          <Link href={'/'}>
-            <button className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-blue-500 hover:text-blue-600 hover:bg-slate-100 active:bg-slate-200 transition-all cursor-pointer">
+      <div className="container mx-auto py-8">
+        <div className="flex justify-start items-center  mb-3">
+          <Link href={"/"}>
+            <button className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 active:bg-purple-500/20 transition-all cursor-pointer">
               <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
               <span className="text-[17px] font-normal">Back</span>
             </button>
           </Link>
         </div>
         {loading ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <p className="text-gray-500">Loading profile...</p>
+          <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 text-center">
+            <p className="text-gray-400">Loading profile...</p>
           </div>
         ) : userData ? (
           <>
@@ -380,8 +386,8 @@ const ProfilePage = () => {
             {accountSettings}
           </>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <p className="text-gray-500">Failed to load profile.</p>
+          <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 text-center">
+            <p className="text-gray-400">Failed to load profile.</p>
           </div>
         )}
       </div>
