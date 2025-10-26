@@ -1,13 +1,15 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { Mail, Phone, MapPin, Calendar, User, Edit2 } from "lucide-react";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import AvatarUpload from "@/components/ui/avatar-upload";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
 
   const [userData, setUserData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false);
 
   // Memoize the fetch function to prevent recreation on every render
   const fetchProfile = useCallback(async (userId: string) => {
@@ -48,6 +50,23 @@ const ProfilePage = () => {
     }
   }, [userId, fetchProfile]);
 
+  // Handle avatar change
+  const handleAvatarChange = useCallback(
+    (newAvatarUrl: string | null) => {
+      if (userData) {
+        setUserData({
+          ...userData,
+          profile: {
+            ...userData.profile,
+            avatarUrl: newAvatarUrl,
+          },
+        });
+      }
+      setIsEditingAvatar(false);
+    },
+    [userData]
+  );
+
   // Memoize profile sections to prevent unnecessary re-renders
   const profileCard = useMemo(() => {
     if (!userData) return null;
@@ -56,46 +75,91 @@ const ProfilePage = () => {
       <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-yellow-500 flex items-center justify-center text-white text-3xl font-semibold">
-              {userData.profile?.avatarUrl ? (
-                <img
-                  src={userData.profile.avatarUrl}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover"
-                />
-              ) : (
-                `${
-                  userData.profile?.displayName?.[0] ||
-                  userData.email?.[0] ||
-                  "U"
-                }`
-              )}
-            </div>
-            <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-800">
-              {userData.profile?.displayName || userData.email}
-            </h2>
-            <p className="text-gray-600 capitalize">
-              {userData.role?.toLowerCase()}
-            </p>
-            {userData.profile?.isCreator && (
-              <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full mt-1">
-                Content Creator
-              </span>
+            {isEditingAvatar ? (
+              <AvatarUpload
+                currentAvatarUrl={userData.profile?.avatarUrl}
+                displayName={userData.profile?.displayName}
+                email={userData.email}
+                size="xl"
+                onAvatarChange={handleAvatarChange}
+                className="items-center"
+              />
+            ) : (
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-yellow-500 flex items-center justify-center text-white text-3xl font-semibold overflow-hidden">
+                  {userData.profile?.avatarUrl ? (
+                    <img
+                      src={userData.profile.avatarUrl}
+                      alt="Profile"
+                      className="w-24 h-24 rounded-full object-cover"
+                    />
+                  ) : (
+                    `${
+                      userData.profile?.displayName?.[0] ||
+                      userData.email?.[0] ||
+                      "U"
+                    }`
+                  )}
+                </div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
+
+                {/* Edit avatar button */}
+                <button
+                  onClick={() => setIsEditingAvatar(true)}
+                  className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Change avatar"
+                >
+                  <Edit2 className="w-6 h-6 text-white" />
+                </button>
+              </div>
             )}
-            <p className="text-gray-500 text-sm mt-1">
-              Status:{" "}
-              <span className="capitalize">
-                {userData.status?.toLowerCase()}
-              </span>
-            </p>
           </div>
+
+          {!isEditingAvatar && (
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-semibold text-gray-800">
+                  {userData.profile?.displayName || userData.email}
+                </h2>
+                <button
+                  onClick={() => setIsEditingAvatar(true)}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                  title="Edit avatar"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-gray-600 capitalize">
+                {userData.role?.toLowerCase()}
+              </p>
+              {userData.profile?.isCreator && (
+                <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full mt-1">
+                  Content Creator
+                </span>
+              )}
+              <p className="text-gray-500 text-sm mt-1">
+                Status:{" "}
+                <span className="capitalize">
+                  {userData.status?.toLowerCase()}
+                </span>
+              </p>
+            </div>
+          )}
         </div>
+
+        {isEditingAvatar && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => setIsEditingAvatar(false)}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     );
-  }, [userData]);
+  }, [userData, isEditingAvatar, handleAvatarChange]);
 
   const personalInfo = useMemo(() => {
     if (!userData) return null;

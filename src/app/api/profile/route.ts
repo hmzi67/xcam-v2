@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
-import { writeFile } from 'fs/promises';
-import path from 'path';
 
 // GET: Fetch user profile
 export async function GET(req: NextRequest) {
@@ -67,38 +65,58 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PUT: Update user profile (including avatar upload)
+// PUT: Update user profile
 export async function PUT(req: NextRequest) {
   const session = await auth();
   
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   
-  const formData = await req.formData();
-  const updateData: any = {
-    name: formData.get('name'),
-    phone: formData.get('phone'),
-    dateOfBirth: formData.get('dateOfBirth'),
-    country: formData.get('country'),
-    city: formData.get('city'),
-    postalCode: formData.get('postalCode'),
-  };
-  
-  // Handle avatar upload
-  const avatar = formData.get('avatar');
-  if (avatar && typeof avatar === 'object' && 'arrayBuffer' in avatar) {
-    const buffer = Buffer.from(await avatar.arrayBuffer());
-    const fileName = `${session.user.email}-avatar.png`;
-    const filePath = path.join(process.cwd(), 'public', fileName);
-    await writeFile(filePath, buffer);
-    updateData.image = `/${fileName}`;
+  try {
+    const body = await req.json();
+    const { displayName, bio, category, language, isCreator } = body;
+    
+    // Update or create profile
+    const updatedProfile = await prisma.profile.upsert({
+      where: { userId: session.user.id },
+      update: {
+        displayName,
+        bio,
+        category,
+        language,
+        isCreator,
+        updatedAt: new Date()
+      },
+      create: {
+        userId: session.user.id,
+        displayName,
+        bio,
+        category,
+        language,
+        isCreator: isCreator || false
+      }
+    });
+    
+    // Return updated user data with profile
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        profile: true,
+        wallet: true,
+        _count: {
+          select: {
+            streams: true,
+            follows: true,
+            followers: true,
+          }
+        }
+      }
+    });
+    
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-  
-  const user = await prisma.user.update({
-    where: { email: session.user.email },
-    data: updateData,
-  });
-  
-  return NextResponse.json(user);
 }
