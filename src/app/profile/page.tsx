@@ -13,7 +13,15 @@ import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
 import Link from "next/link";
 import { Navigation } from "@/components/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -107,9 +115,10 @@ const ProfilePage = () => {
                       className="w-24 h-24 rounded-full object-cover"
                     />
                   ) : (
-                    `${userData.profile?.displayName?.[0] ||
-                    userData.email?.[0] ||
-                    "U"
+                    `${
+                      userData.profile?.displayName?.[0] ||
+                      userData.email?.[0] ||
+                      "U"
                     }`
                   )}
                 </div>
@@ -146,13 +155,15 @@ const ProfilePage = () => {
                     <Edit2 className="w-4 h-4" />
                   </button>
                 </div>
-                <div>
-                  <Link href={""}>
-                    <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-amber-900 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400 hover:from-amber-300 hover:via-amber-400 hover:to-amber-500 active:from-amber-400 active:to-amber-500 shadow-md border border-amber-400/50 transition-all">
-                      <span className="text-[13px] font-medium">Upgrade to Pro</span>
-                    </button>
-                  </Link>
-                </div>
+                {session?.user && (session.user as any).role !== "CREATOR" && (
+                  <div>
+                    <Link href={"/upgrade"}>
+                      <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-amber-900 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400 hover:from-amber-300 hover:via-amber-400 hover:to-amber-500 active:from-amber-400 active:to-amber-500 shadow-md border border-amber-400/50 transition-all">
+                        <span className="font-medium">Upgrade to Creator</span>
+                      </button>
+                    </Link>
+                  </div>
+                )}
               </div>
               {userData.profile?.bio && (
                 <div className="py-2 italic">
@@ -229,7 +240,9 @@ const ProfilePage = () => {
     return (
       <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-white">Personal Information</h3>
+          <h3 className="text-xl font-semibold text-white">
+            Personal Information
+          </h3>
           <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
             <DialogTrigger asChild>
               <button
@@ -242,30 +255,40 @@ const ProfilePage = () => {
             </DialogTrigger>
             <DialogContent className="bg-gray-900 border border-purple-700 rounded-xl shadow-xl">
               <DialogHeader>
-                <DialogTitle className="text-white">Edit Personal Information</DialogTitle>
+                <DialogTitle className="text-white">
+                  Edit Personal Information
+                </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 mt-2">
                 <div>
-                  <label className="text-sm text-gray-400 mb-1 block">Display Name</label>
+                  <label className="text-sm text-gray-400 mb-1 block">
+                    Display Name
+                  </label>
                   <Input
                     value={editDisplayName}
-                    onChange={e => setEditDisplayName(e.target.value)}
+                    onChange={(e) => setEditDisplayName(e.target.value)}
                     className="bg-gray-800 border-gray-700 text-white"
                     maxLength={40}
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-gray-400 mb-1 block">Bio</label>
+                  <label className="text-sm text-gray-400 mb-1 block">
+                    Bio
+                  </label>
                   <textarea
                     value={editBio}
-                    onChange={e => setEditBio(e.target.value)}
+                    onChange={(e) => setEditBio(e.target.value)}
                     className="bg-gray-800 border-gray-700 text-white rounded-md px-3 py-2 w-full min-h-[80px]"
                     maxLength={200}
                   />
-                  <p className="text-xs text-gray-500 mt-1">{editBio.length}/200</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {editBio.length}/200
+                  </p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-400 mb-1 block">Email</label>
+                  <label className="text-sm text-gray-400 mb-1 block">
+                    Email
+                  </label>
                   <Input
                     value={editEmail}
                     disabled
@@ -274,7 +297,9 @@ const ProfilePage = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-gray-400 mb-1 block">Role</label>
+                  <label className="text-sm text-gray-400 mb-1 block">
+                    Role
+                  </label>
                   <Input
                     value={userData?.role?.toLowerCase() || ""}
                     disabled
@@ -282,7 +307,9 @@ const ProfilePage = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-gray-400 mb-1 block">Status</label>
+                  <label className="text-sm text-gray-400 mb-1 block">
+                    Status
+                  </label>
                   <Input
                     value={userData?.status?.toLowerCase() || ""}
                     disabled
@@ -292,7 +319,12 @@ const ProfilePage = () => {
               </div>
               <DialogFooter className="mt-6 flex gap-2 justify-end">
                 <DialogClose asChild>
-                  <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">Cancel</Button>
+                  <Button
+                    variant="outline"
+                    className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  >
+                    Cancel
+                  </Button>
                 </DialogClose>
                 <Button
                   onClick={handleEditSave}
@@ -307,36 +339,67 @@ const ProfilePage = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Display Name</label>
-            <p className="text-gray-200 font-medium">{userData.profile?.displayName || "Not set"}</p>
+            <label className="text-sm text-gray-400 mb-1 block">
+              Display Name
+            </label>
+            <p className="text-gray-200 font-medium">
+              {userData.profile?.displayName || "Not set"}
+            </p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Email Address</label>
+            <label className="text-sm text-gray-400 mb-1 block">
+              Email Address
+            </label>
             <p className="text-gray-200 font-medium">{userData.email}</p>
             {userData.emailVerified && (
               <span className="text-green-600 text-xs">✓ Verified</span>
             )}
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">User Role</label>
-            <p className="text-gray-200 font-medium capitalize">{userData.role?.toLowerCase()}</p>
+            <label className="text-sm text-gray-400 mb-1 block">
+              User Role
+            </label>
+            <p className="text-gray-200 font-medium capitalize">
+              {userData.role?.toLowerCase()}
+            </p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Account Status</label>
-            <p className="text-gray-200 font-medium capitalize">{userData.status?.toLowerCase()}</p>
+            <label className="text-sm text-gray-400 mb-1 block">
+              Account Status
+            </label>
+            <p className="text-gray-200 font-medium capitalize">
+              {userData.status?.toLowerCase()}
+            </p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Member Since</label>
-            <p className="text-gray-200 font-medium">{new Date(userData.createdAt).toLocaleDateString()}</p>
+            <label className="text-sm text-gray-400 mb-1 block">
+              Member Since
+            </label>
+            <p className="text-gray-200 font-medium">
+              {new Date(userData.createdAt).toLocaleDateString()}
+            </p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Last Login</label>
-            <p className="text-gray-200 font-medium">{userData.lastLoginAt ? new Date(userData.lastLoginAt).toLocaleDateString() : "Never"}</p>
+            <label className="text-sm text-gray-400 mb-1 block">
+              Last Login
+            </label>
+            <p className="text-gray-200 font-medium">
+              {userData.lastLoginAt
+                ? new Date(userData.lastLoginAt).toLocaleDateString()
+                : "Never"}
+            </p>
           </div>
         </div>
       </div>
     );
-  }, [userData, editDialogOpen, editDisplayName, editBio, editEmail, editLoading]);
+  }, [
+    userData,
+    editDialogOpen,
+    editDisplayName,
+    editBio,
+    editEmail,
+    editLoading,
+  ]);
 
   const creatorInfo = useMemo(() => {
     if (!userData?.profile?.isCreator) return null;
@@ -397,7 +460,7 @@ const ProfilePage = () => {
               {userData.wallet
                 ? `${userData.wallet.balance} Tokens`
                 : // ? `${userData.wallet.balance} ${userData.wallet.currency}`
-                "No wallet"}
+                  "No wallet"}
             </p>
           </div>
           <div>
@@ -448,8 +511,8 @@ const ProfilePage = () => {
               {userData.googleId
                 ? "Google OAuth"
                 : userData.appleId
-                  ? "Apple OAuth"
-                  : "Email & Password"}
+                ? "Apple OAuth"
+                : "Email & Password"}
             </p>
           </div>
         </div>
