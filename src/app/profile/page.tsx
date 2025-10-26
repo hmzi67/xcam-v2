@@ -127,21 +127,30 @@ const ProfilePage = () => {
 
           {!isEditingAvatar && (
             <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-semibold text-white">
-                  {userData.profile?.displayName || userData.email}
-                </h2>
-                —
-                <p className="text-gray-400 capitalize">
-                  {userData.role?.toLowerCase()}
-                </p>
-                <button
-                  onClick={() => setIsEditingAvatar(true)}
-                  className="text-gray-400 hover:text-purple-300 transition-colors"
-                  title="Edit avatar"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
+              <div className="flex justify-between items-center gap-3">
+                <div className="flex justify-center items-center gap-3">
+                  <h2 className="text-2xl font-semibold text-white">
+                    {userData.profile?.displayName || userData.email}
+                  </h2>
+                  —
+                  <p className="text-gray-400 capitalize">
+                    {userData.role?.toLowerCase()}
+                  </p>
+                  <button
+                    onClick={() => setIsEditingAvatar(true)}
+                    className="text-gray-400 hover:text-purple-300 transition-colors"
+                    title="Edit avatar"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <div>
+                  <Link href={""}>
+                    <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-amber-900 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400 hover:from-amber-300 hover:via-amber-400 hover:to-amber-500 active:from-amber-400 active:to-amber-500 shadow-md border border-amber-400/50 transition-all">
+                      <span className="text-[13px] font-medium">Upgrade to Pro</span>
+                    </button>
+                  </Link>
+                </div>
               </div>
               {userData.profile?.bio && (
                 <div className="py-2 italic">
@@ -314,6 +323,14 @@ const ProfilePage = () => {
           </div>
           <div>
             <label className="text-sm text-gray-400 mb-1 block">
+              Want More Tokens
+            </label>
+            <p className="text-gray-200 font-medium underline">
+              <Link href={`/pricing`}>buy</Link>
+            </p>
+          </div>
+          <div>
+            <label className="text-sm text-gray-400 mb-1 block">
               Payment History
             </label>
             <p className="text-gray-200 font-medium underline">
@@ -365,7 +382,7 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
       <Navigation />
       <div className="container mx-auto py-8">
-        <div className="flex justify-start items-center  mb-3">
+        <div className="flex justify-start items-center mb-3">
           <Link href={"/"}>
             <button className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 active:bg-purple-500/20 transition-all cursor-pointer">
               <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
