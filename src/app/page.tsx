@@ -70,8 +70,8 @@ export default function Home() {
   const categories = [
     { name: "All Girls Cams", icon: Heart, count: 0, active: true },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
-    { name: "New Models", icon: Star, count: 0 },
-    { name: "GOLD Shows", icon: Star, count: 0 },
+    // { name: "New Models", icon: Star, count: 0 },
+    // { name: "GOLD Shows", icon: Star, count: 0 },
   ];
 
   const categoryFilters = [
