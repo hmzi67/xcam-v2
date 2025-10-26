@@ -13,6 +13,9 @@ import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
 import Link from "next/link";
 import { Navigation } from "@/components/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
@@ -104,10 +107,9 @@ const ProfilePage = () => {
                       className="w-24 h-24 rounded-full object-cover"
                     />
                   ) : (
-                    `${
-                      userData.profile?.displayName?.[0] ||
-                      userData.email?.[0] ||
-                      "U"
+                    `${userData.profile?.displayName?.[0] ||
+                    userData.email?.[0] ||
+                    "U"
                     }`
                   )}
                 </div>
@@ -188,76 +190,153 @@ const ProfilePage = () => {
     );
   }, [userData, isEditingAvatar, handleAvatarChange]);
 
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
+
+  const handleEditOpen = () => {
+    setEditDisplayName(userData?.profile?.displayName || "");
+    setEditBio(userData?.profile?.bio || "");
+    setEditEmail(userData?.email || "");
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSave = async () => {
+    setEditLoading(true);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: editDisplayName,
+          bio: editBio,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to update profile");
+      const updated = await res.json();
+      setUserData(updated);
+      setEditDialogOpen(false);
+    } catch (err) {
+      alert("Failed to update profile");
+    }
+    setEditLoading(false);
+  };
+
   const personalInfo = useMemo(() => {
     if (!userData) return null;
-
     return (
       <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-white">
-            Personal Information
-          </h3>
-          <button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30">
-            <Edit2 size={16} />
-            Edit
-          </button>
+          <h3 className="text-xl font-semibold text-white">Personal Information</h3>
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogTrigger asChild>
+              <button
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30"
+                onClick={handleEditOpen}
+              >
+                <Edit2 size={16} />
+                Edit
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-gray-900 border border-purple-700 rounded-xl shadow-xl">
+              <DialogHeader>
+                <DialogTitle className="text-white">Edit Personal Information</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Display Name</label>
+                  <Input
+                    value={editDisplayName}
+                    onChange={e => setEditDisplayName(e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    maxLength={40}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Bio</label>
+                  <textarea
+                    value={editBio}
+                    onChange={e => setEditBio(e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white rounded-md px-3 py-2 w-full min-h-[80px]"
+                    maxLength={200}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">{editBio.length}/200</p>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Email</label>
+                  <Input
+                    value={editEmail}
+                    disabled
+                    className="bg-gray-800 border-gray-700 text-gray-400 cursor-not-allowed"
+                    maxLength={60}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Role</label>
+                  <Input
+                    value={userData?.role?.toLowerCase() || ""}
+                    disabled
+                    className="bg-gray-800 border-gray-700 text-gray-400 cursor-not-allowed capitalize"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Status</label>
+                  <Input
+                    value={userData?.status?.toLowerCase() || ""}
+                    disabled
+                    className="bg-gray-800 border-gray-700 text-gray-400 cursor-not-allowed capitalize"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mt-6 flex gap-2 justify-end">
+                <DialogClose asChild>
+                  <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">Cancel</Button>
+                </DialogClose>
+                <Button
+                  onClick={handleEditSave}
+                  disabled={editLoading}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  {editLoading ? "Saving..." : "Save Changes"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">
-              Display Name
-            </label>
-            <p className="text-gray-200 font-medium">
-              {userData.profile?.displayName || "Not set"}
-            </p>
+            <label className="text-sm text-gray-400 mb-1 block">Display Name</label>
+            <p className="text-gray-200 font-medium">{userData.profile?.displayName || "Not set"}</p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">
-              Email Address
-            </label>
+            <label className="text-sm text-gray-400 mb-1 block">Email Address</label>
             <p className="text-gray-200 font-medium">{userData.email}</p>
             {userData.emailVerified && (
               <span className="text-green-600 text-xs">✓ Verified</span>
             )}
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">
-              User Role
-            </label>
-            <p className="text-gray-200 font-medium capitalize">
-              {userData.role?.toLowerCase()}
-            </p>
+            <label className="text-sm text-gray-400 mb-1 block">User Role</label>
+            <p className="text-gray-200 font-medium capitalize">{userData.role?.toLowerCase()}</p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">
-              Account Status
-            </label>
-            <p className="text-gray-200 font-medium capitalize">
-              {userData.status?.toLowerCase()}
-            </p>
+            <label className="text-sm text-gray-400 mb-1 block">Account Status</label>
+            <p className="text-gray-200 font-medium capitalize">{userData.status?.toLowerCase()}</p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">
-              Member Since
-            </label>
-            <p className="text-gray-200 font-medium">
-              {new Date(userData.createdAt).toLocaleDateString()}
-            </p>
+            <label className="text-sm text-gray-400 mb-1 block">Member Since</label>
+            <p className="text-gray-200 font-medium">{new Date(userData.createdAt).toLocaleDateString()}</p>
           </div>
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">
-              Last Login
-            </label>
-            <p className="text-gray-200 font-medium">
-              {userData.lastLoginAt
-                ? new Date(userData.lastLoginAt).toLocaleDateString()
-                : "Never"}
-            </p>
+            <label className="text-sm text-gray-400 mb-1 block">Last Login</label>
+            <p className="text-gray-200 font-medium">{userData.lastLoginAt ? new Date(userData.lastLoginAt).toLocaleDateString() : "Never"}</p>
           </div>
         </div>
       </div>
     );
-  }, [userData]);
+  }, [userData, editDialogOpen, editDisplayName, editBio, editEmail, editLoading]);
 
   const creatorInfo = useMemo(() => {
     if (!userData?.profile?.isCreator) return null;
@@ -318,7 +397,7 @@ const ProfilePage = () => {
               {userData.wallet
                 ? `${userData.wallet.balance} Tokens`
                 : // ? `${userData.wallet.balance} ${userData.wallet.currency}`
-                  "No wallet"}
+                "No wallet"}
             </p>
           </div>
           <div>
@@ -369,8 +448,8 @@ const ProfilePage = () => {
               {userData.googleId
                 ? "Google OAuth"
                 : userData.appleId
-                ? "Apple OAuth"
-                : "Email & Password"}
+                  ? "Apple OAuth"
+                  : "Email & Password"}
             </p>
           </div>
         </div>
