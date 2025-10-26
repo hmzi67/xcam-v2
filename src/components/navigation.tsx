@@ -102,14 +102,7 @@ export function Navigation() {
                                             <span>Streaming</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    {((session.user as any).role === "CREATOR" || (session.user as any).role === "ADMIN") && (
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/earnings" className="cursor-pointer">
-                                                <DollarSign className="w-4 h-4 mr-2" />
-                                                <span>Earnings</span>
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    )}
+                                   
                                     {((session.user as import("../../lib/auth-utils").SessionUser).role === "CREATOR" ||
                                         (session.user as import("../../lib/auth-utils").SessionUser).role === "ADMIN") && (
                                             <DropdownMenuItem asChild>
