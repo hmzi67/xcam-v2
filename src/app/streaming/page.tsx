@@ -361,14 +361,16 @@ export default function StreamingPage() {
                 <Users className="w-4 h-4 mr-2" />
                 Browse Streams
               </Button>
-              <Button
-                onClick={() => setMode('create')}
-                variant={mode === 'create' ? 'default' : 'outline'}
-                className={mode === 'create' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"}
-              >
-                <Plus className="w-4 h-4" />
-                Go Live
-              </Button>
+              {(session.user && ((session.user as any).role === 'CREATOR' || (session.user as any).role === 'ADMIN')) && (
+                <Button
+                  onClick={() => setMode('create')}
+                  variant={mode === 'create' ? 'default' : 'outline'}
+                  className={mode === 'create' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"}
+                >
+                  <Plus className="w-4 h-4" />
+                  Go Live
+                </Button>
+              )}
             </div>
           </div>
 
