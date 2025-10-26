@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import { Mail, Phone, MapPin, Calendar, User, Edit2 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
+import Link from "next/link";
 
 const ProfilePage = () => {
   const { data: session } = useSession();
@@ -304,18 +305,10 @@ const ProfilePage = () => {
           </div>
           <div>
             <label className="text-sm text-gray-500 mb-1 block">
-              Following
+              Payment History
             </label>
-            <p className="text-gray-800 font-medium">
-              {userData._count?.follows || 0} creators
-            </p>
-          </div>
-          <div>
-            <label className="text-sm text-gray-500 mb-1 block">
-              Followers
-            </label>
-            <p className="text-gray-800 font-medium">
-              {userData._count?.followers || 0} users
+            <p className="text-gray-800 font-medium underline">
+              <Link href={`/profile/${userData.id}/payments`}>view all</Link>
             </p>
           </div>
         </div>
