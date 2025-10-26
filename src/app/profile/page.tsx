@@ -116,11 +116,15 @@ const ProfilePage = () => {
           </div>
 
           {!isEditingAvatar && (
-            <div>
+            <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h2 className="text-2xl font-semibold text-gray-800">
                   {userData.profile?.displayName || userData.email}
                 </h2>
+                —
+                <p className="text-gray-600 capitalize">
+                  {userData.role?.toLowerCase()}
+                </p>
                 <button
                   onClick={() => setIsEditingAvatar(true)}
                   className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -129,15 +133,19 @@ const ProfilePage = () => {
                   <Edit2 className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-gray-600 capitalize">
-                {userData.role?.toLowerCase()}
-              </p>
+              {userData.profile?.bio && (
+                <div className="py-2 italic">
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    "{userData.profile.bio}"
+                  </p>
+                </div>
+              )}
               {userData.profile?.isCreator && (
                 <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full mt-1">
                   Content Creator
                 </span>
               )}
-              <p className="text-gray-500 text-sm mt-1">
+              <p className="text-gray-500 text-sm">
                 Status:{" "}
                 <span className="capitalize">
                   {userData.status?.toLowerCase()}
@@ -228,12 +236,6 @@ const ProfilePage = () => {
             </p>
           </div>
         </div>
-        {userData.profile?.bio && (
-          <div className="mt-6">
-            <label className="text-sm text-gray-500 mb-1 block">Bio</label>
-            <p className="text-gray-800">{userData.profile.bio}</p>
-          </div>
-        )}
       </div>
     );
   }, [userData]);
@@ -295,8 +297,9 @@ const ProfilePage = () => {
             </label>
             <p className="text-gray-800 font-medium text-lg">
               {userData.wallet
-                ? `${userData.wallet.balance} ${userData.wallet.currency}`
-                : "No wallet"}
+                ? `${userData.wallet.balance} Tokens`
+                : // ? `${userData.wallet.balance} ${userData.wallet.currency}`
+                  "No wallet"}
             </p>
           </div>
           <div>
