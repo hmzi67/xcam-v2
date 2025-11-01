@@ -34,7 +34,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Navigation } from "@/components/navigation";
 import { useState } from "react";
 
 interface FormData {
@@ -234,7 +233,7 @@ export default function UpgradePage() {
         if (
           formData.digitalSignature &&
           formData.digitalSignature.toLowerCase() !==
-            formData.legalName.toLowerCase()
+          formData.legalName.toLowerCase()
         ) {
           newErrors.digitalSignature =
             "Signature must match your legal name exactly";
@@ -272,7 +271,6 @@ export default function UpgradePage() {
 
   return (
     <>
-      <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white py-8 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -316,13 +314,12 @@ export default function UpgradePage() {
                   <div key={step.id} className="flex items-center flex-1">
                     <div className="flex flex-col items-center flex-1">
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                          isCompleted
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isCompleted
                             ? "bg-green-500"
                             : isActive
-                            ? "bg-purple-600"
-                            : "bg-gray-700"
-                        } text-white`}
+                              ? "bg-purple-600"
+                              : "bg-gray-700"
+                          } text-white`}
                       >
                         {isCompleted ? (
                           <Check size={20} />
@@ -331,20 +328,18 @@ export default function UpgradePage() {
                         )}
                       </div>
                       <p
-                        className={`text-xs mt-2 text-center hidden sm:block ${
-                          isActive
+                        className={`text-xs mt-2 text-center hidden sm:block ${isActive
                             ? "font-semibold text-purple-400"
                             : "text-gray-500"
-                        }`}
+                          }`}
                       >
                         {step.title}
                       </p>
                     </div>
                     {index < steps.length - 1 && (
                       <div
-                        className={`h-0.5 flex-1 ${
-                          isCompleted ? "bg-green-500" : "bg-gray-700"
-                        }`}
+                        className={`h-0.5 flex-1 ${isCompleted ? "bg-green-500" : "bg-gray-700"
+                          }`}
                       />
                     )}
                   </div>
@@ -569,11 +564,10 @@ export default function UpgradePage() {
                     <div className="space-y-2">
                       <Label htmlFor="idFrontImage">ID Front Photo *</Label>
                       <div
-                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                          errors.idFrontImage
+                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${errors.idFrontImage
                             ? "border-red-500/50 bg-red-500/10"
                             : "border-gray-600 hover:border-purple-500"
-                        }`}
+                          }`}
                       >
                         <Upload
                           className="mx-auto text-gray-500 mb-2"
@@ -609,11 +603,10 @@ export default function UpgradePage() {
                     <div className="space-y-2">
                       <Label htmlFor="idBackImage">ID Back Photo *</Label>
                       <div
-                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                          errors.idBackImage
+                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${errors.idBackImage
                             ? "border-red-500/50 bg-red-500/10"
                             : "border-gray-600 hover:border-purple-500"
-                        }`}
+                          }`}
                       >
                         <Upload
                           className="mx-auto text-gray-500 mb-2"
@@ -649,11 +642,10 @@ export default function UpgradePage() {
                     <div className="space-y-2">
                       <Label htmlFor="selfieImage">Selfie with ID *</Label>
                       <div
-                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                          errors.selfieImage
+                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${errors.selfieImage
                             ? "border-red-500/50 bg-red-500/10"
                             : "border-gray-600 hover:border-purple-500"
-                        }`}
+                          }`}
                       >
                         <Camera
                           className="mx-auto text-gray-500 mb-2"
@@ -1147,9 +1139,8 @@ export default function UpgradePage() {
                       value={formData.digitalSignature}
                       onChange={handleInputChange}
                       placeholder="Type your full legal name"
-                      className={`font-serif text-xl ${
-                        errors.digitalSignature ? "border-red-500" : ""
-                      }`}
+                      className={`font-serif text-xl ${errors.digitalSignature ? "border-red-500" : ""
+                        }`}
                     />
                     {errors.digitalSignature && (
                       <p className="text-sm text-red-500">
@@ -1221,7 +1212,7 @@ export default function UpgradePage() {
 
           {/* Footer Links */}
           <div className="mt-8 space-y-4">
-            
+
             <div className="flex justify-center items-center gap-6 pt-4">
               <a
                 href="https://www.rtalabel.org/"

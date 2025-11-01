@@ -12,7 +12,6 @@ import {
 import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
 import Link from "next/link";
-import { Navigation } from "@/components/navigation";
 import {
   Dialog,
   DialogContent,
@@ -115,10 +114,9 @@ const ProfilePage = () => {
                       className="w-24 h-24 rounded-full object-cover"
                     />
                   ) : (
-                    `${
-                      userData.profile?.displayName?.[0] ||
-                      userData.email?.[0] ||
-                      "U"
+                    `${userData.profile?.displayName?.[0] ||
+                    userData.email?.[0] ||
+                    "U"
                     }`
                   )}
                 </div>
@@ -460,7 +458,7 @@ const ProfilePage = () => {
               {userData.wallet
                 ? `${userData.wallet.balance} Tokens`
                 : // ? `${userData.wallet.balance} ${userData.wallet.currency}`
-                  "No wallet"}
+                "No wallet"}
             </p>
           </div>
           <div>
@@ -511,8 +509,8 @@ const ProfilePage = () => {
               {userData.googleId
                 ? "Google OAuth"
                 : userData.appleId
-                ? "Apple OAuth"
-                : "Email & Password"}
+                  ? "Apple OAuth"
+                  : "Email & Password"}
             </p>
           </div>
         </div>
@@ -522,7 +520,6 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
-      <Navigation />
       <div className="container mx-auto py-8">
         <div className="flex justify-start items-center mb-3">
           <Link href={"/"}>

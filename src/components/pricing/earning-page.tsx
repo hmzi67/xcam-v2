@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { Navigation } from "@/components/navigation";
+import { Navigation } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -111,7 +111,7 @@ export default function EarningsPage() {
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <Navigation />
+
 
             <div className="container mx-auto px-4 py-8">
                 {/* Hero Section */}

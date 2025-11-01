@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { AgeVerificationDialog } from "@/components/age-verification-dialog";
+import { Header } from "@/components/header";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <AgeVerificationDialog />
+          <Header />
           {children}
         </AuthProvider>
       </body>

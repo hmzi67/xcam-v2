@@ -18,8 +18,6 @@ import {
     LogOut,
     User,
     Hand,
-    Menu,
-    X,
 } from "lucide-react"
 
 import React, { useCallback, useMemo, useState } from "react"
@@ -29,7 +27,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 export function Header() {
     const { data: session, status } = useSession()
     const pathname = usePathname()
-    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
 
     const [userData, setUserData] = useState<any>(null)
     const [loading, setLoading] = useState(false)
@@ -70,12 +67,10 @@ export function Header() {
     // Show skeleton only while auth is resolving or while profile is fetching for an authenticated user
     if (status === "loading" || (session?.user && loading)) {
         return (
-            <header className="bg-gray-900/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-800/50">
-                <div className="w-full">
-                    <div className="flex h-16 items-center">
-                        <div className="w-64 px-6">
-                            <div className="animate-pulse h-6 w-24 bg-gray-700 rounded" />
-                        </div>
+            <header className="bg-gray-900 shadow-sm sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-16 items-center">
+                        <div className="animate-pulse h-6 w-24 bg-gray-700 rounded" />
                     </div>
                 </div>
             </header>
@@ -83,23 +78,23 @@ export function Header() {
     }
 
     return (
-        <header className="bg-gray-900/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-800/50">
-            <div className="w-full">
-                <div className="flex items-center h-16">
-                    <div className="flex items-center flex-shrink-0 px-4 md:w-64 md:px-6">
+        <header className="bg-gray-900 shadow-sm sticky top-0 z-50">
+            <div className="container mx-auto px-4 max-w-7xl">
+                <div className="flex justify-between h-16">
+                    <div className="flex items-center space-x-8">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/30">
+                            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
                                 <Video className="w-5 h-5 text-white" />
                             </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+                            <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-transparent">
                                 XCAM
                             </span>
                         </Link>
                     </div>
 
-                    {/* Center nav pill - Desktop */}
+                    {/* Center nav pill */}
                     <nav className="hidden md:flex flex-1 items-center justify-center">
-                        <div className="relative rounded-full border border-gray-700/50 bg-gray-800/50 backdrop-blur-sm px-2 py-1 shadow-md">
+                        <div className="relative rounded-full border border-gray-700 bg-gray-800/70 backdrop-blur px-2 py-1 shadow-sm">
                             <ul className="flex items-center">
                                 {[
                                     { label: "Home", href: "/" },
@@ -126,22 +121,10 @@ export function Header() {
                         </div>
                     </nav>
 
-                    {/* Mobile menu button */}
-                    <div className="flex md:hidden flex-1 justify-end">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="text-gray-300 hover:text-white hover:bg-gray-800/60"
-                        >
-                            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                        </Button>
-                    </div>
-
-                    <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0 justify-end px-4 md:w-64 md:px-6">
+                    <div className="flex items-center space-x-3">
                         {(session?.user as any)?.role === "ADMIN" && (
                             <Link href="/admin" className="hidden md:block">
-                                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400 hover:bg-gray-800/60">
+                                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
                                     <Shield className="w-4 h-4 mr-2" />
                                     Admin
                                 </Button>
@@ -194,14 +177,14 @@ export function Header() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <div className="flex items-center space-x-2 md:space-x-3">
-                                <Link href="/login" className="hidden sm:block">
+                            <div className="flex items-center space-x-3">
+                                <Link href="/login">
                                     <Button variant="ghost" size="sm" className="text-gray-300 hover:text-purple-400">
                                         Sign In
                                     </Button>
                                 </Link>
                                 <Link href="/register">
-                                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm px-3 sm:px-4">
+                                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
                                         Sign Up
                                     </Button>
                                 </Link>
@@ -209,35 +192,6 @@ export function Header() {
                         )}
                     </div>
                 </div>
-
-                {/* Mobile Menu Dropdown */}
-                {mobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-800/50 bg-gray-900/95 backdrop-blur-md">
-                        <nav className="px-4 py-3 space-y-1">
-                            {[
-                                { label: "Home", href: "/" },
-                                { label: "Pricing", href: "/pricing" },
-                                { label: "About", href: "/about" },
-                                { label: "Streaming", href: "/streaming" },
-                            ].map((item) => {
-                                const active = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className={`block px-4 py-3 rounded-lg text-sm transition-colors ${active
-                                                ? "bg-purple-600 text-white"
-                                                : "text-gray-300 hover:text-white hover:bg-gray-800/60"
-                                            }`}
-                                    >
-                                        {item.label}
-                                    </Link>
-                                )
-                            })}
-                        </nav>
-                    </div>
-                )}
             </div>
         </header>
     )

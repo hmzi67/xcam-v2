@@ -1,6 +1,6 @@
 import { auth } from "../../../lib/auth"
 import { redirect } from "next/navigation"
-import { Navigation } from "@/components/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function DashboardPage() {
     const session = await auth()
@@ -11,7 +11,6 @@ export default async function DashboardPage() {
 
     return (
         <div className="min-h-screen">
-            <Navigation />
             <div className="container mx-auto p-6">
                 <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
                 <div className="bg-white shadow rounded-lg p-6">

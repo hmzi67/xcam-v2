@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Navigation } from "@/components/navigation";
 import { StreamCard } from "@/components/stream";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -168,12 +167,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <Navigation />
-
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
       <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 border-r border-gray-700 p-4 pt-20 overflow-y-auto scrollbar-hide">
+        {/* Sidebar (offset below sticky header) - Hidden on mobile */}
+        <div className="hidden lg:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-700/50 p-4 overflow-y-auto scrollbar-hide z-40 shadow-xl">
           {/* Main Categories */}
           <div className="mb-6">
             {categories.map((category) => {
@@ -193,9 +190,9 @@ export default function Home() {
                 <button
                   key={category.name}
                   onClick={() => handleCategoryClick(category.name)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-colors neon-hover ${selectedCategory === category.name
-                    ? 'bg-purple-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-700'
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-all neon-hover ${selectedCategory === category.name
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                    : 'text-gray-300 hover:bg-gray-800/80'
                     }`}
                 >
                   <IconComponent
@@ -228,9 +225,9 @@ export default function Home() {
                 <button
                   key={filter.name}
                   onClick={() => setSelectedCategory(filter.name)}
-                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-colors neon-hover ${selectedCategory === filter.name
-                    ? 'bg-purple-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-700'
+                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all neon-hover ${selectedCategory === filter.name
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
+                    : 'text-gray-300 hover:bg-gray-800/80'
                     }`}
                 >
                   <span className="flex items-center gap-2">
@@ -248,20 +245,20 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col ml-64">
+        {/* Main Content - Full width on mobile, offset on desktop */}
+        <div className="flex-1 flex flex-col lg:ml-64">
           {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
           {selectedCategory !== "Private Messages" && (
             <>
-              <div className="bg-gray-800 border-b border-gray-700 p-4">
-                <div className="flex flex-wrap items-center gap-4">
+              <div className="bg-gray-900/70 backdrop-blur-sm border-b border-gray-700/50 p-3 md:p-4">
+                <div className="flex flex-wrap items-center gap-2 md:gap-4">
                   {/* Regions Filter */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-sm md:text-base">
                     <MapPin className="w-4 h-4 text-purple-400" />
                     <select
                       value={selectedRegion}
                       onChange={(e) => setSelectedRegion(e.target.value)}
-                      className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"
                     >
                       {regions.map((region) => (
                         <option key={region} value={region}>
@@ -272,12 +269,12 @@ export default function Home() {
                   </div>
 
                   {/* Age Filter */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-sm md:text-base">
                     <Calendar className="w-4 h-4 text-purple-400" />
                     <select
                       value={selectedAge}
                       onChange={(e) => setSelectedAge(e.target.value)}
-                      className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"
                     >
                       {ages.map((age) => (
                         <option key={age} value={age}>
@@ -288,7 +285,7 @@ export default function Home() {
                   </div>
 
                   {/* Ethnicity Filter */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-sm md:text-base">
                     <Users className="w-4 h-4 text-purple-400" />
                     <select
                       value={selectedEthnicity}
@@ -307,29 +304,29 @@ export default function Home() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
+                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300 hidden md:flex"
                   >
                     <Star className="w-4 h-4" />
-                    Features
+                    <span className="hidden lg:inline ml-1">Features</span>
                   </Button>
 
                   {/* Fetishes Filter */}
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
+                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300 hidden md:flex"
                   >
                     <Heart className="w-4 h-4" />
-                    Fetishes
+                    <span className="hidden lg:inline ml-1">Fetishes</span>
                   </Button>
 
                   {/* Language Filter */}
-                  <div className="flex items-center gap-2">
+                  <div className="hidden md:flex items-center gap-2 text-sm md:text-base">
                     <Languages className="w-4 h-4 text-purple-400" />
                     <select
                       value={selectedLanguage}
                       onChange={(e) => setSelectedLanguage(e.target.value)}
-                      className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"
                     >
                       {languages.map((language) => (
                         <option key={language} value={language}>
@@ -368,15 +365,15 @@ export default function Home() {
                 </div>
               </div>
               {/* Search Bar */}
-              <div className="bg-gray-800 border-b border-gray-700 p-4">
-                <div className="relative max-w-md">
+              <div className="bg-gray-900/70 backdrop-blur-sm border-b border-gray-700/50 p-3 md:p-4">
+                <div className="relative max-w-full md:max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type="text"
                     placeholder="Search models, categories..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-gray-700 border-gray-600 focus:border-purple-500 text-white"
+                    className="pl-10 bg-gray-800/80 border-gray-600 focus:border-purple-500 text-white placeholder:text-gray-400 text-sm md:text-base"
                   />
                 </div>
               </div>
@@ -384,12 +381,12 @@ export default function Home() {
           )}
 
           {/* Content Area */}
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-3 md:p-4">
             {selectedCategory === "Private Messages" ? (
               <PrivateChatContainer streamId="homepage" token={null} />
             ) : loading && streams.length === 0 ? (
-              <div className={`grid gap-4 ${viewMode === 'grid'
-                ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+              <div className={`grid gap-3 md:gap-4 ${viewMode === 'grid'
+                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
                 : 'grid-cols-1'
                 }`}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
@@ -405,8 +402,8 @@ export default function Home() {
                 ))}
               </div>
             ) : filteredStreams.length > 0 ? (
-              <div className={`grid gap-4 ${viewMode === 'grid'
-                ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+              <div className={`grid gap-3 md:gap-4 ${viewMode === 'grid'
+                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
                 : 'grid-cols-1'
                 }`}>
                 {filteredStreams.map((stream) => (

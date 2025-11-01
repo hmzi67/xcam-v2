@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { Loader2, Video, Users, Plus, Upload, X, Tag, FolderOpen } from 'lucide-react';
 import { TabbedChatContainer } from '@/components/chat';
-import { Navigation } from "@/components/navigation";
 
 interface Stream {
   id: string;
@@ -340,7 +339,7 @@ export default function StreamingPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Navigation />
+
 
       <main className="container mx-auto px-4 py-8">
         <div className="">
