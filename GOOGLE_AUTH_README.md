@@ -76,6 +76,7 @@ This will check if all configurations are in place.
 ## 📖 How It Works
 
 ### For New Users
+
 - User clicks "Continue with Google"
 - Google OAuth consent screen appears
 - After authorization, a new account is created automatically:
@@ -86,6 +87,7 @@ This will check if all configurations are in place.
   - Default role: VIEWER
 
 ### For Existing Users
+
 - User clicks "Continue with Google"
 - System recognizes the email
 - User is logged in
@@ -102,20 +104,25 @@ This will check if all configurations are in place.
 ## 🐛 Troubleshooting
 
 ### "redirect_uri_mismatch" Error
+
 Make sure the redirect URI in Google Cloud Console is exactly:
+
 ```
 http://localhost:3000/api/auth/callback/google
 ```
 
 ### "invalid_client" Error
+
 Check your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env` file.
 
 ### Button doesn't work
+
 1. Restart your development server
 2. Check browser console for errors
 3. Verify environment variables are set
 
 ### More Help
+
 See `docs/GOOGLE_OAUTH_SETUP.md` for detailed troubleshooting.
 
 ## 📱 Production Deployment
@@ -123,10 +130,12 @@ See `docs/GOOGLE_OAUTH_SETUP.md` for detailed troubleshooting.
 When deploying to production:
 
 1. Update Google Cloud Console with production URLs:
+
    - Authorized JavaScript origin: `https://yourdomain.com`
    - Authorized redirect URI: `https://yourdomain.com/api/auth/callback/google`
 
 2. Update environment variables:
+
    ```env
    NEXTAUTH_URL="https://yourdomain.com"
    ```

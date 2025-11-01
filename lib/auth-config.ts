@@ -151,21 +151,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = customUser.role;
         token.emailVerified = customUser.emailVerified;
       }
-      
+
       // For Google OAuth, fetch user data from database
       if (account?.provider === "google" && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email },
           include: { profile: true },
         });
-        
+
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
           token.emailVerified = dbUser.emailVerified;
         }
       }
-      
+
       return token;
     },
     async session({ session, token }) {

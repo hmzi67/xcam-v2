@@ -87,6 +87,7 @@ When deploying to production:
 ## Testing
 
 1. Start your development server:
+
    ```bash
    npm run dev
    ```
@@ -99,19 +100,23 @@ When deploying to production:
 ## Troubleshooting
 
 ### "redirect_uri_mismatch" Error
+
 - Make sure the redirect URI in Google Cloud Console exactly matches the one being used
 - Check for trailing slashes and http vs https
 - The redirect URI should be: `http://localhost:3000/api/auth/callback/google`
 
 ### "invalid_client" Error
+
 - Double-check your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the `.env` file
 - Make sure there are no extra spaces or quotes
 
 ### "Access blocked: This app's request is invalid"
+
 - Make sure you've configured the OAuth consent screen
 - Add your email as a test user if the app is not published
 
 ### User is not being created in the database
+
 - Check your database connection
 - Review the server logs for any Prisma errors
 - Make sure the `Profile` table exists in your database

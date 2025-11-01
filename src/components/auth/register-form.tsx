@@ -230,9 +230,8 @@ export default function RegisterForm() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition ${
-                                isLoading ? "opacity-70 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+                                }`}
                         >
                             {isLoading ? "Creating Account..." : "Sign Up"}
                         </button>
@@ -252,9 +251,8 @@ export default function RegisterForm() {
                             type="button"
                             onClick={() => signIn("google", { callbackUrl: "/" })}
                             disabled={isLoading}
-                            className={`w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition ${
-                                isLoading ? "opacity-70 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+                                }`}
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path

@@ -5,6 +5,7 @@
 ### 1. Updated Authentication Configuration (`lib/auth-config.ts`)
 
 **Added:**
+
 - Google OAuth provider import
 - Google OAuth provider configuration
 - Enhanced callbacks for handling Google sign-in
@@ -12,6 +13,7 @@
 - Profile creation for OAuth users
 
 **Key Features:**
+
 - Google accounts are automatically verified (no email verification needed)
 - New users are created with "VIEWER" role by default
 - User profiles are automatically created with Google profile information
@@ -20,6 +22,7 @@
 ### 2. Updated Login Form (`src/components/auth/login-form.tsx`)
 
 **Added:**
+
 - Functional Google OAuth button
 - Proper callback URL handling
 - Loading state for Google button
@@ -27,6 +30,7 @@
 ### 3. Updated Register Form (`src/components/auth/register-form.tsx`)
 
 **Added:**
+
 - Import for `signIn` from next-auth/react
 - Functional Google OAuth button
 - Loading state for Google button
@@ -34,6 +38,7 @@
 ### 4. Environment Configuration
 
 **Created:**
+
 - `.env.example` file with all required environment variables
 - Documentation for Google OAuth setup
 
@@ -42,6 +47,7 @@
 ### User Flow
 
 1. **New User with Google:**
+
    - User clicks "Continue with Google"
    - Redirected to Google OAuth consent screen
    - After authorization, user is created in database with:
@@ -53,6 +59,7 @@
    - User is redirected to the callback URL
 
 2. **Existing User with Google:**
+
    - User clicks "Continue with Google"
    - System checks if user exists by email
    - If user exists, they are signed in
@@ -104,6 +111,7 @@ http://localhost:3000/register
 ## Database Schema
 
 The implementation works with the existing database schema:
+
 - `User` table stores authentication data
 - `Profile` table stores user profile information
 - Both tables are automatically populated on Google OAuth sign-in
@@ -111,9 +119,11 @@ The implementation works with the existing database schema:
 ## Callback URLs
 
 **Development:**
+
 - `http://localhost:3000/api/auth/callback/google`
 
 **Production:**
+
 - `https://yourdomain.com/api/auth/callback/google`
 
 Make sure these URLs are added to your Google Cloud Console OAuth credentials.
@@ -121,6 +131,7 @@ Make sure these URLs are added to your Google Cloud Console OAuth credentials.
 ## Troubleshooting
 
 If Google OAuth is not working:
+
 1. Check that environment variables are set correctly
 2. Verify Google Cloud Console configuration
 3. Ensure redirect URIs match exactly

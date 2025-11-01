@@ -1,13 +1,13 @@
 "use client"
 
-import React, {useState, useEffect} from "react"
-import {useRouter, useSearchParams} from "next/navigation"
-import {signIn} from "next-auth/react"
-import {useForm} from "react-hook-form"
-import {z} from "zod"
-import {zodResolver} from "@hookform/resolvers/zod"
+import React, { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "next-auth/react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
-import {Mail, Lock, Eye, EyeOff, MessageSquare, Video} from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, MessageSquare, Video } from "lucide-react"
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -32,7 +32,7 @@ export default function LoginForm() {
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     })
@@ -82,7 +82,7 @@ export default function LoginForm() {
 
                 <div className="relative z-10 flex flex-col justify-between p-12 text-gray-100">
                     <div className="flex items-center space-x-2">
-                        <Video className="w-8 h-8 text-purple-400"/>
+                        <Video className="w-8 h-8 text-purple-400" />
                         <span className="text-2xl font-bold">XCam</span>
                     </div>
 
@@ -111,7 +111,7 @@ export default function LoginForm() {
                 <div className="w-full max-w-lg p-8 ">
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex items-center space-x-2 mb-8">
-                        <MessageSquare className="w-8 h-8 text-purple-400"/>
+                        <MessageSquare className="w-8 h-8 text-purple-400" />
                         <span className="text-2xl font-bold text-gray-100">XCam</span>
                     </div>
 
@@ -145,7 +145,7 @@ export default function LoginForm() {
                             </label>
                             <div className="relative">
                                 <Mail
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5"/>
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                                 <input
                                     {...register("email")}
                                     type="email"
@@ -168,7 +168,7 @@ export default function LoginForm() {
                             </label>
                             <div className="relative">
                                 <Lock
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5"/>
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                                 <input
                                     {...register("password")}
                                     type={showPassword ? "text" : "password"}
@@ -182,9 +182,9 @@ export default function LoginForm() {
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
                                 >
                                     {showPassword ? (
-                                        <EyeOff className="w-5 h-5"/>
+                                        <EyeOff className="w-5 h-5" />
                                     ) : (
-                                        <Eye className="w-5 h-5"/>
+                                        <Eye className="w-5 h-5" />
                                     )}
                                 </button>
                             </div>
@@ -198,7 +198,7 @@ export default function LoginForm() {
                         {/* Forget Password */}
                         <div className="flex items-center justify-end">
                             <Link href={'/forgot-password'} className="text-sm text-purple-300">
-                              Forget Password
+                                Forget Password
                             </Link>
                         </div>
 
@@ -206,9 +206,8 @@ export default function LoginForm() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition ${
-                                isLoading ? "opacity-70 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+                                }`}
                         >
                             {isLoading ? "Signing in..." : "Sign in"}
                         </button>
@@ -228,9 +227,8 @@ export default function LoginForm() {
                             type="button"
                             onClick={() => signIn("google", { callbackUrl })}
                             disabled={isLoading}
-                            className={`w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition ${
-                                isLoading ? "opacity-70 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+                                }`}
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path
