@@ -5,7 +5,6 @@ import { ViewerDashboard } from "@/components/dashboard/viewer-dashboard";
 import { CreatorDashboard } from "@/components/dashboard/creator-dashboard";
 import { ModeratorDashboard } from "@/components/dashboard/moderator-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { UserRole, UserStatus } from "@prisma/client";
 
 export default async function DashboardPage() {
@@ -41,49 +40,22 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Render different dashboards based on user role with sidebar layout
-  const layoutProps = {
-    userRole: user.role,
-    userName: user.profile?.displayName || null,
-    userEmail: user.email,
-    avatarUrl: user.profile?.avatarUrl || null,
-  };
-
+  // Render different dashboards based on user role
   switch (user.role) {
     case UserRole.VIEWER:
-      return (
-        <DashboardLayout {...layoutProps}>
-          <ViewerDashboardContent user={user} />
-        </DashboardLayout>
-      );
+      return <ViewerDashboardContent user={user} />;
 
     case UserRole.CREATOR:
-      return (
-        <DashboardLayout {...layoutProps}>
-          <CreatorDashboardContent user={user} />
-        </DashboardLayout>
-      );
+      return <CreatorDashboardContent user={user} />;
 
     case UserRole.MODERATOR:
-      return (
-        <DashboardLayout {...layoutProps}>
-          <ModeratorDashboardContent user={user} />
-        </DashboardLayout>
-      );
+      return <ModeratorDashboardContent user={user} />;
 
     case UserRole.ADMIN:
-      return (
-        <DashboardLayout {...layoutProps}>
-          <AdminDashboardContent user={user} />
-        </DashboardLayout>
-      );
+      return <AdminDashboardContent user={user} />;
 
     default:
-      return (
-        <DashboardLayout {...layoutProps}>
-          <ViewerDashboardContent user={user} />
-        </DashboardLayout>
-      );
+      return <ViewerDashboardContent user={user} />;
   }
 }
 
