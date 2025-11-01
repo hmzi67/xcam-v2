@@ -11,7 +11,8 @@ export default function page() {
   return (
     <div>
       { session?.user && ((session.user as any).role === "CREATOR") && (<EarningsPage/>) }
-      { session?.user && ((session.user as any).role === "VIEWER") && ((session.user as any).role === "ADMIN") && (<ViewerTokenPage />) }
+      { session?.user && ((session.user as any).role === "VIEWER")  && (<ViewerTokenPage />) }
+      { session?.user && ((session.user as any).role === "ADMIN") && (<ViewerTokenPage />) }
     </div>
   );
 }
