@@ -28,14 +28,14 @@ import {
   Eye,
   Flame,
   MessageCircle,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
 
 interface Stream {
   id: string;
   title: string;
   description: string;
-  status: 'LIVE' | 'SCHEDULED' | 'ENDED';
+  status: "LIVE" | "SCHEDULED" | "ENDED";
   category?: string;
   tags?: string[];
   thumbnailUrl?: string;
@@ -60,10 +60,9 @@ export default function Home() {
   const [selectedAge, setSelectedAge] = useState("");
   const [selectedEthnicity, setSelectedEthnicity] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const handleCategoryClick = (categoryName: string) => {
-
     setSelectedCategory(categoryName);
   };
   const categories = [
@@ -99,16 +98,39 @@ export default function Home() {
     return { ...filter, count };
   });
 
-
-  const regions = ["All Regions", "North America", "Europe", "Asia", "South America", "Africa", "Oceania"];
+  const regions = [
+    "All Regions",
+    "North America",
+    "Europe",
+    "Asia",
+    "South America",
+    "Africa",
+    "Oceania",
+  ];
   const ages = ["All Ages", "18-22", "23-30", "31-40", "40+"];
-  const ethnicities = ["All Ethnicities", "White", "Asian", "Latina", "Black", "Mixed", "Other"];
-  const languages = ["All Languages", "English", "Spanish", "French", "German", "Italian", "Portuguese"];
+  const ethnicities = [
+    "All Ethnicities",
+    "White",
+    "Asian",
+    "Latina",
+    "Black",
+    "Mixed",
+    "Other",
+  ];
+  const languages = [
+    "All Languages",
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Italian",
+    "Portuguese",
+  ];
 
   const fetchStreams = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/streams/list');
+      const response = await fetch("/api/streams/list");
       if (response.ok) {
         const data = await response.json();
         const streamsWithDates = (data.streams || []).map((stream: any) => ({
@@ -116,13 +138,13 @@ export default function Home() {
           createdAt: new Date(stream.createdAt),
           creator: {
             ...stream.creator,
-            image: stream.creator.avatar // Map avatar to image for consistency
-          }
+            image: stream.creator.avatar, // Map avatar to image for consistency
+          },
         }));
         setStreams(streamsWithDates);
       }
     } catch (error) {
-      console.error('Error fetching streams:', error);
+      console.error("Error fetching streams:", error);
     } finally {
       setLoading(false);
     }
@@ -141,20 +163,33 @@ export default function Home() {
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter(stream =>
-        stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stream.creator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stream.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (stream) =>
+          stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          stream.creator.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          stream.category?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // Category filter
     if (selectedCategory && selectedCategory !== "All Girls Cams") {
-      filtered = filtered.filter(stream => stream.category === selectedCategory);
+      filtered = filtered.filter(
+        (stream) => stream.category === selectedCategory
+      );
     }
 
     setFilteredStreams(filtered);
-  }, [streams, searchQuery, selectedCategory, selectedRegion, selectedAge, selectedEthnicity, selectedLanguage]);
+  }, [
+    streams,
+    searchQuery,
+    selectedCategory,
+    selectedRegion,
+    selectedAge,
+    selectedEthnicity,
+    selectedLanguage,
+  ]);
 
   const handleJoinStream = (streamId: string) => {
     if (!session) {
@@ -177,29 +212,36 @@ export default function Home() {
               const IconComponent = category.icon;
               const isCreator = !!(
                 session?.user &&
-                (
-                  // common possible flags for "creator" role
-                  (session.user as any).isCreator ||
+                // common possible flags for "creator" role
+                ((session.user as any).isCreator ||
                   (session.user as any).role === "CREATOR" ||
-                  (Array.isArray((session.user as any).roles) && (session.user as any).roles.includes("CREATOR"))
-                )
+                  (Array.isArray((session.user as any).roles) &&
+                    (session.user as any).roles.includes("CREATOR")))
               );
-
 
               return (
                 <button
                   key={category.name}
                   onClick={() => handleCategoryClick(category.name)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-all neon-hover ${selectedCategory === category.name
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                    : 'text-gray-300 hover:bg-gray-800/80'
-                    }`}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-all neon-hover ${
+                    selectedCategory === category.name
+                      ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30"
+                      : "text-gray-300 hover:bg-gray-800/80"
+                  }`}
                 >
                   <IconComponent
-                    className={`w-5 h-5 ${selectedCategory === category.name ? 'neon-purple-icon' : 'neon-target-icon'}`}
+                    className={`w-5 h-5 ${
+                      selectedCategory === category.name
+                        ? "neon-purple-icon"
+                        : "neon-target-icon"
+                    }`}
                   />
                   <span
-                    className={`font-medium ${selectedCategory === category.name ? 'neon-purple-text' : 'neon-target-text'}`}
+                    className={`font-medium ${
+                      selectedCategory === category.name
+                        ? "neon-purple-text"
+                        : "neon-target-text"
+                    }`}
                   >
                     {category.name}
                   </span>
@@ -209,7 +251,6 @@ export default function Home() {
                   {category.name === "Private Messages" && (
                     <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
                   )}
-
                 </button>
               );
             })}
@@ -225,13 +266,22 @@ export default function Home() {
                 <button
                   key={filter.name}
                   onClick={() => setSelectedCategory(filter.name)}
-                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all neon-hover ${selectedCategory === filter.name
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
-                    : 'text-gray-300 hover:bg-gray-800/80'
-                    }`}
+                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all neon-hover ${
+                    selectedCategory === filter.name
+                      ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+                      : "text-gray-300 hover:bg-gray-800/80"
+                  }`}
                 >
                   <span className="flex items-center gap-2">
-                    <span className={`${selectedCategory === filter.name ? 'neon-purple-text' : 'neon-target-text'}`}>{filter.name}</span>
+                    <span
+                      className={`${
+                        selectedCategory === filter.name
+                          ? "neon-purple-text"
+                          : "neon-target-text"
+                      }`}
+                    >
+                      {filter.name}
+                    </span>
                     {filter.hot && (
                       <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 neon-red-badge">
                         hot
@@ -336,45 +386,19 @@ export default function Home() {
                     </select>
                   </div>
 
-                  {/* View Mode Toggle */}
+                  {/* Search Bar */}
                   <div className="ml-auto flex items-center gap-2">
-                    <Button
-                      variant={viewMode === 'grid' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('grid')}
-                      className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
-                    >
-                      <Grid3X3 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === 'list' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('list')}
-                      className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300'}
-                    >
-                      <List className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                    <div className="relative max-w-full md:max-w-md">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Search models, categories..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-gray-800/80 border-gray-600 focus:border-purple-500 text-white placeholder:text-gray-400 text-sm md:text-base"
+                      />
+                    </div>
                   </div>
-                </div>
-              </div>
-              {/* Search Bar */}
-              <div className="bg-gray-900/70 backdrop-blur-sm border-b border-gray-700/50 p-3 md:p-4">
-                <div className="relative max-w-full md:max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search models, categories..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-gray-800/80 border-gray-600 focus:border-purple-500 text-white placeholder:text-gray-400 text-sm md:text-base"
-                  />
                 </div>
               </div>
             </>
@@ -385,12 +409,18 @@ export default function Home() {
             {selectedCategory === "Private Messages" ? (
               <PrivateChatContainer streamId="homepage" token={null} />
             ) : loading && streams.length === 0 ? (
-              <div className={`grid gap-3 md:gap-4 ${viewMode === 'grid'
-                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                : 'grid-cols-1'
-                }`}>
+              <div
+                className={`grid gap-3 md:gap-4 ${
+                  viewMode === "grid"
+                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                    : "grid-cols-1"
+                }`}
+              >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-                  <Card key={i} className="animate-pulse bg-gray-800 border-gray-700">
+                  <Card
+                    key={i}
+                    className="animate-pulse bg-gray-800 border-gray-700"
+                  >
                     <CardContent className="p-0">
                       <div className="aspect-video bg-gray-700 rounded-t-lg" />
                       <div className="p-3 space-y-2">
@@ -402,16 +432,19 @@ export default function Home() {
                 ))}
               </div>
             ) : filteredStreams.length > 0 ? (
-              <div className={`grid gap-3 md:gap-4 ${viewMode === 'grid'
-                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                : 'grid-cols-1'
-                }`}>
+              <div
+                className={`grid gap-3 md:gap-4 ${
+                  viewMode === "grid"
+                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                    : "grid-cols-1"
+                }`}
+              >
                 {filteredStreams.map((stream) => (
                   <StreamCard
                     key={stream.id}
                     stream={stream}
                     onJoinStream={handleJoinStream}
-                    className={viewMode === 'list' ? 'flex-row' : ''}
+                    className={viewMode === "list" ? "flex-row" : ""}
                   />
                 ))}
               </div>
@@ -421,9 +454,13 @@ export default function Home() {
                   <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Play className="w-12 h-12 text-gray-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">No Streams Found</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No Streams Found
+                  </h3>
                   <p className="text-gray-500 mb-6">
-                    {searchQuery ? 'No streams match your search criteria.' : 'No streams available right now.'}
+                    {searchQuery
+                      ? "No streams match your search criteria."
+                      : "No streams available right now."}
                   </p>
                   {session && (
                     <Link href="/streaming">

@@ -76,7 +76,7 @@ export function Header() {
     if (status === "loading" || (session?.user && loading)) {
         return (
             <header className="bg-gray-900 shadow-sm sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto px-5">
                     <div className="flex justify-between h-16 items-center">
                         <div className="animate-pulse h-6 w-24 bg-gray-700 rounded" />
                     </div>
@@ -87,7 +87,7 @@ export function Header() {
 
     return (
         <header className="bg-gray-900 shadow-sm sticky top-0 z-50">
-            <div className="container mx-auto px-4 max-w-7xl">
+            <div className="mx-auto px-5">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center space-x-8">
                         <Link href="/" className="flex items-center space-x-2">
@@ -108,7 +108,6 @@ export function Header() {
                                     {[
                                         { label: "Home", href: "/" },
                                         { label: "Pricing", href: "/pricing" },
-                                        { label: "About", href: "/about" },
                                         { label: "Streaming", href: "/streaming" },
                                     ].map((item) => {
                                         const active = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
