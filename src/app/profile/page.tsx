@@ -8,6 +8,7 @@ import {
   User,
   Edit2,
   ChevronLeft,
+  Crown,
 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
@@ -114,9 +115,10 @@ const ProfilePage = () => {
                       className="w-24 h-24 rounded-full object-cover"
                     />
                   ) : (
-                    `${userData.profile?.displayName?.[0] ||
-                    userData.email?.[0] ||
-                    "U"
+                    `${
+                      userData.profile?.displayName?.[0] ||
+                      userData.email?.[0] ||
+                      "U"
                     }`
                   )}
                 </div>
@@ -156,8 +158,9 @@ const ProfilePage = () => {
                 {session?.user && (session.user as any).role !== "CREATOR" && (
                   <div>
                     <Link href={"/upgrade"}>
-                      <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-amber-900 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400 hover:from-amber-300 hover:via-amber-400 hover:to-amber-500 active:from-amber-400 active:to-amber-500 shadow-md border border-amber-400/50 transition-all">
-                        <span className="font-medium">Upgrade to Creator</span>
+                      <button className="px-4 py-2 bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg transition-colors flex items-center gap-2 font-semibold cursor-pointer">
+                        <Crown className="w-4 h-4" />
+                        Upgrade to Pro
                       </button>
                     </Link>
                   </div>
@@ -458,7 +461,7 @@ const ProfilePage = () => {
               {userData.wallet
                 ? `${userData.wallet.balance} Tokens`
                 : // ? `${userData.wallet.balance} ${userData.wallet.currency}`
-                "No wallet"}
+                  "No wallet"}
             </p>
           </div>
           <div>
@@ -509,8 +512,8 @@ const ProfilePage = () => {
               {userData.googleId
                 ? "Google OAuth"
                 : userData.appleId
-                  ? "Apple OAuth"
-                  : "Email & Password"}
+                ? "Apple OAuth"
+                : "Email & Password"}
             </p>
           </div>
         </div>
