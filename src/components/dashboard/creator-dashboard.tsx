@@ -34,23 +34,25 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
   return (
     <div className="space-y-6">
       {/* User Profile Section */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-white">
             Creator Dashboard - {userData.displayName || "Creator"}
           </CardTitle>
-          <CardDescription>{userData.email}</CardDescription>
+          <CardDescription className="text-gray-400">
+            {userData.email}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-4">
           {userData.avatarUrl && (
             <img
               src={userData.avatarUrl}
               alt="Avatar"
-              className="w-16 h-16 rounded-full object-cover"
+              className="w-16 h-16 rounded-full object-cover border-2 border-purple-500/50"
             />
           )}
           <div>
-            <p className="text-sm text-muted-foreground">Role: Creator</p>
+            <p className="text-sm text-gray-300">Role: Creator</p>
           </div>
         </CardContent>
       </Card>
@@ -105,21 +107,33 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="text-white">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-4 flex-wrap">
-          <a href="/creator" className="text-blue-600 hover:underline">
+          <a
+            href="/creator"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Go Live
           </a>
-          <a href="/creator/stream" className="text-blue-600 hover:underline">
+          <a
+            href="/creator/stream"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Manage Streams
           </a>
-          <a href="/profile" className="text-blue-600 hover:underline">
+          <a
+            href="/profile"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Edit Profile
           </a>
-          <a href="/pricing" className="text-blue-600 hover:underline">
+          <a
+            href="/pricing"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Buy Credits
           </a>
         </CardContent>

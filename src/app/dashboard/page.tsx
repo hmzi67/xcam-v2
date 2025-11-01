@@ -109,7 +109,7 @@ async function ViewerDashboardContent({ user }: { user: any }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Dashboard</h1>
       <ViewerDashboard userData={userData} />
     </>
   );
@@ -158,7 +158,7 @@ async function CreatorDashboardContent({ user }: { user: any }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6">Creator Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Creator Dashboard</h1>
       <CreatorDashboard userData={userData} />
     </>
   );
@@ -210,7 +210,9 @@ async function ModeratorDashboardContent({ user }: { user: any }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6">Moderator Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">
+        Moderator Dashboard
+      </h1>
       <ModeratorDashboard userData={userData} />
     </>
   );
@@ -287,7 +289,7 @@ async function AdminDashboardContent({ user }: { user: any }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Admin Dashboard</h1>
       <AdminDashboard userData={userData} platformStats={platformStats} />
     </>
   );

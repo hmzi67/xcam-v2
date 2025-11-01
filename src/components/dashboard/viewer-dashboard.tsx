@@ -30,23 +30,25 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
   return (
     <div className="space-y-6">
       {/* User Profile Section */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-white">
             Welcome back, {userData.displayName || "Viewer"}!
           </CardTitle>
-          <CardDescription>{userData.email}</CardDescription>
+          <CardDescription className="text-gray-400">
+            {userData.email}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-4">
           {userData.avatarUrl && (
             <img
               src={userData.avatarUrl}
               alt="Avatar"
-              className="w-16 h-16 rounded-full object-cover"
+              className="w-16 h-16 rounded-full object-cover border-2 border-purple-500/50"
             />
           )}
           <div>
-            <p className="text-sm text-muted-foreground">Role: Viewer</p>
+            <p className="text-sm text-gray-300">Role: Viewer</p>
           </div>
         </CardContent>
       </Card>
@@ -74,18 +76,27 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="text-white">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-4">
-          <a href="/streaming" className="text-blue-600 hover:underline">
+          <a
+            href="/streaming"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Browse Streams
           </a>
-          <a href="/pricing" className="text-blue-600 hover:underline">
+          <a
+            href="/pricing"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Buy Credits
           </a>
-          <a href="/profile" className="text-blue-600 hover:underline">
+          <a
+            href="/profile"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Edit Profile
           </a>
         </CardContent>

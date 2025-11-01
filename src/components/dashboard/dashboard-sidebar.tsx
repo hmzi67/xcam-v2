@@ -221,21 +221,21 @@ export function DashboardSidebar({
   const getRoleBadgeColor = () => {
     switch (userRole) {
       case "ADMIN":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-900/30 text-red-400 border-red-500/50";
       case "MODERATOR":
-        return "bg-orange-100 text-orange-800 border-orange-200";
+        return "bg-orange-900/30 text-orange-400 border-orange-500/50";
       case "CREATOR":
-        return "bg-purple-100 text-purple-800 border-purple-200";
+        return "bg-purple-900/30 text-purple-400 border-purple-500/50";
       case "VIEWER":
       default:
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-900/30 text-blue-400 border-blue-500/50";
     }
   };
 
   const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
     <>
       {/* User Profile Section */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-700">
         <div
           className={cn(
             "flex items-center",
@@ -247,31 +247,31 @@ export function DashboardSidebar({
               src={avatarUrl}
               alt="User avatar"
               className={cn(
-                "rounded-full object-cover",
+                "rounded-full object-cover border-2 border-purple-500/50",
                 collapsed ? "w-10 h-10" : "w-12 h-12"
               )}
             />
           ) : (
             <div
               className={cn(
-                "rounded-full bg-gray-200 flex items-center justify-center",
+                "rounded-full bg-gray-700 flex items-center justify-center",
                 collapsed ? "w-10 h-10" : "w-12 h-12"
               )}
             >
               <User
                 className={cn(
                   collapsed ? "w-5 h-5" : "w-6 h-6",
-                  "text-gray-500"
+                  "text-gray-400"
                 )}
               />
             </div>
           )}
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-white truncate">
                 {userName || "User"}
               </p>
-              <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+              <p className="text-xs text-gray-400 truncate">{userEmail}</p>
             </div>
           )}
         </div>
@@ -305,8 +305,8 @@ export function DashboardSidebar({
                 "flex items-center rounded-lg text-sm font-medium transition-colors",
                 collapsed ? "justify-center p-3" : "gap-3 px-3 py-2",
                 isActive
-                  ? "bg-purple-50 text-purple-700 border border-purple-200"
-                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30"
+                  : "text-gray-300 hover:bg-gray-800/80 hover:text-white"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -317,12 +317,12 @@ export function DashboardSidebar({
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-700">
         <Link
           href="/profile"
           title={collapsed ? "Settings" : undefined}
           className={cn(
-            "flex items-center rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors",
+            "flex items-center rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800/80 hover:text-white transition-colors",
             collapsed ? "justify-center p-3" : "gap-3 px-3 py-2"
           )}
           onClick={() => setIsMobileMenuOpen(false)}
@@ -342,7 +342,7 @@ export function DashboardSidebar({
           variant="outline"
           size="icon"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="bg-white shadow-lg"
+          className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 shadow-lg"
         >
           {isMobileMenuOpen ? (
             <X className="w-5 h-5" />
@@ -355,7 +355,7 @@ export function DashboardSidebar({
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className="lg:hidden fixed inset-0 bg-black/70 z-30"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -363,7 +363,7 @@ export function DashboardSidebar({
       {/* Sidebar - Desktop */}
       <aside
         className={cn(
-          "hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-16 lg:bottom-0 bg-white border-r border-gray-200 shadow-sm transition-all duration-300",
+          "hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-16 lg:bottom-0 bg-gray-900/95 backdrop-blur-sm border-r border-gray-700/50 shadow-xl transition-all duration-300",
           isCollapsed ? "lg:w-20" : "lg:w-64"
         )}
       >
@@ -372,13 +372,13 @@ export function DashboardSidebar({
         {/* Collapse Toggle Button - Desktop */}
         <button
           onClick={onToggleCollapse}
-          className="hidden lg:flex absolute -right-3 top-8 w-6 h-6 bg-white border border-gray-200 rounded-full items-center justify-center hover:bg-gray-50 transition-colors shadow-sm z-10"
+          className="hidden lg:flex absolute -right-3 top-8 w-6 h-6 bg-gray-800 border border-gray-700 rounded-full items-center justify-center hover:bg-gray-700 transition-colors shadow-sm z-10"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <ChevronRight className="w-4 h-4 text-gray-600" />
+            <ChevronRight className="w-4 h-4 text-gray-300" />
           ) : (
-            <ChevronLeft className="w-4 h-4 text-gray-600" />
+            <ChevronLeft className="w-4 h-4 text-gray-300" />
           )}
         </button>
       </aside>
@@ -386,7 +386,7 @@ export function DashboardSidebar({
       {/* Sidebar - Mobile */}
       <aside
         className={cn(
-          "lg:hidden fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 shadow-lg z-40 transition-transform duration-300 flex flex-col",
+          "lg:hidden fixed left-0 top-16 bottom-0 w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-700/50 shadow-lg z-40 transition-transform duration-300 flex flex-col",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

@@ -34,24 +34,26 @@ export function ModeratorDashboard({ userData }: ModeratorDashboardProps) {
   return (
     <div className="space-y-6">
       {/* User Profile Section */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-white">
             Moderator Dashboard - {userData.displayName || "Moderator"}
           </CardTitle>
-          <CardDescription>{userData.email}</CardDescription>
+          <CardDescription className="text-gray-400">
+            {userData.email}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-4">
           {userData.avatarUrl && (
             <img
               src={userData.avatarUrl}
               alt="Avatar"
-              className="w-16 h-16 rounded-full object-cover"
+              className="w-16 h-16 rounded-full object-cover border-2 border-orange-500/50"
             />
           )}
           <div>
-            <p className="text-sm text-muted-foreground">Role: Moderator</p>
-            <p className="text-sm font-medium text-orange-600">
+            <p className="text-sm text-gray-300">Role: Moderator</p>
+            <p className="text-sm font-medium text-orange-400">
               Platform Moderation
             </p>
           </div>
@@ -108,30 +110,36 @@ export function ModeratorDashboard({ userData }: ModeratorDashboardProps) {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="text-white">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-4 flex-wrap">
-          <a href="/streaming" className="text-blue-600 hover:underline">
+          <a
+            href="/streaming"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Monitor Streams
           </a>
-          <a href="/profile" className="text-blue-600 hover:underline">
+          <a
+            href="/profile"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Edit Profile
           </a>
         </CardContent>
       </Card>
 
       {/* Recent Activity */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Moderation Overview</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Moderation Overview</CardTitle>
+          <CardDescription className="text-gray-400">
             Keep the platform safe and welcoming
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-300">
             You have taken {userData.totalModerationActions} moderation actions
             to date.
           </p>

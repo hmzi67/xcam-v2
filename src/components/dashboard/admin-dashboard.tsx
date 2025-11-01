@@ -45,12 +45,12 @@ export function AdminDashboard({
   return (
     <div className="space-y-6">
       {/* User Profile Section */}
-      <Card className="border-red-200 bg-red-50">
+      <Card className="border-red-500/50 bg-red-900/20 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-red-900">
+          <CardTitle className="text-red-400">
             Admin Dashboard - {userData.displayName || "Administrator"}
           </CardTitle>
-          <CardDescription className="text-red-700">
+          <CardDescription className="text-red-300/80">
             {userData.email}
           </CardDescription>
         </CardHeader>
@@ -59,21 +59,23 @@ export function AdminDashboard({
             <img
               src={userData.avatarUrl}
               alt="Avatar"
-              className="w-16 h-16 rounded-full object-cover border-2 border-red-300"
+              className="w-16 h-16 rounded-full object-cover border-2 border-red-500/50"
             />
           )}
           <div>
-            <p className="text-sm font-bold text-red-900">
+            <p className="text-sm font-bold text-red-400">
               Role: Administrator
             </p>
-            <p className="text-sm text-red-700">Full Platform Access</p>
+            <p className="text-sm text-red-300/80">Full Platform Access</p>
           </div>
         </CardContent>
       </Card>
 
       {/* Platform Overview */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Platform Overview</h2>
+        <h2 className="text-2xl font-bold mb-4 text-white">
+          Platform Overview
+        </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Users"
@@ -104,7 +106,9 @@ export function AdminDashboard({
 
       {/* Financial Stats */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Financial Overview</h2>
+        <h2 className="text-2xl font-bold mb-4 text-white">
+          Financial Overview
+        </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <StatsCard
             title="Credits in Circulation"
@@ -129,7 +133,9 @@ export function AdminDashboard({
 
       {/* Moderation & Safety */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Moderation & Safety</h2>
+        <h2 className="text-2xl font-bold mb-4 text-white">
+          Moderation & Safety
+        </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Actions"
@@ -159,18 +165,27 @@ export function AdminDashboard({
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Admin Quick Actions</CardTitle>
+          <CardTitle className="text-white">Admin Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-4 flex-wrap">
-          <a href="/streaming" className="text-blue-600 hover:underline">
+          <a
+            href="/streaming"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Monitor Streams
           </a>
-          <a href="/profile" className="text-blue-600 hover:underline">
+          <a
+            href="/profile"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Edit Profile
           </a>
-          <a href="/pricing" className="text-blue-600 hover:underline">
+          <a
+            href="/pricing"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
             Manage Pricing
           </a>
         </CardContent>
