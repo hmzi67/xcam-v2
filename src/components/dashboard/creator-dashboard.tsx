@@ -14,6 +14,7 @@ import {
   MessageSquare,
   TrendingUp,
 } from "lucide-react";
+import { generateChartData } from "@/lib/chart-utils";
 
 interface CreatorDashboardProps {
   userData: {
@@ -64,16 +65,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={`$${userData.totalEarnings.toFixed(2)}`}
           description="From all streams"
           icon={DollarSign}
-          chartData={[
-            120,
-            180,
-            240,
-            350,
-            420,
-            500,
-            580,
-            userData.totalEarnings,
-          ]}
+          chartData={generateChartData(userData.totalEarnings, 8, "increasing")}
           chartColor="green"
           trend={{ value: 12.5, isPositive: true }}
         />
@@ -82,7 +74,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={`$${userData.balance.toFixed(2)}`}
           description="Available balance"
           icon={DollarSign}
-          chartData={[50, 120, 80, 150, 100, 180, 140, userData.balance]}
+          chartData={generateChartData(userData.balance, 8, "fluctuating")}
           chartColor="blue"
         />
         <StatsCard
@@ -90,7 +82,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.totalViews}
           description="All-time views"
           icon={Eye}
-          chartData={[100, 250, 400, 600, 850, 1100, 1400, userData.totalViews]}
+          chartData={generateChartData(userData.totalViews, 8, "increasing")}
           chartColor="purple"
           trend={{ value: 18.2, isPositive: true }}
         />
@@ -102,7 +94,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.totalStreams}
           description="All streams created"
           icon={Video}
-          chartData={[2, 4, 6, 9, 12, 15, 18, userData.totalStreams]}
+          chartData={generateChartData(userData.totalStreams, 8, "increasing")}
           chartColor="purple"
         />
         <StatsCard
@@ -110,7 +102,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.liveStreams}
           description="Currently streaming"
           icon={Video}
-          chartData={[0, 1, 0, 1, 2, 1, 0, userData.liveStreams]}
+          chartData={generateChartData(userData.liveStreams, 8, "fluctuating")}
           chartColor="red"
         />
         <StatsCard
@@ -118,16 +110,11 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.totalChatMessages}
           description="Total chat messages"
           icon={MessageSquare}
-          chartData={[
-            50,
-            120,
-            200,
-            350,
-            500,
-            680,
-            850,
+          chartData={generateChartData(
             userData.totalChatMessages,
-          ]}
+            8,
+            "increasing"
+          )}
           chartColor="blue"
           trend={{ value: 24.8, isPositive: true }}
         />
@@ -136,16 +123,11 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.avgViewersPerStream.toFixed(1)}
           description="Per stream"
           icon={TrendingUp}
-          chartData={[
-            15,
-            25,
-            30,
-            45,
-            55,
-            65,
-            70,
+          chartData={generateChartData(
             Math.round(userData.avgViewersPerStream),
-          ]}
+            8,
+            "increasing"
+          )}
           chartColor="orange"
           trend={{ value: 8.4, isPositive: true }}
         />

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { StatsCard } from "./stats-card";
 import { Wallet, Video, Clock, TrendingUp } from "lucide-react";
+import { generateChartData } from "@/lib/chart-utils";
 
 interface ViewerDashboardProps {
   userData: {
@@ -60,7 +61,7 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
           value={`$${userData.balance.toFixed(2)}`}
           description="Available credits"
           icon={Wallet}
-          chartData={[45, 52, 48, 65, 70, 68, 75, userData.balance]}
+          chartData={generateChartData(userData.balance, 8, "increasing")}
           chartColor="green"
         />
         <StatsCard
@@ -68,7 +69,7 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
           value={`${watchTimeHours}h ${watchTimeMinutes}m`}
           description="Total viewing time"
           icon={Clock}
-          chartData={[20, 35, 45, 60, 55, 70, 80, watchTimeHours]}
+          chartData={generateChartData(watchTimeHours, 8, "increasing")}
           chartColor="blue"
         />
         <StatsCard
@@ -76,7 +77,11 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
           value={userData.activeStreamSessions}
           description="Currently watching"
           icon={Video}
-          chartData={[0, 1, 2, 1, 3, 2, 1, userData.activeStreamSessions]}
+          chartData={generateChartData(
+            userData.activeStreamSessions,
+            8,
+            "fluctuating"
+          )}
           chartColor="purple"
         />
       </div>
