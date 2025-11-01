@@ -61,6 +61,7 @@ export default function Home() {
   const [selectedEthnicity, setSelectedEthnicity] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleCategoryClick = (categoryName: string) => {
     setSelectedCategory(categoryName);
@@ -223,25 +224,22 @@ export default function Home() {
                 <button
                   key={category.name}
                   onClick={() => handleCategoryClick(category.name)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-all neon-hover ${
-                    selectedCategory === category.name
-                      ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30"
-                      : "text-gray-300 hover:bg-gray-800/80"
-                  }`}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-all neon-hover ${selectedCategory === category.name
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30"
+                    : "text-gray-300 hover:bg-gray-800/80"
+                    }`}
                 >
                   <IconComponent
-                    className={`w-5 h-5 ${
-                      selectedCategory === category.name
-                        ? "neon-purple-icon"
-                        : "neon-target-icon"
-                    }`}
+                    className={`w-5 h-5 ${selectedCategory === category.name
+                      ? "neon-purple-icon"
+                      : "neon-target-icon"
+                      }`}
                   />
                   <span
-                    className={`font-medium ${
-                      selectedCategory === category.name
-                        ? "neon-purple-text"
-                        : "neon-target-text"
-                    }`}
+                    className={`font-medium ${selectedCategory === category.name
+                      ? "neon-purple-text"
+                      : "neon-target-text"
+                      }`}
                   >
                     {category.name}
                   </span>
@@ -266,19 +264,17 @@ export default function Home() {
                 <button
                   key={filter.name}
                   onClick={() => setSelectedCategory(filter.name)}
-                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all neon-hover ${
-                    selectedCategory === filter.name
-                      ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                      : "text-gray-300 hover:bg-gray-800/80"
-                  }`}
+                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all neon-hover ${selectedCategory === filter.name
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+                    : "text-gray-300 hover:bg-gray-800/80"
+                    }`}
                 >
                   <span className="flex items-center gap-2">
                     <span
-                      className={`${
-                        selectedCategory === filter.name
-                          ? "neon-purple-text"
-                          : "neon-target-text"
-                      }`}
+                      className={`${selectedCategory === filter.name
+                        ? "neon-purple-text"
+                        : "neon-target-text"
+                        }`}
                     >
                       {filter.name}
                     </span>
@@ -388,15 +384,43 @@ export default function Home() {
 
                   {/* Search Bar */}
                   <div className="ml-auto flex items-center gap-2">
-                    <div className="relative max-w-full md:max-w-md">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <Input
-                        type="text"
-                        placeholder="Search models, categories..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-gray-800/80 border-gray-600 focus:border-purple-500 text-white placeholder:text-gray-400 text-sm md:text-base"
-                      />
+                    <div className="relative flex items-center">
+                      {/* Expandable Search Container */}
+                      <div
+                        className={`relative flex items-center transition-all duration-500 ease-in-out rounded-full backdrop-blur-sm ${isSearchOpen
+                            ? "w-64 md:w-96 bg-gray-800/95 border-2 border-purple-500 shadow-lg shadow-purple-500/30"
+                            : "w-12 h-12 bg-gray-800/80 border border-gray-600 hover:border-gray-500"
+                          }`}
+                      >
+                        {/* Search Input */}
+                        <Input
+                          type="text"
+                          placeholder="Search models, categories..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className={`h-12 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-gray-400 text-sm md:text-base transition-all duration-500 rounded-full ${isSearchOpen
+                              ? "pl-5 pr-14 opacity-100 visible"
+                              : "w-0 pl-0 pr-0 opacity-0 invisible"
+                            }`}
+                          autoFocus={isSearchOpen}
+                        />
+
+                        {/* Search Icon Button */}
+                        <Button
+                          type="button"
+                          size="icon"
+                          onClick={() => setIsSearchOpen(!isSearchOpen)}
+                          className={`absolute right-0 rounded-full transition-all duration-300 z-10 ${isSearchOpen
+                              ? "bg-purple-600 hover:bg-purple-700 shadow-lg h-11 w-11"
+                              : "bg-transparent hover:bg-purple-600 h-12 w-12"
+                            }`}
+                        >
+                          <Search
+                            className={`transition-all duration-300 ${isSearchOpen ? "w-5 h-5 text-white rotate-90" : "w-5 h-5 text-gray-400"
+                              }`}
+                          />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -410,11 +434,10 @@ export default function Home() {
               <PrivateChatContainer streamId="homepage" token={null} />
             ) : loading && streams.length === 0 ? (
               <div
-                className={`grid gap-3 md:gap-4 ${
-                  viewMode === "grid"
-                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-                    : "grid-cols-1"
-                }`}
+                className={`grid gap-3 md:gap-4 ${viewMode === "grid"
+                  ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                  : "grid-cols-1"
+                  }`}
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                   <Card
@@ -433,11 +456,10 @@ export default function Home() {
               </div>
             ) : filteredStreams.length > 0 ? (
               <div
-                className={`grid gap-3 md:gap-4 ${
-                  viewMode === "grid"
-                    ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-                    : "grid-cols-1"
-                }`}
+                className={`grid gap-3 md:gap-4 ${viewMode === "grid"
+                  ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                  : "grid-cols-1"
+                  }`}
               >
                 {filteredStreams.map((stream) => (
                   <StreamCard
