@@ -82,7 +82,16 @@ export function AdminDashboard({
             value={platformStats.totalUsers}
             description={`${platformStats.activeUsers} active`}
             icon={Users}
-            chartData={[500, 800, 1200, 1800, 2500, 3200, 4000, platformStats.totalUsers]}
+            chartData={[
+              500,
+              800,
+              1200,
+              1800,
+              2500,
+              3200,
+              4000,
+              platformStats.totalUsers,
+            ]}
             chartColor="blue"
             trend={{ value: 28.5, isPositive: true }}
           />
@@ -91,7 +100,16 @@ export function AdminDashboard({
             value={platformStats.totalCreators}
             description="Platform creators"
             icon={Activity}
-            chartData={[50, 80, 120, 180, 250, 350, 450, platformStats.totalCreators]}
+            chartData={[
+              50,
+              80,
+              120,
+              180,
+              250,
+              350,
+              450,
+              platformStats.totalCreators,
+            ]}
             chartColor="purple"
             trend={{ value: 32.8, isPositive: true }}
           />
@@ -100,7 +118,16 @@ export function AdminDashboard({
             value={platformStats.totalStreams}
             description={`${platformStats.liveStreams} live now`}
             icon={Video}
-            chartData={[100, 200, 350, 550, 800, 1100, 1500, platformStats.totalStreams]}
+            chartData={[
+              100,
+              200,
+              350,
+              550,
+              800,
+              1100,
+              1500,
+              platformStats.totalStreams,
+            ]}
             chartColor="purple"
             trend={{ value: 42.1, isPositive: true }}
           />
@@ -109,7 +136,16 @@ export function AdminDashboard({
             value={`$${platformStats.totalRevenue.toFixed(2)}`}
             description="All-time platform revenue"
             icon={DollarSign}
-            chartData={[5000, 12000, 25000, 42000, 68000, 95000, 125000, platformStats.totalRevenue]}
+            chartData={[
+              5000,
+              12000,
+              25000,
+              42000,
+              68000,
+              95000,
+              125000,
+              platformStats.totalRevenue,
+            ]}
             chartColor="green"
             trend={{ value: 56.7, isPositive: true }}
           />
@@ -127,7 +163,16 @@ export function AdminDashboard({
             value={`$${platformStats.totalCreditsInCirculation.toFixed(2)}`}
             description="User wallet balances"
             icon={Database}
-            chartData={[10000, 15000, 22000, 35000, 48000, 65000, 85000, platformStats.totalCreditsInCirculation]}
+            chartData={[
+              10000,
+              15000,
+              22000,
+              35000,
+              48000,
+              65000,
+              85000,
+              platformStats.totalCreditsInCirculation,
+            ]}
             chartColor="blue"
             trend={{ value: 18.9, isPositive: true }}
           />
@@ -136,7 +181,16 @@ export function AdminDashboard({
             value={`$${platformStats.totalRevenue.toFixed(2)}`}
             description="Total payments received"
             icon={TrendingUp}
-            chartData={[5000, 12000, 25000, 42000, 68000, 95000, 125000, platformStats.totalRevenue]}
+            chartData={[
+              5000,
+              12000,
+              25000,
+              42000,
+              68000,
+              95000,
+              125000,
+              platformStats.totalRevenue,
+            ]}
             chartColor="green"
             trend={{ value: 56.7, isPositive: true }}
           />
@@ -162,7 +216,16 @@ export function AdminDashboard({
             value={platformStats.totalModerationActions}
             description="Moderation actions"
             icon={Shield}
-            chartData={[100, 200, 350, 500, 700, 950, 1200, platformStats.totalModerationActions]}
+            chartData={[
+              100,
+              200,
+              350,
+              500,
+              700,
+              950,
+              1200,
+              platformStats.totalModerationActions,
+            ]}
             chartColor="orange"
           />
           <StatsCard
@@ -170,7 +233,16 @@ export function AdminDashboard({
             value={platformStats.pendingVerifications}
             description="Users awaiting approval"
             icon={AlertTriangle}
-            chartData={[15, 12, 18, 10, 8, 14, 6, platformStats.pendingVerifications]}
+            chartData={[
+              15,
+              12,
+              18,
+              10,
+              8,
+              14,
+              6,
+              platformStats.pendingVerifications,
+            ]}
             chartColor="orange"
             trend={{ value: 12.5, isPositive: false }}
           />
