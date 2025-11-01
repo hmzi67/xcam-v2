@@ -64,7 +64,16 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={`$${userData.totalEarnings.toFixed(2)}`}
           description="From all streams"
           icon={DollarSign}
-          chartData={[120, 180, 240, 350, 420, 500, 580, userData.totalEarnings]}
+          chartData={[
+            120,
+            180,
+            240,
+            350,
+            420,
+            500,
+            580,
+            userData.totalEarnings,
+          ]}
           chartColor="green"
           trend={{ value: 12.5, isPositive: true }}
         />
@@ -109,7 +118,16 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.totalChatMessages}
           description="Total chat messages"
           icon={MessageSquare}
-          chartData={[50, 120, 200, 350, 500, 680, 850, userData.totalChatMessages]}
+          chartData={[
+            50,
+            120,
+            200,
+            350,
+            500,
+            680,
+            850,
+            userData.totalChatMessages,
+          ]}
           chartColor="blue"
           trend={{ value: 24.8, isPositive: true }}
         />
@@ -118,7 +136,16 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.avgViewersPerStream.toFixed(1)}
           description="Per stream"
           icon={TrendingUp}
-          chartData={[15, 25, 30, 45, 55, 65, 70, Math.round(userData.avgViewersPerStream)]}
+          chartData={[
+            15,
+            25,
+            30,
+            45,
+            55,
+            65,
+            70,
+            Math.round(userData.avgViewersPerStream),
+          ]}
           chartColor="orange"
           trend={{ value: 8.4, isPositive: true }}
         />

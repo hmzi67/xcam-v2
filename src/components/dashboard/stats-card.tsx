@@ -15,11 +15,11 @@ interface StatsCardProps {
 }
 
 // Mini Sparkline Chart Component
-function MiniChart({ 
-  data, 
-  color = "purple" 
-}: { 
-  data: number[]; 
+function MiniChart({
+  data,
+  color = "purple",
+}: {
+  data: number[];
   color?: "purple" | "green" | "blue" | "orange" | "red";
 }) {
   if (!data || data.length === 0) return null;
@@ -27,12 +27,14 @@ function MiniChart({
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
-  
-  const points = data.map((value, index) => {
-    const x = (index / (data.length - 1)) * 100;
-    const y = 100 - ((value - min) / range) * 100;
-    return `${x},${y}`;
-  }).join(" ");
+
+  const points = data
+    .map((value, index) => {
+      const x = (index / (data.length - 1)) * 100;
+      const y = 100 - ((value - min) / range) * 100;
+      return `${x},${y}`;
+    })
+    .join(" ");
 
   const colorClasses = {
     purple: "stroke-purple-500",
@@ -51,8 +53,8 @@ function MiniChart({
   };
 
   return (
-    <svg 
-      viewBox="0 0 100 100" 
+    <svg
+      viewBox="0 0 100 100"
       className="w-full h-12 mt-2"
       preserveAspectRatio="none"
     >

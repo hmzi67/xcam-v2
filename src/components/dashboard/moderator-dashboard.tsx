@@ -67,7 +67,16 @@ export function ModeratorDashboard({ userData }: ModeratorDashboardProps) {
           value={userData.totalModerationActions}
           description="All-time moderation"
           icon={Shield}
-          chartData={[50, 80, 120, 180, 220, 280, 350, userData.totalModerationActions]}
+          chartData={[
+            50,
+            80,
+            120,
+            180,
+            220,
+            280,
+            350,
+            userData.totalModerationActions,
+          ]}
           chartColor="orange"
           trend={{ value: 15.3, isPositive: true }}
         />
@@ -92,7 +101,16 @@ export function ModeratorDashboard({ userData }: ModeratorDashboardProps) {
           value={userData.recentMessageDeletions}
           description="Last 30 days"
           icon={MessageSquare}
-          chartData={[25, 35, 40, 50, 55, 60, 70, userData.recentMessageDeletions]}
+          chartData={[
+            25,
+            35,
+            40,
+            50,
+            55,
+            60,
+            70,
+            userData.recentMessageDeletions,
+          ]}
           chartColor="purple"
         />
       </div>
@@ -120,7 +138,16 @@ export function ModeratorDashboard({ userData }: ModeratorDashboardProps) {
           value={userData.totalUsers}
           description="Platform users"
           icon={Users}
-          chartData={[500, 650, 800, 1000, 1200, 1400, 1600, userData.totalUsers]}
+          chartData={[
+            500,
+            650,
+            800,
+            1000,
+            1200,
+            1400,
+            1600,
+            userData.totalUsers,
+          ]}
           chartColor="blue"
           trend={{ value: 22.4, isPositive: true }}
         />
