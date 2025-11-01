@@ -60,18 +60,24 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
           value={`$${userData.balance.toFixed(2)}`}
           description="Available credits"
           icon={Wallet}
+          chartData={[45, 52, 48, 65, 70, 68, 75, userData.balance]}
+          chartColor="green"
         />
         <StatsCard
           title="Watch Time"
           value={`${watchTimeHours}h ${watchTimeMinutes}m`}
           description="Total viewing time"
           icon={Clock}
+          chartData={[20, 35, 45, 60, 55, 70, 80, watchTimeHours]}
+          chartColor="blue"
         />
         <StatsCard
           title="Active Sessions"
           value={userData.activeStreamSessions}
           description="Currently watching"
           icon={Video}
+          chartData={[0, 1, 2, 1, 3, 2, 1, userData.activeStreamSessions]}
+          chartColor="purple"
         />
       </div>
 

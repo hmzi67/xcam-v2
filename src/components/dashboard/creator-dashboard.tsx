@@ -64,18 +64,26 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={`$${userData.totalEarnings.toFixed(2)}`}
           description="From all streams"
           icon={DollarSign}
+          chartData={[120, 180, 240, 350, 420, 500, 580, userData.totalEarnings]}
+          chartColor="green"
+          trend={{ value: 12.5, isPositive: true }}
         />
         <StatsCard
           title="Wallet Balance"
           value={`$${userData.balance.toFixed(2)}`}
           description="Available balance"
           icon={DollarSign}
+          chartData={[50, 120, 80, 150, 100, 180, 140, userData.balance]}
+          chartColor="blue"
         />
         <StatsCard
           title="Total Views"
           value={userData.totalViews}
           description="All-time views"
           icon={Eye}
+          chartData={[100, 250, 400, 600, 850, 1100, 1400, userData.totalViews]}
+          chartColor="purple"
+          trend={{ value: 18.2, isPositive: true }}
         />
       </div>
 
@@ -85,24 +93,34 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           value={userData.totalStreams}
           description="All streams created"
           icon={Video}
+          chartData={[2, 4, 6, 9, 12, 15, 18, userData.totalStreams]}
+          chartColor="purple"
         />
         <StatsCard
           title="Live Now"
           value={userData.liveStreams}
           description="Currently streaming"
           icon={Video}
+          chartData={[0, 1, 0, 1, 2, 1, 0, userData.liveStreams]}
+          chartColor="red"
         />
         <StatsCard
           title="Chat Engagement"
           value={userData.totalChatMessages}
           description="Total chat messages"
           icon={MessageSquare}
+          chartData={[50, 120, 200, 350, 500, 680, 850, userData.totalChatMessages]}
+          chartColor="blue"
+          trend={{ value: 24.8, isPositive: true }}
         />
         <StatsCard
           title="Avg. Viewers"
           value={userData.avgViewersPerStream.toFixed(1)}
           description="Per stream"
           icon={TrendingUp}
+          chartData={[15, 25, 30, 45, 55, 65, 70, Math.round(userData.avgViewersPerStream)]}
+          chartColor="orange"
+          trend={{ value: 8.4, isPositive: true }}
         />
       </div>
 
