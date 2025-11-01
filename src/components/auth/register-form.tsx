@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { Mail, Lock, Eye, EyeOff, User, Video, MessageSquare } from "lucide-react"
 
@@ -249,7 +250,11 @@ export default function RegisterForm() {
                         {/* Google Button */}
                         <button
                             type="button"
-                            className="w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition"
+                            onClick={() => signIn("google", { callbackUrl: "/" })}
+                            disabled={isLoading}
+                            className={`w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition ${
+                                isLoading ? "opacity-70 cursor-not-allowed" : ""
+                            }`}
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path

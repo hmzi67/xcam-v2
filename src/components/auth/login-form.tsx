@@ -226,7 +226,11 @@ export default function LoginForm() {
                         {/* Google Button */}
                         <button
                             type="button"
-                            className="w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition"
+                            onClick={() => signIn("google", { callbackUrl })}
+                            disabled={isLoading}
+                            className={`w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium py-3 rounded-lg transition ${
+                                isLoading ? "opacity-70 cursor-not-allowed" : ""
+                            }`}
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path

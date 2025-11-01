@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -30,6 +31,17 @@ interface CustomUser {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -82,13 +94,78 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          // Check if user exists
+          let existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            include: { profile: true },
+          });
+
+          if (!existingUser) {
+            // Create new user with Google OAuth
+            existingUser = await prisma.user.create({
+              data: {
+                email: user.email!,
+                emailVerified: true, // Google emails are pre-verified
+                role: "VIEWER",
+                profile: {
+                  create: {
+                    displayName: user.name || user.email!.split("@")[0],
+                    avatarUrl: user.image || null,
+                  },
+                },
+              },
+              include: { profile: true },
+            });
+          } else if (!existingUser.profile) {
+            // Create profile if it doesn't exist
+            await prisma.profile.create({
+              data: {
+                userId: existingUser.id,
+                displayName: user.name || user.email!.split("@")[0],
+                avatarUrl: user.image || null,
+              },
+            });
+          }
+
+          // Update last login
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { lastLoginAt: new Date() },
+          });
+
+          return true;
+        } catch (error) {
+          console.error("Google sign-in error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
         const customUser = user as CustomUser;
         token.id = customUser.id;
         token.role = customUser.role;
         token.emailVerified = customUser.emailVerified;
       }
+      
+      // For Google OAuth, fetch user data from database
+      if (account?.provider === "google" && token.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email },
+          include: { profile: true },
+        });
+        
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+          token.emailVerified = dbUser.emailVerified;
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {

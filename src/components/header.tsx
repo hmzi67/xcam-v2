@@ -64,6 +64,14 @@ export function Header() {
         void signOut({ callbackUrl: "/" })
     }
 
+    // Hide header on auth pages and upgrade page
+    const hideHeaderPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/verify', '/upgrade']
+    const shouldHideHeader = hideHeaderPaths.some(path => pathname?.startsWith(path))
+
+    if (shouldHideHeader) {
+        return null
+    }
+
     // Show skeleton only while auth is resolving or while profile is fetching for an authenticated user
     if (status === "loading" || (session?.user && loading)) {
         return (
@@ -92,34 +100,36 @@ export function Header() {
                         </Link>
                     </div>
 
-                    {/* Center nav pill */}
-                    <nav className="hidden md:flex flex-1 items-center justify-center">
-                        <div className="relative rounded-full border border-gray-700 bg-gray-800/70 backdrop-blur px-2 py-1 shadow-sm">
-                            <ul className="flex items-center">
-                                {[
-                                    { label: "Home", href: "/" },
-                                    { label: "Pricing", href: "/pricing" },
-                                    { label: "About", href: "/about" },
-                                    { label: "Streaming", href: "/streaming" },
-                                ].map((item) => {
-                                    const active = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
-                                    return (
-                                        <li key={item.href} className="px-1">
-                                            <Link
-                                                href={item.href}
-                                                className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${active ? "text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/60"}`}
-                                            >
-                                                <span className="whitespace-nowrap">{item.label}</span>
-                                                {active && (
-                                                    <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-purple-400" />
-                                                )}
-                                            </Link>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        </div>
-                    </nav>
+                    {/* Center nav pill - Only show when logged in */}
+                    {session?.user && (
+                        <nav className="hidden md:flex flex-1 items-center justify-center">
+                            <div className="relative rounded-full border border-gray-700 bg-gray-800/70 backdrop-blur px-2 py-1 shadow-sm">
+                                <ul className="flex items-center">
+                                    {[
+                                        { label: "Home", href: "/" },
+                                        { label: "Pricing", href: "/pricing" },
+                                        { label: "About", href: "/about" },
+                                        { label: "Streaming", href: "/streaming" },
+                                    ].map((item) => {
+                                        const active = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
+                                        return (
+                                            <li key={item.href} className="px-1">
+                                                <Link
+                                                    href={item.href}
+                                                    className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${active ? "text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/60"}`}
+                                                >
+                                                    <span className="whitespace-nowrap">{item.label}</span>
+                                                    {active && (
+                                                        <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-purple-400" />
+                                                    )}
+                                                </Link>
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            </div>
+                        </nav>
+                    )}
 
                     <div className="flex items-center space-x-3">
                         {(session?.user as any)?.role === "ADMIN" && (
