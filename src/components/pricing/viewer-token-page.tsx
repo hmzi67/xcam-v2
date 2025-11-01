@@ -39,55 +39,7 @@ export default function ViewerTokenPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-          {/* Free Plan */}
-          <Card
-            onClick={() => setSelectedPlan("free")}
-            className={`cursor-pointer bg-gray-800/30 backdrop-blur-sm rounded-2xl overflow-hidden transition-all ${
-              selectedPlan === "free"
-                ? "border-purple-500/50 shadow-2xl shadow-purple-500/20 scale-105"
-                : "border-gray-700/50 hover:border-gray-600/50"
-            }`}
-          >
-            <CardHeader className="pb-8 pt-8">
-              <div className="flex items-center justify-between mb-6">
-                <CardTitle className="text-2xl font-semibold text-white">
-                  Free
-                </CardTitle>
-                <div className="w-10 h-10 rounded-full bg-gray-700/50 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-gray-400" />
-                </div>
-              </div>
-              <div className="mb-6">
-                <span className="text-5xl font-bold text-white">$0</span>
-              </div>
-              <Button
-                disabled
-                className="w-full bg-gray-700/50 hover:bg-gray-700/50 text-gray-400 rounded-xl py-6 cursor-not-allowed border border-gray-600/30"
-              >
-                Current Plan
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-3 pb-8">
-              <div className="flex items-start gap-3">
-                <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-gray-500" />
-                <span className="text-sm text-gray-400">
-                  Limited access to public streams
-                </span>
-              </div>
-              <div className="flex items-start gap-3">
-                <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-gray-500" />
-                <span className="text-sm text-gray-400">View-only mode</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-gray-500" />
-                <span className="text-sm text-gray-400">
-                  Basic community access
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-16">
           {/* Basic Plan */}
           <Card
             onClick={() => setSelectedPlan("basic")}
