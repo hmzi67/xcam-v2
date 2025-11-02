@@ -64,9 +64,12 @@ interface User {
   streamsCount: number;
   messagesCount: number;
   moderationActionsCount: number;
-  moderationTargetCount: number;
   createdAt: string;
   lastLoginAt: string | null;
+  banExpiresAt: string | null;
+  suspendExpiresAt: string | null;
+  banReason: string | null;
+  suspendReason: string | null;
 }
 
 interface PaginationData {
@@ -107,6 +110,8 @@ export default function UsersManagementPage() {
   }>({ open: false, userId: null, userName: null, action: null });
 
   const [banReason, setBanReason] = useState("");
+  const [banDuration, setBanDuration] = useState<string>("7d"); // Default 7 days
+  const [suspendDuration, setSuspendDuration] = useState<string>("3h"); // Default 3 hours
   const [actionLoading, setActionLoading] = useState(false);
 
   // Fetch users
@@ -180,6 +185,32 @@ export default function UsersManagementPage() {
 
     try {
       setActionLoading(true);
+
+      // Calculate duration in seconds
+      let durationInSeconds = null;
+
+      if (banDialog.action === "BAN") {
+        if (banDuration === "permanent") {
+          durationInSeconds = null; // Permanent ban
+        } else {
+          const durationMap: Record<string, number> = {
+            "7d": 7 * 24 * 60 * 60,      // 7 days
+            "30d": 30 * 24 * 60 * 60,    // 1 month
+            "180d": 180 * 24 * 60 * 60,  // 6 months
+            "365d": 365 * 24 * 60 * 60,  // 1 year
+          };
+          durationInSeconds = durationMap[banDuration] || null;
+        }
+      } else if (banDialog.action === "SUSPEND") {
+        const durationMap: Record<string, number> = {
+          "1h": 60 * 60,        // 1 hour
+          "3h": 3 * 60 * 60,    // 3 hours
+          "6h": 6 * 60 * 60,    // 6 hours
+          "12h": 12 * 60 * 60,  // 12 hours
+        };
+        durationInSeconds = durationMap[suspendDuration];
+      }
+
       const response = await fetch("/api/users", {
         method: "PATCH",
         headers: {
@@ -189,6 +220,7 @@ export default function UsersManagementPage() {
           userId: banDialog.userId,
           action: banDialog.action,
           reason: banReason,
+          duration: durationInSeconds,
         }),
       });
 
@@ -200,6 +232,8 @@ export default function UsersManagementPage() {
       toast.success(`User ${banDialog.action.toLowerCase()}ned successfully`);
       setBanDialog({ open: false, userId: null, userName: null, action: null });
       setBanReason("");
+      setBanDuration("7d");
+      setSuspendDuration("3h");
       fetchUsers();
     } catch (error: any) {
       console.error("Error updating user:", error);
@@ -209,8 +243,31 @@ export default function UsersManagementPage() {
     }
   };
 
-  // Get status badge color
-  const getStatusBadge = (status: string) => {
+  // Helper function to format time remaining
+  const formatTimeRemaining = (expiresAt: string | null): string => {
+    if (!expiresAt) return "Permanent";
+
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diff = expires.getTime() - now.getTime();
+
+    if (diff <= 0) return "Expired";
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days}d`;
+    if (hours > 0) return `${hours}h`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${seconds}s`;
+  };
+
+  // Get status badge color with time remaining
+  const getStatusBadge = (user: User) => {
+    const status = user.status;
+
     switch (status) {
       case "ACTIVE":
         return (
@@ -219,16 +276,24 @@ export default function UsersManagementPage() {
           </Badge>
         );
       case "BANNED":
+        const banTime = formatTimeRemaining(user.banExpiresAt);
         return (
-          <Badge className="bg-red-600/20 text-red-400 border-red-500/50">
-            Banned
-          </Badge>
+          <div className="flex flex-col gap-1">
+            <Badge className="bg-red-600/20 text-red-400 border-red-500/50">
+              Banned
+            </Badge>
+            <span className="text-xs text-red-400">{banTime}</span>
+          </div>
         );
       case "SUSPENDED":
+        const suspendTime = formatTimeRemaining(user.suspendExpiresAt);
         return (
-          <Badge className="bg-orange-600/20 text-orange-400 border-orange-500/50">
-            Suspended
-          </Badge>
+          <div className="flex flex-col gap-1">
+            <Badge className="bg-orange-600/20 text-orange-400 border-orange-500/50">
+              Suspended
+            </Badge>
+            <span className="text-xs text-orange-400">{suspendTime}</span>
+          </div>
         );
       case "PENDING_VERIFICATION":
         return (
@@ -408,7 +473,7 @@ export default function UsersManagementPage() {
                           </div>
                         </TableCell>
                         <TableCell>{getRoleBadge(user.role)}</TableCell>
-                        <TableCell>{getStatusBadge(user.status)}</TableCell>
+                        <TableCell>{getStatusBadge(user)}</TableCell>
                         <TableCell>
                           ${Number(user.balance).toFixed(2)}
                         </TableCell>
@@ -594,6 +659,8 @@ export default function UsersManagementPage() {
           if (!actionLoading) {
             setBanDialog({ open, userId: null, userName: null, action: null });
             setBanReason("");
+            setBanDuration("7d");
+            setSuspendDuration("3h");
           }
         }}
       >
@@ -603,10 +670,10 @@ export default function UsersManagementPage() {
               {banDialog.action === "BAN"
                 ? "Ban User"
                 : banDialog.action === "SUSPEND"
-                ? "Suspend User"
-                : banDialog.action === "ACTIVATE"
-                ? "Activate User"
-                : "Unban User"}
+                  ? "Suspend User"
+                  : banDialog.action === "ACTIVATE"
+                    ? "Activate User"
+                    : "Unban User"}
             </DialogTitle>
             <DialogDescription>
               {banDialog.action === "BAN" || banDialog.action === "SUSPEND"
@@ -616,16 +683,62 @@ export default function UsersManagementPage() {
             </DialogDescription>
           </DialogHeader>
 
-          {(banDialog.action === "BAN" || banDialog.action === "SUSPEND") && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Reason (optional)</label>
-              <Textarea
-                placeholder="Enter the reason for this action..."
-                value={banReason}
-                onChange={(e) => setBanReason(e.target.value)}
-                className="bg-gray-900/50 border-gray-700"
-                rows={3}
-              />
+          {banDialog.action === "BAN" && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Ban Duration</label>
+                <Select value={banDuration} onValueChange={setBanDuration}>
+                  <SelectTrigger className="bg-gray-900/50 border-gray-700">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">7 Days</SelectItem>
+                    <SelectItem value="30d">1 Month</SelectItem>
+                    <SelectItem value="180d">6 Months</SelectItem>
+                    <SelectItem value="365d">1 Year</SelectItem>
+                    <SelectItem value="permanent">Permanent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Reason (optional)</label>
+                <Textarea
+                  placeholder="Enter the reason for this ban..."
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  className="bg-gray-900/50 border-gray-700"
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+
+          {banDialog.action === "SUSPEND" && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Suspension Duration</label>
+                <Select value={suspendDuration} onValueChange={setSuspendDuration}>
+                  <SelectTrigger className="bg-gray-900/50 border-gray-700">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">1 Hour</SelectItem>
+                    <SelectItem value="3h">3 Hours</SelectItem>
+                    <SelectItem value="6h">6 Hours</SelectItem>
+                    <SelectItem value="12h">12 Hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Reason (optional)</label>
+                <Textarea
+                  placeholder="Enter the reason for this suspension..."
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  className="bg-gray-900/50 border-gray-700"
+                  rows={3}
+                />
+              </div>
             </div>
           )}
 
@@ -640,6 +753,8 @@ export default function UsersManagementPage() {
                   action: null,
                 });
                 setBanReason("");
+                setBanDuration("7d");
+                setSuspendDuration("3h");
               }}
               disabled={actionLoading}
               className="border-gray-700 text-gray-300 hover:bg-gray-800"
@@ -653,8 +768,8 @@ export default function UsersManagementPage() {
                 banDialog.action === "BAN"
                   ? "bg-red-600 hover:bg-red-700 text-white"
                   : banDialog.action === "SUSPEND"
-                  ? "bg-orange-600 hover:bg-orange-700 text-white"
-                  : "bg-green-600 hover:bg-green-700 text-white"
+                    ? "bg-orange-600 hover:bg-orange-700 text-white"
+                    : "bg-green-600 hover:bg-green-700 text-white"
               }
             >
               {actionLoading ? (

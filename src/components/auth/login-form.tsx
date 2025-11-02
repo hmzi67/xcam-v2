@@ -29,6 +29,9 @@ export default function LoginForm() {
     const callbackUrl = searchParams.get("callbackUrl") || "/"
     const verified = searchParams.get("verified")
     const authError = searchParams.get("error")
+    const errorTime = searchParams.get("time")
+    const errorReason = searchParams.get("reason")
+    const isPermanent = searchParams.get("permanent")
 
     const {
         register,
@@ -45,24 +48,40 @@ export default function LoginForm() {
 
         // Handle OAuth errors (e.g., from Google sign-in)
         if (authError) {
-            const errorMessages: Record<string, string> = {
-                AccountSuspended: "Your account has been suspended. Please contact support for assistance.",
-                AccountBanned: "Your account has been permanently banned. Please contact support if you believe this is an error.",
-                AccountInactive: "Your account is inactive. Please contact support for assistance.",
-                OAuthSignin: "Error occurred during OAuth sign-in. Please try again.",
-                OAuthCallback: "Error occurred during OAuth callback. Please try again.",
-                OAuthCreateAccount: "Could not create OAuth account. Please try again.",
-                EmailCreateAccount: "Could not create email account. Please try again.",
-                Callback: "Error occurred during callback. Please try again.",
-                OAuthAccountNotLinked: "This email is already associated with another account. Please sign in using your original method.",
-                EmailSignin: "Could not send sign-in email. Please try again.",
-                CredentialsSignin: "Sign in failed. Please check your credentials.",
-                Default: "An error occurred during authentication. Please try again.",
+            let errorMessage = "";
+
+            if (authError === "AccountSuspended" && errorTime && errorReason) {
+                errorMessage = `Your account has been suspended for ${decodeURIComponent(errorTime)}. Reason: ${decodeURIComponent(errorReason)}`;
+            } else if (authError === "AccountBanned") {
+                if (isPermanent === "true" && errorReason) {
+                    errorMessage = `Your account has been permanently banned. Reason: ${decodeURIComponent(errorReason)}. Please contact support if you believe this is an error.`;
+                } else if (errorTime && errorReason) {
+                    errorMessage = `Your account has been banned for ${decodeURIComponent(errorTime)}. Reason: ${decodeURIComponent(errorReason)}`;
+                } else {
+                    errorMessage = "Your account has been banned. Please contact support.";
+                }
+            } else {
+                const errorMessages: Record<string, string> = {
+                    AccountSuspended: "Your account has been suspended. Please contact support for assistance.",
+                    AccountBanned: "Your account has been banned. Please contact support.",
+                    AccountInactive: "Your account is inactive. Please contact support for assistance.",
+                    OAuthSignin: "Error occurred during OAuth sign-in. Please try again.",
+                    OAuthCallback: "Error occurred during OAuth callback. Please try again.",
+                    OAuthCreateAccount: "Could not create OAuth account. Please try again.",
+                    EmailCreateAccount: "Could not create email account. Please try again.",
+                    Callback: "Error occurred during callback. Please try again.",
+                    OAuthAccountNotLinked: "This email is already associated with another account. Please sign in using your original method.",
+                    EmailSignin: "Could not send sign-in email. Please try again.",
+                    CredentialsSignin: "Sign in failed. Please check your credentials.",
+                    Default: "An error occurred during authentication. Please try again.",
+                };
+
+                errorMessage = errorMessages[authError] || errorMessages.Default;
             }
 
-            setError(errorMessages[authError] || errorMessages.Default)
+            setError(errorMessage);
         }
-    }, [verified, authError])
+    }, [verified, authError, errorTime, errorReason, isPermanent])
 
     const onSubmit = async (data: LoginFormData) => {
         try {

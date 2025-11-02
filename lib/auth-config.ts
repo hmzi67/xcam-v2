@@ -4,6 +4,10 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import {
+  checkAndUpdateExpiredRestrictions,
+  getRestrictionInfo,
+} from "@/lib/auto-unban";
 
 const prisma = new PrismaClient();
 
@@ -57,8 +61,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             include: { profile: true },
           });
 
-          if (!user || !user.passwordHash) {
+          if (!user) {
             throw new Error("Invalid email or password");
+          }
+
+          // Check if user has a password (wasn't created via OAuth only)
+          if (!user.passwordHash) {
+            throw new Error(
+              "This account was created with Google Sign-In. Please use the 'Continue with Google' button to login."
+            );
           }
 
           const isValidPassword = await verifyPassword(
@@ -69,23 +80,44 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new Error("Invalid email or password");
           }
 
-          // Check user account status
-          if (user.status === "SUSPENDED") {
-            throw new Error(
-              "Your account has been suspended. Please contact support for assistance."
-            );
-          }
+          // Check and update expired restrictions
+          const updatedUser = await checkAndUpdateExpiredRestrictions(user.id);
+          const currentUser = updatedUser || user;
 
-          if (user.status === "BANNED") {
-            throw new Error(
-              "Your account has been permanently banned. Please contact support if you believe this is an error."
-            );
+          // Get restriction info
+          const restrictionInfo = getRestrictionInfo({
+            status: currentUser.status,
+            banExpiresAt: currentUser.banExpiresAt,
+            suspendExpiresAt: currentUser.suspendExpiresAt,
+            banReason: currentUser.banReason,
+            suspendReason: currentUser.suspendReason,
+          });
+
+          // Check user account status with detailed messages
+          if (restrictionInfo.restricted) {
+            if (restrictionInfo.type === "SUSPENDED") {
+              throw new Error(
+                `Your account has been suspended for ${restrictionInfo.timeRemaining}. Reason: ${restrictionInfo.reason}`
+              );
+            }
+
+            if (restrictionInfo.type === "BANNED") {
+              if (restrictionInfo.isPermanent) {
+                throw new Error(
+                  `Your account has been permanently banned. Reason: ${restrictionInfo.reason}. Please contact support if you believe this is an error.`
+                );
+              } else {
+                throw new Error(
+                  `Your account has been banned for ${restrictionInfo.timeRemaining}. Reason: ${restrictionInfo.reason}`
+                );
+              }
+            }
           }
 
           // Allow ACTIVE and PENDING_VERIFICATION users to login
           if (
-            user.status !== "ACTIVE" &&
-            user.status !== "PENDING_VERIFICATION"
+            currentUser.status !== "ACTIVE" &&
+            currentUser.status !== "PENDING_VERIFICATION"
           ) {
             throw new Error("Unable to sign in. Please contact support.");
           }
@@ -115,7 +147,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
           // Check if user exists
@@ -142,20 +174,46 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               include: { profile: true },
             });
           } else {
-            // Check existing user's account status
-            if (existingUser.status === "SUSPENDED") {
-              // Return a URL with error parameter instead of throwing
-              return `/login?error=AccountSuspended`;
-            }
+            // Check and update expired restrictions
+            const updatedUser = await checkAndUpdateExpiredRestrictions(
+              existingUser.id
+            );
+            const currentUser = updatedUser || existingUser;
 
-            if (existingUser.status === "BANNED") {
-              return `/login?error=AccountBanned`;
+            // Get restriction info
+            const restrictionInfo = getRestrictionInfo({
+              status: currentUser.status,
+              banExpiresAt: currentUser.banExpiresAt,
+              suspendExpiresAt: currentUser.suspendExpiresAt,
+              banReason: currentUser.banReason,
+              suspendReason: currentUser.suspendReason,
+            });
+
+            // Check existing user's account status with detailed messages
+            if (restrictionInfo.restricted) {
+              if (restrictionInfo.type === "SUSPENDED") {
+                return `/login?error=AccountSuspended&time=${encodeURIComponent(
+                  restrictionInfo.timeRemaining
+                )}&reason=${encodeURIComponent(restrictionInfo.reason)}`;
+              }
+
+              if (restrictionInfo.type === "BANNED") {
+                if (restrictionInfo.isPermanent) {
+                  return `/login?error=AccountBanned&permanent=true&reason=${encodeURIComponent(
+                    restrictionInfo.reason
+                  )}`;
+                } else {
+                  return `/login?error=AccountBanned&time=${encodeURIComponent(
+                    restrictionInfo.timeRemaining
+                  )}&reason=${encodeURIComponent(restrictionInfo.reason)}`;
+                }
+              }
             }
 
             // Allow ACTIVE and PENDING_VERIFICATION users to login
             if (
-              existingUser.status !== "ACTIVE" &&
-              existingUser.status !== "PENDING_VERIFICATION"
+              currentUser.status !== "ACTIVE" &&
+              currentUser.status !== "PENDING_VERIFICATION"
             ) {
               return `/login?error=AccountInactive`;
             }
@@ -215,7 +273,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string;
         session.user.name = session.user.name || session.user.email || "";
         // Add custom fields to session user
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).role = token.role as string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).emailVerified = token.emailVerified === true;
       }
       return session;

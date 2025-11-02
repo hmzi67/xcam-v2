@@ -88,12 +88,18 @@ model User {
   appleId  String? @unique @map("apple_id")
 
   // Email Verification
-  verificationToken   String?   @unique @map("verification_token")
+  verificationToken        String?   @unique @map("verification_token")
   verificationTokenExpires DateTime? @map("verification_token_expires")
 
   // Password Reset
   passwordResetToken   String?   @unique @map("password_reset_token")
   passwordResetExpires DateTime? @map("password_reset_expires")
+
+  // Ban/Suspension fields
+  banExpiresAt     DateTime? @map("ban_expires_at")
+  suspendExpiresAt DateTime? @map("suspend_expires_at")
+  banReason        String?   @map("ban_reason")
+  suspendReason    String?   @map("suspend_reason")
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -111,7 +117,7 @@ model User {
   sentPrivateMessages     PrivateMessage[]   @relation("SentPrivateMessages")
   receivedPrivateMessages PrivateMessage[]   @relation("ReceivedPrivateMessages")
   moderationActions       ModerationAction[] @relation("ModeratorActions")
-  moderationTargets       ModerationAction[] @relation("TargetUser")
+  // moderationTargets       ModerationAction[] @relation("TargetUser")
   streamSessions          StreamSession[]
   meterEvents             MeterEvent[]
 
@@ -174,11 +180,11 @@ model Stream {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  creator           User               @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  sessions          StreamSession[]
-  chatMessages      ChatMessage[]
-  privateMessages   PrivateMessage[]
-  moderationActions ModerationAction[] @relation("TargetStream")
+  creator         User             @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  sessions        StreamSession[]
+  chatMessages    ChatMessage[]
+  privateMessages PrivateMessage[]
+  // moderationActions ModerationAction[] @relation("TargetStream")
 
   @@index([creatorId])
   @@index([status, startedAt])
@@ -371,9 +377,9 @@ model ChatMessage {
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  stream            Stream             @relation(fields: [streamId], references: [id], onDelete: Cascade)
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  moderationActions ModerationAction[] @relation("TargetMessage")
+  stream Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // moderationActions ModerationAction[] @relation("TargetMessage")
 
   @@index([streamId, createdAt])
   @@index([userId])
@@ -423,10 +429,12 @@ model ModerationAction {
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  actor         User         @relation("ModeratorActions", fields: [actorId], references: [id], onDelete: Cascade)
-  targetUser    User?        @relation("TargetUser", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_user_fkey")
-  targetStream  Stream?      @relation("TargetStream", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_stream_fkey")
-  targetMessage ChatMessage? @relation("TargetMessage", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_message_fkey")
+  actor User @relation("ModeratorActions", fields: [actorId], references: [id], onDelete: Cascade)
+  // Note: These relations are intentionally commented out to avoid foreign key constraint issues
+  // when targetId references different entity types. The targetId field is used polymorphically.
+  // targetUser    User?        @relation("TargetUser", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_user_fkey")
+  // targetStream  Stream?      @relation("TargetStream", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_stream_fkey")
+  // targetMessage ChatMessage? @relation("TargetMessage", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_message_fkey")
 
   @@index([targetType, targetId])
   @@index([actorId])

@@ -1,58 +1,61 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
-import { UserRole } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { UserRole } from "@prisma/client";
 
 // Helper to check if user is moderator or admin
 function isAuthorized(role: string): boolean {
-  return role === 'MODERATOR' || role === 'ADMIN';
+  return role === "MODERATOR" || role === "ADMIN";
 }
 
 // GET: List all users with pagination and filters
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userRole = (session.user as any).role;
     const currentUserId = (session.user as any).id;
-    
+
     // Check if user is moderator or admin
     if (!isAuthorized(userRole)) {
-      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden: Insufficient permissions" },
+        { status: 403 }
+      );
     }
 
     // Parse query parameters
     const searchParams = req.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const search = searchParams.get('search') || '';
-    const role = searchParams.get('role') || '';
-    const status = searchParams.get('status') || '';
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const search = searchParams.get("search") || "";
+    const role = searchParams.get("role") || "";
+    const status = searchParams.get("status") || "";
 
     const skip = (page - 1) * limit;
 
     // Build where clause
     const where: any = {
       // Exclude current user from the list
-      id: { not: currentUserId }
+      id: { not: currentUserId },
     };
-    
+
     if (search) {
       where.OR = [
-        { email: { contains: search, mode: 'insensitive' } },
-        { profile: { displayName: { contains: search, mode: 'insensitive' } } },
+        { email: { contains: search, mode: "insensitive" } },
+        { profile: { displayName: { contains: search, mode: "insensitive" } } },
       ];
     }
 
-    if (role && role !== 'ALL') {
+    if (role && role !== "ALL") {
       where.role = role as UserRole;
     }
 
-    if (status && status !== 'ALL') {
+    if (status && status !== "ALL") {
       where.status = status;
     }
 
@@ -82,17 +85,16 @@ export async function GET(req: NextRequest) {
             streams: true,
             chatMessages: true,
             moderationActions: true,
-            moderationTargets: true,
           },
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     // Format response
-    const formattedUsers = users.map(user => ({
+    const formattedUsers = users.map((user) => ({
       id: user.id,
       email: user.email,
       role: user.role,
@@ -105,9 +107,12 @@ export async function GET(req: NextRequest) {
       streamsCount: user._count.streams,
       messagesCount: user._count.chatMessages,
       moderationActionsCount: user._count.moderationActions,
-      moderationTargetCount: user._count.moderationTargets,
       createdAt: user.createdAt,
       lastLoginAt: user.lastLoginAt,
+      banExpiresAt: user.banExpiresAt,
+      suspendExpiresAt: user.suspendExpiresAt,
+      banReason: user.banReason,
+      suspendReason: user.suspendReason,
     }));
 
     return NextResponse.json({
@@ -120,42 +125,54 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Error fetching users:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
-// PATCH: Ban/unban a user
+// PATCH: Ban/unban a user with time-based restrictions
 export async function PATCH(req: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userRole = (session.user as any).role;
     const actorId = (session.user as any).id;
-    
+
     // Check if user is moderator or admin
     if (!isAuthorized(userRole)) {
-      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden: Insufficient permissions" },
+        { status: 403 }
+      );
     }
 
     const body = await req.json();
-    const { userId, action, reason } = body;
+    const { userId, action, reason, duration } = body; // Added duration parameter
 
     if (!userId || !action) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
-    if (!['BAN', 'UNBAN', 'SUSPEND', 'ACTIVATE'].includes(action)) {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    if (!["BAN", "UNBAN", "SUSPEND", "ACTIVATE"].includes(action)) {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
     // Prevent users from banning themselves
     if (userId === actorId) {
-      return NextResponse.json({ error: 'Cannot perform action on yourself' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Cannot perform action on yourself" },
+        { status: 400 }
+      );
     }
 
     // Get target user
@@ -165,37 +182,83 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (!targetUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Moderators cannot ban admins
-    if (userRole === 'MODERATOR' && targetUser.role === 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden: Cannot ban administrators' }, { status: 403 });
+    if (userRole === "MODERATOR" && targetUser.role === "ADMIN") {
+      return NextResponse.json(
+        { error: "Forbidden: Cannot ban administrators" },
+        { status: 403 }
+      );
     }
 
-    // Update user status
-    let newStatus;
+    // Calculate expiration time based on action and duration
+    interface UpdateData {
+      status?: "ACTIVE" | "BANNED" | "SUSPENDED" | "PENDING_VERIFICATION";
+      banReason?: string | null;
+      suspendReason?: string | null;
+      banExpiresAt?: Date | null;
+      suspendExpiresAt?: Date | null;
+    }
+
+    const updateData: UpdateData = {};
+
     switch (action) {
-      case 'BAN':
-        newStatus = 'BANNED' as const;
+      case "BAN":
+        updateData.status = "BANNED";
+        updateData.banReason = reason || "Banned by moderator";
+
+        // Set ban expiration time (null means permanent)
+        if (duration && duration !== "permanent") {
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + duration * 1000); // duration in seconds
+          updateData.banExpiresAt = expiresAt;
+        } else {
+          updateData.banExpiresAt = null; // Permanent ban
+        }
+        // Clear suspension fields when banning
+        updateData.suspendExpiresAt = null;
+        updateData.suspendReason = null;
         break;
-      case 'SUSPEND':
-        newStatus = 'SUSPENDED' as const;
+
+      case "SUSPEND":
+        updateData.status = "SUSPENDED";
+        updateData.suspendReason = reason || "Suspended by moderator";
+
+        // Suspension always has a duration
+        if (duration) {
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + duration * 1000); // duration in seconds
+          updateData.suspendExpiresAt = expiresAt;
+        } else {
+          return NextResponse.json(
+            { error: "Suspension requires a duration" },
+            { status: 400 }
+          );
+        }
+        // Clear ban fields when suspending
+        updateData.banExpiresAt = null;
+        updateData.banReason = null;
         break;
-      case 'ACTIVATE':
-      case 'UNBAN':
-        newStatus = 'ACTIVE' as const;
+
+      case "ACTIVATE":
+      case "UNBAN":
+        updateData.status = "ACTIVE";
+        updateData.banExpiresAt = null;
+        updateData.suspendExpiresAt = null;
+        updateData.banReason = null;
+        updateData.suspendReason = null;
         break;
+
       default:
-        newStatus = 'ACTIVE' as const;
+        return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
     // Update user
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: {
-        status: newStatus,
-      },
+      data: updateData,
       include: {
         profile: {
           select: {
@@ -205,13 +268,13 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    // Create moderation action record
-    if (action === 'BAN' || action === 'SUSPEND') {
+    // Create moderation action record for audit trail
+    if (action === "BAN" || action === "SUSPEND") {
       await prisma.moderationAction.create({
         data: {
-          targetType: 'USER',
+          targetType: "USER",
           targetId: userId,
-          action: action === 'BAN' ? 'BAN' : 'WARN',
+          action: action === "BAN" ? "BAN" : "WARN",
           reason: reason || `User ${action.toLowerCase()}ned by moderator`,
           actorId,
         },
@@ -225,11 +288,24 @@ export async function PATCH(req: NextRequest) {
         email: updatedUser.email,
         status: updatedUser.status,
         displayName: updatedUser.profile?.displayName,
+        banExpiresAt: updatedUser.banExpiresAt,
+        suspendExpiresAt: updatedUser.suspendExpiresAt,
       },
     });
   } catch (error) {
-    console.error('Error updating user status:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Error updating user status:", error);
+    console.error("Full error details:", JSON.stringify(error, null, 2));
+
+    // Return more specific error message if available
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json(
+      {
+        error: "Failed to update user status",
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -237,29 +313,38 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userRole = (session.user as any).role;
     const actorId = (session.user as any).id;
-    
+
     // Only admins can delete users
-    if (userRole !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden: Only administrators can delete users' }, { status: 403 });
+    if (userRole !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Forbidden: Only administrators can delete users" },
+        { status: 403 }
+      );
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const userId = searchParams.get('userId');
+    const userId = searchParams.get("userId");
 
     if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
     }
 
     // Prevent users from deleting themselves
     if (userId === actorId) {
-      return NextResponse.json({ error: 'Cannot delete yourself' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Cannot delete yourself" },
+        { status: 400 }
+      );
     }
 
     // Get target user
@@ -269,7 +354,7 @@ export async function DELETE(req: NextRequest) {
     });
 
     if (!targetUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // For now, we'll do a hard delete
@@ -279,11 +364,14 @@ export async function DELETE(req: NextRequest) {
     });
 
     return NextResponse.json({
-      message: 'User deleted successfully',
+      message: "User deleted successfully",
       deletedUserId: userId,
     });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
