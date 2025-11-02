@@ -28,6 +28,7 @@ export default function LoginForm() {
 
     const callbackUrl = searchParams.get("callbackUrl") || "/"
     const verified = searchParams.get("verified")
+    const authError = searchParams.get("error")
 
     const {
         register,
@@ -41,7 +42,27 @@ export default function LoginForm() {
         if (verified === "true") {
             setSuccessMessage("Email verified successfully! You can now sign in.")
         }
-    }, [verified])
+
+        // Handle OAuth errors (e.g., from Google sign-in)
+        if (authError) {
+            const errorMessages: Record<string, string> = {
+                AccountSuspended: "Your account has been suspended. Please contact support for assistance.",
+                AccountBanned: "Your account has been permanently banned. Please contact support if you believe this is an error.",
+                AccountInactive: "Your account is inactive. Please contact support for assistance.",
+                OAuthSignin: "Error occurred during OAuth sign-in. Please try again.",
+                OAuthCallback: "Error occurred during OAuth callback. Please try again.",
+                OAuthCreateAccount: "Could not create OAuth account. Please try again.",
+                EmailCreateAccount: "Could not create email account. Please try again.",
+                Callback: "Error occurred during callback. Please try again.",
+                OAuthAccountNotLinked: "This email is already associated with another account. Please sign in using your original method.",
+                EmailSignin: "Could not send sign-in email. Please try again.",
+                CredentialsSignin: "Sign in failed. Please check your credentials.",
+                Default: "An error occurred during authentication. Please try again.",
+            }
+
+            setError(errorMessages[authError] || errorMessages.Default)
+        }
+    }, [verified, authError])
 
     const onSubmit = async (data: LoginFormData) => {
         try {
@@ -54,8 +75,9 @@ export default function LoginForm() {
             })
 
             if (result?.error) {
-                setError("Invalid email or password")
-            } else {
+                // Display the specific error message from the auth provider
+                setError(result.error)
+            } else if (result?.ok) {
                 router.push(callbackUrl)
                 router.refresh()
             }

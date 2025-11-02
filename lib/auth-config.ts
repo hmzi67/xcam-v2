@@ -58,7 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
 
           if (!user || !user.passwordHash) {
-            return null;
+            throw new Error("Invalid email or password");
           }
 
           const isValidPassword = await verifyPassword(
@@ -66,7 +66,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             user.passwordHash
           );
           if (!isValidPassword) {
-            return null;
+            throw new Error("Invalid email or password");
+          }
+
+          // Check user account status
+          if (user.status === "SUSPENDED") {
+            throw new Error(
+              "Your account has been suspended. Please contact support for assistance."
+            );
+          }
+
+          if (user.status === "BANNED") {
+            throw new Error(
+              "Your account has been permanently banned. Please contact support if you believe this is an error."
+            );
+          }
+
+          // Allow ACTIVE and PENDING_VERIFICATION users to login
+          if (
+            user.status !== "ACTIVE" &&
+            user.status !== "PENDING_VERIFICATION"
+          ) {
+            throw new Error("Unable to sign in. Please contact support.");
           }
 
           // Update last login
@@ -84,7 +105,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           } as CustomUser;
         } catch (error) {
           console.error("Auth error:", error);
-          return null;
+          throw error;
         }
       },
     }),
@@ -110,6 +131,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 email: user.email!,
                 emailVerified: true, // Google emails are pre-verified
                 role: "VIEWER",
+                status: "ACTIVE", // Set to ACTIVE for new Google OAuth users
                 profile: {
                   create: {
                     displayName: user.name || user.email!.split("@")[0],
@@ -119,15 +141,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               },
               include: { profile: true },
             });
-          } else if (!existingUser.profile) {
-            // Create profile if it doesn't exist
-            await prisma.profile.create({
-              data: {
-                userId: existingUser.id,
-                displayName: user.name || user.email!.split("@")[0],
-                avatarUrl: user.image || null,
-              },
-            });
+          } else {
+            // Check existing user's account status
+            if (existingUser.status === "SUSPENDED") {
+              // Return a URL with error parameter instead of throwing
+              return `/login?error=AccountSuspended`;
+            }
+
+            if (existingUser.status === "BANNED") {
+              return `/login?error=AccountBanned`;
+            }
+
+            // Allow ACTIVE and PENDING_VERIFICATION users to login
+            if (
+              existingUser.status !== "ACTIVE" &&
+              existingUser.status !== "PENDING_VERIFICATION"
+            ) {
+              return `/login?error=AccountInactive`;
+            }
+
+            if (!existingUser.profile) {
+              // Create profile if it doesn't exist
+              await prisma.profile.create({
+                data: {
+                  userId: existingUser.id,
+                  displayName: user.name || user.email!.split("@")[0],
+                  avatarUrl: user.image || null,
+                },
+              });
+            }
           }
 
           // Update last login
@@ -182,6 +224,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
     error: "/login",
+  },
+  events: {
+    async signIn({ user, account }) {
+      // Log successful sign-ins for audit purposes
+      console.log(
+        `User ${user.email} signed in successfully with ${
+          account?.provider || "credentials"
+        }`
+      );
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
