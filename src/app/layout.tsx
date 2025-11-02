@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { AgeVerificationDialog } from "@/components/age-verification-dialog";
 import { Header } from "@/components/header";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,6 +35,7 @@ export default function RootLayout({
           <AgeVerificationDialog />
           <Header />
           {children}
+          <Toaster position="top-right" richColors />
         </AuthProvider>
       </body>
     </html>

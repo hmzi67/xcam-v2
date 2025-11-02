@@ -126,6 +126,12 @@ export function DashboardSidebar({
         roles: ["MODERATOR"],
       },
       {
+        label: "User Management",
+        href: "/users",
+        icon: Users,
+        roles: ["MODERATOR"],
+      },
+      {
         label: "Moderation Queue",
         href: "/moderator/queue",
         icon: AlertTriangle,
@@ -135,12 +141,6 @@ export function DashboardSidebar({
         label: "Reports",
         href: "/moderator/reports",
         icon: Bell,
-        roles: ["MODERATOR"],
-      },
-      {
-        label: "User Management",
-        href: "/moderator/users",
-        icon: Users,
         roles: ["MODERATOR"],
       },
       {
