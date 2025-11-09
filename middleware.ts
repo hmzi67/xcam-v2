@@ -37,16 +37,23 @@ export async function middleware(request: NextRequest) {
     const requiredRoles =
       PROTECTED_ROUTES[protectedRoute as keyof typeof PROTECTED_ROUTES];
 
+    const userRole = (session.user as { role?: string })?.role as
+      | UserRole
+      | undefined;
+
     if (
       requiredRoles.length > 0 &&
-      !requiredRoles.includes(session.user.role)
+      userRole &&
+      !requiredRoles.includes(userRole)
     ) {
       // User doesn't have required role
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
 
     // Check email verification for protected routes
-    if (!session.user.emailVerified && pathname !== "/verify-email") {
+    const emailVerified = (session.user as { emailVerified?: boolean })
+      ?.emailVerified;
+    if (!emailVerified && pathname !== "/verify-email") {
       return NextResponse.redirect(new URL("/verify-email", request.url));
     }
 

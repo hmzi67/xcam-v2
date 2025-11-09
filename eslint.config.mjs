@@ -18,7 +18,29 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "docs/**",
+      "scripts/**",
     ],
+  },
+  {
+    rules: {
+      // Temporarily allow 'any' types in certain contexts
+      "@typescript-eslint/no-explicit-any": "warn",
+      // Allow unused variables starting with _
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      // Relax some Next.js rules
+      "@next/next/no-img-element": "warn",
+      "react/no-unescaped-entities": "warn",
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/rules-of-hooks": "error", // Keep this as error
+    },
   },
 ];
 

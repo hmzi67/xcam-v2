@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { UserStatus } from "@prisma/client";
 
 /**
  * Check and automatically unban/unsuspend users whose ban/suspension period has expired
@@ -22,7 +23,13 @@ export async function checkAndUpdateExpiredRestrictions(userId: string) {
 
     const now = new Date();
     let shouldUpdate = false;
-    let updateData: any = {};
+    const updateData: {
+      status?: UserStatus;
+      banExpiresAt?: Date | null;
+      banReason?: string | null;
+      suspendExpiresAt?: Date | null;
+      suspendReason?: string | null;
+    } = {};
 
     // Check if ban has expired
     if (

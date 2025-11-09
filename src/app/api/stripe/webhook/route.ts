@@ -10,19 +10,36 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: NextRequest) {
+  console.log("🎯 Webhook endpoint hit");
+
+  // Check if webhook secret is configured
+  if (!webhookSecret) {
+    console.error("❌ STRIPE_WEBHOOK_SECRET is not configured!");
+    return NextResponse.json(
+      { error: "Webhook secret not configured" },
+      { status: 500 }
+    );
+  }
+
   const body = await req.text();
-  const signature = req.headers.get("stripe-signature")!;
+  const signature = req.headers.get("stripe-signature");
+
+  if (!signature) {
+    console.error("❌ No stripe-signature header found");
+    return NextResponse.json(
+      { error: "No signature provided" },
+      { status: 400 }
+    );
+  }
 
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    console.log("✅ Webhook signature verified");
   } catch (err: any) {
-    console.error("Webhook signature verification failed:", err.message);
-    return NextResponse.json(
-      { error: "Invalid signature" },
-      { status: 400 }
-    );
+    console.error("❌ Webhook signature verification failed:", err.message);
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   // Handle the event
@@ -30,21 +47,31 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        
+
         console.log("🔔 Webhook received: checkout.session.completed");
         console.log("Session ID:", session.id);
         console.log("Session metadata:", session.metadata);
-        
+
         // Extract metadata
         const userId = session.metadata?.userId;
         const planId = session.metadata?.planId;
         const tokens = parseInt(session.metadata?.tokens || "0");
 
-        console.log("Parsed values - userId:", userId, "planId:", planId, "tokens:", tokens);
+        console.log(
+          "Parsed values - userId:",
+          userId,
+          "planId:",
+          planId,
+          "tokens:",
+          tokens
+        );
 
         if (!userId || !tokens) {
           console.error("Missing userId or tokens in session metadata");
-          return NextResponse.json({ error: "Invalid metadata" }, { status: 400 });
+          return NextResponse.json(
+            { error: "Invalid metadata" },
+            { status: 400 }
+          );
         }
 
         // Check if payment already exists to prevent duplicates
@@ -54,7 +81,10 @@ export async function POST(req: NextRequest) {
 
         if (existingPayment) {
           console.log("⚠️ Payment already processed, skipping:", session.id);
-          return NextResponse.json({ received: true, message: "Already processed" });
+          return NextResponse.json({
+            received: true,
+            message: "Already processed",
+          });
         }
 
         console.log("💰 Processing payment for user:", userId);
@@ -124,7 +154,9 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        console.log(`✅ Successfully processed payment for user ${userId}: +${tokens} tokens (New balance: ${updatedWallet?.balance})`);
+        console.log(
+          `✅ Successfully processed payment for user ${userId}: +${tokens} tokens (New balance: ${updatedWallet?.balance})`
+        );
         break;
       }
 
@@ -137,7 +169,7 @@ export async function POST(req: NextRequest) {
 
       case "checkout.session.async_payment_failed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        
+
         const userId = session.metadata?.userId;
         if (userId) {
           await prisma.payment.create({
@@ -154,7 +186,7 @@ export async function POST(req: NextRequest) {
             },
           });
         }
-        
+
         console.log("Async payment failed:", session.id);
         break;
       }

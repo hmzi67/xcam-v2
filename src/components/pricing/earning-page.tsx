@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Navigation } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,11 @@ import {
 
 export default function EarningsPage() {
     const { data: session, status } = useSession();
-    const userRole = (session?.user as any)?.role;
+    const [calculatorMinutes, setCalculatorMinutes] = useState(60);
+    const [calculatorCustomers, setCalculatorCustomers] = useState(3);
+
+    const userRole = (session?.user as { role?: string })?.role;
+
     if (status === "loading") {
         return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>;
     }
@@ -37,13 +42,11 @@ export default function EarningsPage() {
                 <div className="bg-gray-800/80 p-8 rounded-lg shadow-lg border border-gray-700 text-center max-w-md">
                     <h2 className="text-2xl font-bold mb-4 text-red-400">Unauthorized</h2>
                     <p className="text-gray-300 mb-4">You do not have permission to view this page.</p>
-                    <a href="/" className="text-purple-400 underline">Go back to Home</a>
+                    <Link href="/" className="text-purple-400 underline">Go back to Home</Link>
                 </div>
             </div>
         );
     }
-    const [calculatorMinutes, setCalculatorMinutes] = useState(60);
-    const [calculatorCustomers, setCalculatorCustomers] = useState(3);
 
     const tokenRates = {
         webcamChat: 0.22, // dollars per minute per customer

@@ -1,0 +1,35 @@
+# Netlify Build Configuration
+# See: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Use Next.js Runtime (required for App Router)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# Redirect all routes to Next.js
+[[redirects]]
+  from = "/*"
+  to = "/"
+  status = 200
+
+# Functions configuration
+[functions]
+  node_bundler = "esbuild"
+  # Note: Netlify has a 10 second timeout on free tier
+  # This may cause issues with long-running API routes
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

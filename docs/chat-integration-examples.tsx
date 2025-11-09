@@ -31,9 +31,8 @@ export default function StreamViewPage({ params }: StreamViewPageProps) {
     }, [streamId]);
 
     const isCreator = stream?.creatorId === session?.user?.id;
-    const isModerator =
-        session?.user?.role === "MODERATOR" ||
-        session?.user?.role === "ADMIN";
+    const userRole = (session?.user as { role?: string })?.role;
+    const isModerator = userRole === "MODERATOR" || userRole === "ADMIN";
     const canModerate = isCreator || isModerator;
 
     return (
@@ -88,8 +87,8 @@ export function MobileStreamView({ streamId }: { streamId: string }) {
                 <button
                     onClick={() => setActiveTab("video")}
                     className={`flex-1 py-3 ${activeTab === "video"
-                            ? "border-b-2 border-blue-500 font-semibold"
-                            : "text-gray-500"
+                        ? "border-b-2 border-blue-500 font-semibold"
+                        : "text-gray-500"
                         }`}
                 >
                     Video
@@ -97,8 +96,8 @@ export function MobileStreamView({ streamId }: { streamId: string }) {
                 <button
                     onClick={() => setActiveTab("chat")}
                     className={`flex-1 py-3 ${activeTab === "chat"
-                            ? "border-b-2 border-blue-500 font-semibold"
-                            : "text-gray-500"
+                        ? "border-b-2 border-blue-500 font-semibold"
+                        : "text-gray-500"
                         }`}
                 >
                     Chat

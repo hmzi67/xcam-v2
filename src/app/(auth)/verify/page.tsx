@@ -1,10 +1,10 @@
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { MailCheck, MailX, Loader2, MessageSquare, Video } from "lucide-react"
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const token = searchParams.get("token")
@@ -93,9 +93,8 @@ export default function VerifyEmailPage() {
                         <button
                             onClick={resendVerificationEmail}
                             disabled={isResending}
-                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition ${
-                                isResending ? "opacity-70 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition ${isResending ? "opacity-70 cursor-not-allowed" : ""
+                                }`}
                         >
                             {isResending ? "Sending..." : "Resend Verification Email"}
                         </button>
@@ -116,9 +115,8 @@ export default function VerifyEmailPage() {
                         <button
                             onClick={resendVerificationEmail}
                             disabled={isResending}
-                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition ${
-                                isResending ? "opacity-70 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition ${isResending ? "opacity-70 cursor-not-allowed" : ""
+                                }`}
                         >
                             {isResending ? "Sending..." : "Resend Verification Email"}
                         </button>
@@ -182,5 +180,20 @@ export default function VerifyEmailPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+                <div className="flex items-center gap-2 text-white">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span>Loading...</span>
+                </div>
+            </div>
+        }>
+            <VerifyEmailContent />
+        </Suspense>
     )
 }

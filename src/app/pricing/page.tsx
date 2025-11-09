@@ -5,14 +5,15 @@ import { useSession } from "next-auth/react";
 import EarningsPage from "@/components/pricing/earning-page";
 import ViewerTokenPage from "@/components/pricing/viewer-token-page";
 
-export default function page() {
-  const { data: session, status } = useSession();
+export default function Page() {
+  const { data: session } = useSession();
+  const userRole = (session?.user as { role?: string })?.role;
 
   return (
     <div>
-      { session?.user && ((session.user as any).role === "CREATOR") && (<EarningsPage/>) }
-      { session?.user && ((session.user as any).role === "VIEWER")  && (<ViewerTokenPage />) }
-      { session?.user && ((session.user as any).role === "ADMIN") && (<ViewerTokenPage />) }
+      {userRole === "CREATOR" && <EarningsPage />}
+      {userRole === "VIEWER" && <ViewerTokenPage />}
+      {userRole === "ADMIN" && <ViewerTokenPage />}
     </div>
   );
 }

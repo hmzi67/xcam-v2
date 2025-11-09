@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { UserRole } from "@prisma/client";
+import { UserRole, UserStatus, Prisma } from "@prisma/client";
+import { getSessionUser } from "@/lib/session-helpers";
 
 // Helper to check if user is moderator or admin
 function isAuthorized(role: string): boolean {
@@ -17,11 +18,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    const currentUserId = (session.user as any).id;
+    const sessionUser = getSessionUser(session);
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Check if user is moderator or admin
-    if (!isAuthorized(userRole)) {
+    if (!isAuthorized(sessionUser.role || "")) {
       return NextResponse.json(
         { error: "Forbidden: Insufficient permissions" },
         { status: 403 }
@@ -39,9 +42,9 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: any = {
+    const where: Prisma.UserWhereInput = {
       // Exclude current user from the list
-      id: { not: currentUserId },
+      id: { not: sessionUser.id },
     };
 
     if (search) {
@@ -56,7 +59,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (status && status !== "ALL") {
-      where.status = status;
+      where.status = status as UserStatus;
     }
 
     // Get total count
@@ -142,11 +145,13 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    const actorId = (session.user as any).id;
+    const sessionUser = getSessionUser(session);
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Check if user is moderator or admin
-    if (!isAuthorized(userRole)) {
+    if (!isAuthorized(sessionUser.role || "")) {
       return NextResponse.json(
         { error: "Forbidden: Insufficient permissions" },
         { status: 403 }
@@ -168,7 +173,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Prevent users from banning themselves
-    if (userId === actorId) {
+    if (userId === sessionUser.id) {
       return NextResponse.json(
         { error: "Cannot perform action on yourself" },
         { status: 400 }
@@ -186,7 +191,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Moderators cannot ban admins
-    if (userRole === "MODERATOR" && targetUser.role === "ADMIN") {
+    if (sessionUser.role === "MODERATOR" && targetUser.role === "ADMIN") {
       return NextResponse.json(
         { error: "Forbidden: Cannot ban administrators" },
         { status: 403 }
@@ -276,7 +281,7 @@ export async function PATCH(req: NextRequest) {
           targetId: userId,
           action: action === "BAN" ? "BAN" : "WARN",
           reason: reason || `User ${action.toLowerCase()}ned by moderator`,
-          actorId,
+          actorId: sessionUser.id,
         },
       });
     }
@@ -318,11 +323,13 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    const actorId = (session.user as any).id;
+    const sessionUser = getSessionUser(session);
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Only admins can delete users
-    if (userRole !== "ADMIN") {
+    if (sessionUser.role !== "ADMIN") {
       return NextResponse.json(
         { error: "Forbidden: Only administrators can delete users" },
         { status: 403 }
@@ -340,7 +347,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Prevent users from deleting themselves
-    if (userId === actorId) {
+    if (userId === sessionUser.id) {
       return NextResponse.json(
         { error: "Cannot delete yourself" },
         { status: 400 }

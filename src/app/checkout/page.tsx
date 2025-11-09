@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planId = searchParams.get("plan");
@@ -105,5 +105,25 @@ export default function CheckoutPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center p-4">
+        <Card className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 max-w-md w-full">
+          <CardContent className="p-8">
+            <div className="text-center">
+              <Loader2 className="w-16 h-16 mx-auto mb-4 text-purple-500 animate-spin" />
+              <h2 className="text-2xl font-bold mb-2">Loading...</h2>
+              <p className="text-gray-400">Please wait</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 }
