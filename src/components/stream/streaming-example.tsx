@@ -100,7 +100,7 @@ export function StreamingExample() {
         fetchStreams(); // Refresh stream list
     };
 
-    const LIVEKIT_SERVER_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://xcam-9i0fzyim.livekit.cloud';
+    const LIVEKIT_SERVER_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || '';
 
     if (!session) {
         return (
@@ -214,7 +214,7 @@ export function StreamingExample() {
                     <CreatorBroadcast
                         streamId={selectedStream}
                         token={streamToken}
-                        serverUrl={'wss://xcam-9i0fzyim.livekit.cloud'}
+                        serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}
                         streamTitle="Example Stream"
                         onStreamEnd={handleStreamEnd}
                     />

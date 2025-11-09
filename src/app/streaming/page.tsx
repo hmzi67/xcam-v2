@@ -303,7 +303,7 @@ export default function StreamingPage() {
     fetchStreams(); // Refresh stream list
   };
 
-  const LIVEKIT_SERVER_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://xcam-9i0fzyim.livekit.cloud';
+  const LIVEKIT_SERVER_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || '';
 
   if (status === 'loading') {
     return (

@@ -13,6 +13,21 @@
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
 
+# Configure secrets scanning
+[build.processing.secrets]
+  # Omit public environment variables and build artifacts
+  enabled = true
+  omit_keys = ["NEXT_PUBLIC_APP_URL", "NEXT_PUBLIC_LIVEKIT_URL", "STRIPE_PUBLIC_KEY"]
+  omit_paths = [
+    ".next/**/*",
+    ".netlify/**/*",
+    "node_modules/**/*",
+    "docs/**/*",
+    "scripts/**/*",
+    "README.md",
+    "DEPLOYMENT.md"
+  ]
+
 # Redirect all routes to Next.js
 [[redirects]]
   from = "/*"
@@ -33,3 +48,8 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

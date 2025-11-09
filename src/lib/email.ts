@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 
 // Email configuration from environment variables
 const EMAIL_CONFIG = {
-    host: process.env.EMAIL_HOST || 'smtp.hostinger.com',
+    host: process.env.EMAIL_HOST || '',
     port: parseInt(process.env.EMAIL_PORT || '587'),
     secure: process.env.EMAIL_SECURE === 'true',
     user: process.env.EMAIL_USER,
